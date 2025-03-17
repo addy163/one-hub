@@ -2,14 +2,14 @@ FROM node:18 as builder
 
 WORKDIR /build
 
-# 先复制 package.json 和 yarn.lock 并安装依赖
-COPY web/package.json web/yarn.lock ./
+COPY web/package.json .
+COPY web/yarn.lock .
+
 RUN yarn --frozen-lockfile
 
-# 再复制剩余的 web 目录内容
-COPY web .
-COPY VERSION .
-RUN DISABLE_ESLINT_PLUGIN='true' VITE_APP_VERSION=$(cat VERSION) yarn build
+COPY ./web .
+COPY ./VERSION .
+RUN DISABLE_ESLINT_PLUGIN='true' VITE_APP_VERSION=$(cat VERSION) npm run build
 
 FROM golang:1.22 AS builder2
 
