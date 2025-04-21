@@ -106,10 +106,10 @@ func InitOptionMap() {
 	config.GlobalOption.RegisterInt("OldTokenMaxId", &config.OldTokenMaxId)
 	config.GlobalOption.RegisterBool("GitHubOldIdCloseEnabled", &config.GitHubOldIdCloseEnabled)
 
-	config.GlobalOption.RegisterCustom("AudioTokenJson", func() string {
-		return GetDefaultAudioRatio()
+	config.GlobalOption.RegisterCustom("ExtraTokenPriceJson", func() string {
+		return GetDefaultExtraRatio()
 	}, func(value string) error {
-		config.AudioTokenJson = value
+		config.ExtraTokenPriceJson = value
 		if PricingInstance != nil {
 			PricingInstance.Init()
 		}
@@ -127,6 +127,15 @@ func InitOptionMap() {
 	}, common.GetDefaultDisableChannelKeywords())
 
 	config.GlobalOption.RegisterInt("RetryTimeOut", &config.RetryTimeOut)
+
+	config.GlobalOption.RegisterBool("EnableSafe", &config.EnableSafe)
+	config.GlobalOption.RegisterString("SafeToolName", &config.SafeToolName)
+	config.GlobalOption.RegisterCustom("SafeKeyWords", func() string {
+		return strings.Join(config.SafeKeyWords, "\n")
+	}, func(value string) error {
+		config.SafeKeyWords = strings.Split(value, "\n")
+		return nil
+	}, "")
 
 	loadOptionsFromDatabase()
 }

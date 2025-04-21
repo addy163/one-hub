@@ -380,12 +380,12 @@ export default function ChannelList() {
   return (
     <AdminContainer>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h2">
-          {t('channel_index.channel')}
-          <Typography variant="subtitle1" sx={{ mt: 1 }} color="text.secondary">
+        <Stack direction="column" spacing={1}>
+          <Typography variant="h2">{t('channel_index.channel')}</Typography>
+          <Typography variant="subtitle1" color="text.secondary">
             Channel
           </Typography>
-        </Typography>
+        </Stack>
 
         <ButtonGroup variant="contained" aria-label="outlined small primary button group">
           <Button color="primary" startIcon={<Icon icon="solar:add-circle-line-duotone" />} onClick={() => handleOpenModal(0)}>
@@ -423,7 +423,7 @@ export default function ChannelList() {
             p: (theme) => theme.spacing(0, 1, 0, 3)
           }}
         >
-          <Container>
+          <Container maxWidth="xl">
             {matchUpMd ? (
               <ButtonGroup variant="outlined" aria-label="outlined small primary button group">
                 <Button onClick={() => handleRefresh(true)} startIcon={<Icon icon="solar:refresh-circle-bold-duotone" width={18} />}>

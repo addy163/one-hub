@@ -126,12 +126,12 @@ export default function Task() {
   return (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h2">
-          任务
-          <Typography variant="subtitle1" sx={{ mt: 1 }} color="text.secondary">
+        <Stack direction="column" spacing={1}>
+          <Typography variant="h2">{t('taskPage.title')}</Typography>
+          <Typography variant="subtitle1" color="text.secondary">
             Task
           </Typography>
-        </ Typography>
+        </Stack>
       </Stack>
       <Card>
         <Box component="form" noValidate>
@@ -146,7 +146,7 @@ export default function Task() {
             p: (theme) => theme.spacing(0, 1, 0, 3)
           }}
         >
-          <Container>
+          <Container maxWidth="xl">
             <ButtonGroup variant="outlined" aria-label="outlined small primary button group">
               <Button onClick={handleRefresh} startIcon={<Icon icon="solar:refresh-bold-duotone" width={18} />}>
                 {t('midjourneyPage.refreshClearSearch')}

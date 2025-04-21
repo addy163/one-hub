@@ -5,7 +5,7 @@ import { IconMessageChatbot } from '@tabler/icons-react';
 import { useSelector } from 'react-redux';
 import { useState, useCallback } from 'react';
 import { API } from 'utils/api';
-import { replaceChatPlaceholders } from 'utils/common';
+import { replaceChatPlaceholders, getChatLinks } from 'utils/common';
 import { IconAppWindow } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,7 @@ const QuickStartCard = () => {
   const [key, setKey] = useState('');
   const theme = useTheme();
   const siteInfo = useSelector((state) => state.siteInfo);
-  const chatLinks = siteInfo.chat_links && siteInfo.chat_links != '' ? JSON.parse(siteInfo.chat_links) : [];
+  const chatLinks = getChatLinks(false);
   const baseServer = siteInfo.server_address;
 
   const getProcessedUrl = useCallback(
@@ -97,10 +97,10 @@ const QuickStartCard = () => {
                       color: 'white',
                       '&:hover': {
                         backgroundColor: '#00838F',
-                        boxShadow: '0 0 10px 0 rgba(3, 119, 94, 0.5)'
+                        boxShadow: '0 0 10px 0 #00838F'
                       },
                       textTransform: 'none',
-                      boxShadow: '0 0 15px 0 rgba(3, 119, 94, 0.5)'
+                      boxShadow: '0 0 10px 0 #00838F'
                     }}
                   >
                     {option.name}

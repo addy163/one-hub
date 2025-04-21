@@ -184,12 +184,12 @@ export default function Log() {
   return (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h2">
-          {t('logPage.title')}
-          <Typography variant="subtitle1" sx={{ mt: 1 }} color="text.secondary">
+        <Stack direction="column" spacing={1}>
+          <Typography variant="h2">{t('logPage.title')}</Typography>
+          <Typography variant="subtitle1" color="text.secondary">
             Log
           </Typography>
-        </Typography>
+        </Stack>
       </Stack>
       <Card>
         <Box component="form" noValidate>
@@ -204,7 +204,7 @@ export default function Log() {
             p: (theme) => theme.spacing(0, 1, 0, 3)
           }}
         >
-          <Container>
+          <Container maxWidth="xl">
             {matchUpMd ? (
               <ButtonGroup variant="outlined" aria-label="outlined small primary button group">
                 <Button onClick={handleRefresh} size="small" startIcon={<Icon icon="solar:refresh-bold-duotone" width={18} />}>

@@ -158,12 +158,12 @@ export default function Users() {
   return (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h2">
-          {t('userPage.users')}
-          <Typography variant="subtitle1" sx={{ mt: 1 }} color="text.secondary">
+        <Stack direction="column" spacing={1}>
+          <Typography variant="h2">{t('userPage.users')}</Typography>
+          <Typography variant="subtitle1" color="text.secondary">
             User
           </Typography>
-        </Typography>
+        </Stack>
 
         <Button
           variant="contained"
@@ -187,7 +187,7 @@ export default function Users() {
             p: (theme) => theme.spacing(0, 1, 0, 3)
           }}
         >
-          <Container>
+          <Container maxWidth="xl">
             <ButtonGroup variant="outlined" aria-label="outlined small primary button group">
               <Button onClick={handleRefresh} startIcon={<Icon icon="solar:refresh-bold-duotone" width={18} />}>
                 {t('userPage.refresh')}

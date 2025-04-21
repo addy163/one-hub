@@ -6,7 +6,7 @@ import ApexCharts from 'ui-component/chart/ApexCharts';
 import SupportModels from './component/SupportModels';
 import { getLastSevenDays, generateBarChartOptions, renderChartNumber } from 'utils/chart';
 import { API } from 'utils/api';
-import { showError, calculateQuota, renderNumber } from 'utils/common';
+import { showError, calculateQuota } from 'utils/common';
 import UserCard from 'ui-component/cards/UserCard';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from 'contexts/UserContext';
@@ -14,6 +14,7 @@ import Label from 'ui-component/Label';
 import InviteCard from './component/InviteCard';
 import QuotaLogWeek from './component/QuotaLogWeek';
 import QuickStartCard from './component/QuickStartCard';
+import RPM from './component/RPM';
 
 const Dashboard = () => {
   const [isLoading, setLoading] = useState(true);
@@ -74,7 +75,7 @@ const Dashboard = () => {
       {/* 今日请求、消费、token */}
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
-          <Grid item lg={4} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_requests')}
@@ -84,7 +85,7 @@ const Dashboard = () => {
               lastDayValue={requestChart?.lastDayValue}
             />
           </Grid>
-          <Grid item lg={4} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_consumption')}
@@ -94,7 +95,7 @@ const Dashboard = () => {
               lastDayValue={quotaChart?.lastDayValue}
             />
           </Grid>
-          <Grid item lg={4} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_tokens')}
@@ -103,6 +104,9 @@ const Dashboard = () => {
               todayValue={tokenChart?.todayValue}
               lastDayValue={tokenChart?.lastDayValue}
             />
+          </Grid>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
+            <RPM />
           </Grid>
         </Grid>
       </Grid>
@@ -292,17 +296,17 @@ function getLineCardOption(lineDataGroup, field) {
     case 'RequestCount':
       // chartData = generateLineChartOptions(lineData, '次');
       lastDayValue = parseFloat(lastDayValue);
-      todayValue = renderNumber(todayValue);
+      todayValue = parseFloat(todayValue);
       break;
     case 'Quota':
       // chartData = generateLineChartOptions(lineData, '美元');
       lastDayValue = parseFloat(lastDayValue);
-      todayValue = '$' + renderNumber(todayValue);
+      todayValue = '$' + parseFloat(todayValue);
       break;
     case 'PromptTokens':
       // chartData = generateLineChartOptions(lineData, '');
       lastDayValue = parseFloat(lastDayValue);
-      todayValue = renderNumber(todayValue);
+      todayValue = parseFloat(todayValue);
       break;
   }
 
