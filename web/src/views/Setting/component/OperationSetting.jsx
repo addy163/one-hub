@@ -18,15 +18,18 @@ import { showSuccess, showError, verifyJSON } from 'utils/common';
 import { API } from 'utils/api';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import ChatLinksDataGrid from './ChatLinksDataGrid';
 import dayjs from 'dayjs';
 import { LoadStatusContext } from 'contexts/StatusContext';
 import { useTranslation } from 'react-i18next';
 import 'dayjs/locale/zh-cn';
+import { DateTimePicker } from '@mui/x-date-pickers';
+import { useSelector } from 'react-redux';
 
 const OperationSetting = () => {
   const { t } = useTranslation();
+  const siteInfo = useSelector((state) => state.siteInfo);
   let now = new Date();
   let [inputs, setInputs] = useState({
     QuotaForNewUser: 0,
@@ -54,7 +57,6 @@ const OperationSetting = () => {
     RechargeDiscount: '',
     CFWorkerImageUrl: '',
     CFWorkerImageKey: '',
-    ExtraTokenPriceJson: '',
     ClaudeAPIEnabled: '',
     GeminiAPIEnabled: '',
     DisableChannelKeywords: '',
@@ -68,6 +70,7 @@ const OperationSetting = () => {
   const [originInputs, setOriginInputs] = useState({});
   let [loading, setLoading] = useState(false);
   let [historyTimestamp, setHistoryTimestamp] = useState(now.getTime() / 1000 - 30 * 24 * 3600); // a month ago new Date().getTime() / 1000 + 3600
+  let [invoiceMonth, setInvoiceMonth] = useState(now.getTime()); // a month ago new Date().getTime() / 1000 + 3600
   const loadStatus = useContext(LoadStatusContext);
   const [safeToolsLoading, setSafeToolsLoading] = useState(true);
 
@@ -272,22 +275,6 @@ const OperationSetting = () => {
             }
           }
           break;
-        case 'ExtraTokenPriceJson':
-          if (originInputs.ExtraTokenPriceJson !== inputs.ExtraTokenPriceJson) {
-            try {
-              if (!verifyJSON(inputs.ExtraTokenPriceJson)) {
-                // 尝试转换为JSON
-                const audioTokens = inputs.ExtraTokenPriceJson.split('\n').filter((line) => line.trim() !== '');
-                await updateOption('ExtraTokenPriceJson', JSON.stringify(audioTokens));
-              } else {
-                await updateOption('ExtraTokenPriceJson', inputs.ExtraTokenPriceJson);
-              }
-            } catch (error) {
-              showError('音频Token不是合法的 JSON 字符串: ' + error.message);
-              return;
-            }
-          }
-          break;
         case 'DisableChannelKeywords':
           if (originInputs.DisableChannelKeywords !== inputs.DisableChannelKeywords) {
             // DisableChannelKeywords 已经是字符串格式，无需解析
@@ -345,6 +332,35 @@ const OperationSetting = () => {
         return;
       }
       showError('日志清理失败：' + message);
+    } catch (error) {
+      return;
+    }
+  };
+
+  const genInvoiceMonth = async () => {
+    try {
+      const time = dayjs(invoiceMonth).format('YYYY-MM-DD');
+      const res = await API.post(`/api/option/invoice/gen/${time}`);
+      const { success, message } = res.data;
+      if (success) {
+        showSuccess(`账单生成成功！`);
+        return;
+      }
+      showError('账单生成失败：' + message);
+    } catch (error) {
+      return;
+    }
+  };
+  const updateInvoiceMonth = async () => {
+    try {
+      const time = dayjs(invoiceMonth).format('YYYY-MM-DD');
+      const res = await API.post(`/api/option/invoice/update/${time}`);
+      const { success, message } = res.data;
+      if (success) {
+        showSuccess(`账单更新成功！`);
+        return;
+      }
+      showError('账单更新失败：' + message);
     } catch (error) {
       return;
     }
@@ -583,6 +599,69 @@ const OperationSetting = () => {
           </Button>
         </Stack>
       </SubCard>
+
+      {siteInfo.UserInvoiceMonth && (
+        <SubCard title={t('setting_index.operationSettings.invoice.title')}>
+          <Stack direction="column" justifyContent="flex-start" alignItems="flex-start" spacing={2}>
+            <FormControl>
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'zh-cn'}>
+                <DatePicker
+                  label={t('setting_index.operationSettings.invoice.genTime')}
+                  placeholder={t('setting_index.operationSettings.invoice.genTime')}
+                  name="invoiceMonth"
+                  value={invoiceMonth === null ? null : dayjs(invoiceMonth)}
+                  disabled={loading}
+                  views={['month', 'year']}
+                  format="YYYY-MM"
+                  onChange={(newValue) => {
+                    // Set to the first day of the selected month
+                    if (newValue) {
+                      const firstDayOfMonth = newValue.startOf('month');
+                      setInvoiceMonth(firstDayOfMonth.valueOf());
+                    } else {
+                      setInvoiceMonth(null);
+                    }
+                  }}
+                  slotProps={{
+                    actionBar: {
+                      actions: ['clear', 'accept']
+                    }
+                  }}
+                />
+              </LocalizationProvider>
+            </FormControl>
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => {
+                  if (invoiceMonth) {
+                    genInvoiceMonth().then();
+                  } else {
+                    showError('Please select invoice Month');
+                  }
+                }}
+              >
+                {t('setting_index.operationSettings.invoice.genMonthInvoice')}
+              </Button>
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={() => {
+                  if (invoiceMonth) {
+                    updateInvoiceMonth().then();
+                  } else {
+                    showError('Please select invoice Month');
+                  }
+                }}
+              >
+                {t('setting_index.operationSettings.invoice.updateMonthInvoice')}
+              </Button>
+            </Stack>
+          </Stack>
+        </SubCard>
+      )}
+
       <SubCard title={t('setting_index.operationSettings.monitoringSettings.title')}>
         <Stack justifyContent="flex-start" alignItems="flex-start" spacing={2}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={{ xs: 3, sm: 2, md: 4 }}>
@@ -799,52 +878,6 @@ const OperationSetting = () => {
               }}
             >
               {t('setting_index.operationSettings.chatLinkSettings.save')}
-            </Button>
-          </Stack>
-        </Stack>
-      </SubCard>
-
-      <SubCard title={t('setting_index.operationSettings.extraTokenPriceJson.title')}>
-        <Stack spacing={2}>
-          <Stack justifyContent="flex-start" alignItems="flex-start" spacing={2}>
-            <Alert severity="info">
-              配置扩展价格，必须以下格式：
-              {`{"gpt-4o-audio-preview":{"input_audio_tokens":40,"output_audio_tokens":20,"cached_tokens":0.5,"cached_write_tokens":1.25,"cached_read_tokens":0.1,"reasoning_tokens":1}}`}
-              ，当前支持以下配置：
-              <br />
-              input_audio_tokens：输入音频令牌 (输入价格)
-              <br />
-              output_audio_tokens：输出音频令牌 (输出价格)
-              <br />
-              cached_tokens：缓存令牌 (输入价格)
-              <br />
-              cached_write_tokens：缓存写入令牌 (输入价格)
-              <br />
-              cached_read_tokens：缓存读取令牌 (输入价格)
-              <br />
-              reasoning_tokens：推理令牌 (输出价格)
-            </Alert>
-            <FormControl fullWidth>
-              <TextField
-                multiline
-                maxRows={15}
-                id="ExtraTokenPriceJson"
-                label={t('setting_index.operationSettings.extraTokenPriceJson.info')}
-                value={inputs.ExtraTokenPriceJson}
-                name="ExtraTokenPriceJson"
-                onChange={handleTextFieldChange}
-                minRows={5}
-                placeholder={t('setting_index.operationSettings.extraTokenPriceJson.info')}
-                disabled={loading}
-              />
-            </FormControl>
-            <Button
-              variant="contained"
-              onClick={() => {
-                submitConfig('ExtraTokenPriceJson').then();
-              }}
-            >
-              {t('setting_index.operationSettings.extraTokenPriceJson.save')}
             </Button>
           </Stack>
         </Stack>

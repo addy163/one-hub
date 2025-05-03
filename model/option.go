@@ -63,6 +63,7 @@ func InitOptionMap() {
 	config.GlobalOption.RegisterString("Logo", &config.Logo)
 	config.GlobalOption.RegisterString("ServerAddress", &config.ServerAddress)
 	config.GlobalOption.RegisterString("GitHubClientId", &config.GitHubClientId)
+	config.GlobalOption.RegisterString("GitHubClientSecret", &config.GitHubClientSecret)
 
 	config.GlobalOption.RegisterString("OIDCClientId", &config.OIDCClientId)
 	config.GlobalOption.RegisterString("OIDCClientSecret", &config.OIDCClientSecret)
@@ -105,16 +106,6 @@ func InitOptionMap() {
 	config.GlobalOption.RegisterString("CFWorkerImageKey", &config.CFWorkerImageKey)
 	config.GlobalOption.RegisterInt("OldTokenMaxId", &config.OldTokenMaxId)
 	config.GlobalOption.RegisterBool("GitHubOldIdCloseEnabled", &config.GitHubOldIdCloseEnabled)
-
-	config.GlobalOption.RegisterCustom("ExtraTokenPriceJson", func() string {
-		return GetDefaultExtraRatio()
-	}, func(value string) error {
-		config.ExtraTokenPriceJson = value
-		if PricingInstance != nil {
-			PricingInstance.Init()
-		}
-		return nil
-	}, "")
 
 	config.GlobalOption.RegisterBool("GeminiAPIEnabled", &config.GeminiAPIEnabled)
 	config.GlobalOption.RegisterBool("ClaudeAPIEnabled", &config.ClaudeAPIEnabled)

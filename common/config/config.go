@@ -16,6 +16,9 @@ func InitConf() {
 	IsMasterNode = viper.GetString("node_type") != "slave"
 	RequestInterval = time.Duration(viper.GetInt("polling_interval")) * time.Second
 	SessionSecret = utils.GetOrDefault("session_secret", SessionSecret)
+	UserInvoiceMonth = viper.GetBool("user_invoice_month")
+	GitHubProxy = viper.GetString("github_proxy")
+	MCP_ENABLE = viper.GetBool("mcp.enable") != false
 }
 
 func setEnv() {
@@ -40,4 +43,5 @@ func defaultConfig() {
 	viper.SetDefault("update_price_service", "https://raw.githubusercontent.com/MartialBE/one-api/prices/prices.json")
 	viper.SetDefault("language", "zh_CN")
 	viper.SetDefault("favicon", "")
+	viper.SetDefault("user_invoice_month", false)
 }

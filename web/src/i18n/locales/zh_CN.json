@@ -5,6 +5,8 @@
   "price": "价格",
   "channel": "渠道",
   "token": "令牌",
+  "invoice": "月度账单",
+  "midjourney": "Midjourney",
   "log": "日志",
   "redemption": "兑换",
   "topup": "充值",
@@ -30,6 +32,10 @@
     "error": "错误",
     "unknownVersion": "未知版本",
     "welcomeBack": "欢迎回来"
+  },
+  "sidebar": {
+    "totalQuota": "总额度",
+    "remainingBalance": "可用额度"
   },
   "registerForm": {
     "enterEmail": "请输入邮箱",
@@ -65,6 +71,8 @@
     "unknown": "未知",
     "week_model_statistics": "近七日模型统计",
     "week_consumption_log": "近七日消费日志",
+    "7days_model_usage_pie": "近七日模型使用情况",
+    "total": "总次数",
     "date": "日期",
     "request_count": "请求次数",
     "amount": "金额",
@@ -218,6 +226,40 @@
     "userGroup": "分组",
     "cancel": "取消",
     "submit": "提交"
+  },
+  "invoice_index": {
+    "invoice": "月度账单",
+    "refresh": "刷新",
+    "id": "ID",
+    "name": "名称",
+    "status": "状态",
+    "amount": "金额",
+    "createdTime": "创建时间",
+    "paidTime": "支付时间",
+    "actions": "操作",
+    "deleteInvoice": "删除账单",
+    "confirmDeleteInvoice": "是否删除账单",
+    "close": "关闭",
+    "delete": "删除",
+    "paid": "已支付",
+    "unpaid": "未支付",
+    "date": "账单时间",
+    "requestCount": "请求总数",
+    "quota": "总金额",
+    "promptTokens": "输入tokens",
+    "completionTokens": "输出tokens",
+    "requestTime": "请求时长",
+    "tokens": "TOKEN(输入/输出)",
+    "alert": "每月1日凌晨生成上月账单数据",
+    "viewInvoice": "查看账单",
+    "modelName": "模型名称",
+    "option": "操作",
+    "username": "用户名",
+    "email": "邮箱",
+    "userinfo": "用户信息",
+    "usage_statistics": "使用统计",
+    "download": "下载PDF",
+    "usage_details": "账单详情"
   },
   "logPage": {
     "title": "日志",
@@ -458,14 +500,28 @@
     "RPM": "API速率",
     "inputMultiplier": "输入价格",
     "outputMultiplier": "输出价格",
+    "input": "输入",
+    "output": "输出",
     "rate": "倍率",
     "search": "搜索",
     "tokens": "按量付费",
     "times": "按次付费",
+    "all": "全部",
+    "price": "价格",
+    "extraRatios": "扩展价格",
+    "noExtraRatios": "没有扩展价格",
     "noneGroup": "当前分组不可用",
     "other": "其他",
-    "inputAudioTokensRatio": "音频输入倍率",
-    "outputAudioTokensRatio": "音频输出倍率"
+    "input_audio_tokens": "音频输入倍率",
+    "output_audio_tokens": "音频输出倍率",
+    "cached_tokens": "缓存倍率",
+    "cached_write_tokens": "缓存写入倍率",
+    "cached_read_tokens": "缓存读取倍率",
+    "reasoning_tokens": "推理倍率",
+    "input_text_tokens": "输入文本倍率",
+    "output_text_tokens": "输出文本倍率",
+    "input_image_tokens": "输入图片倍率",
+    "output_image_tokens": "输出图片倍率"
   },
   "paymentPage": {
     "orderList": "订单列表",
@@ -559,6 +615,12 @@
         "displayTokenStat": "Billing 相关 API 显示令牌额度而非用户额度",
         "approximateToken": "使用近似的方式估算 token 数以减少计算量",
         "saveButton": "保存通用设置"
+      },
+      "invoice": {
+        "title": "账单设置",
+        "genTime": "账单时间",
+        "genMonthInvoice": "生成月账单",
+        "updateMonthInvoice": "更新月账单"
       },
       "otherSettings": {
         "title": "其他设置",
@@ -911,7 +973,15 @@
     "operationCompleted": "操作成功完成！",
     "inputMultiplierChanged": "输入倍率由",
     "to": "变为",
-    "outputMultiplierChanged": "输出倍率由"
+    "outputMultiplierChanged": "输出倍率由",
+    "extraRatiosAdded": "新增扩展倍率",
+    "extraRatiosRemoved": "删除扩展倍率",
+    "extraRatiosChanged": "扩展倍率变化",
+    "extraRatiosChanges": "扩展倍率变动",
+    "extraRatiosChangesTip": "扩展倍率变动：{{changes}}",
+    "added": "新增",
+    "removed": "删除",
+    "modified": "修改"
   },
   "error": {
     "unknownError": "未知错误"
@@ -953,7 +1023,12 @@
     "deleteConfirm": "是否删除 {{title}}?",
     "deleteSuccess": "删除成功！",
     "deleteError": "删除失败: {{message}}",
-    "jsonFormatError": "JSON 格式错误"
+    "jsonFormatError": "JSON 格式错误",
+    "pageSize": "每页条数",
+    "search": "搜索",
+    "actions": "操作",
+    "total": "总数",
+    "noDataAvailable": "没有数据可用"
   },
   "channel_row": {
     "priorityTip": "优先级不能小于 0",
@@ -1065,7 +1140,14 @@
     "locked_title": "锁定价格",
     "locked": "锁定价格",
     "unlocked": "不锁定价格",
-    "lockedTip": "价格锁定后无法通过价格更新服务器和程序自带价格进行覆盖。如果您所配置的价格希望随程序或者价格服务器同步更新请勿锁定"
+    "lockedTip": "价格锁定后无法通过价格更新服务器和程序自带价格进行覆盖。如果您所配置的价格希望随程序或者价格服务器同步更新请勿锁定",
+    "extraRatios": "额外扩展倍率",
+    "selectExtraRatio": "选择扩展倍率",
+    "noExtraRatios": "暂无额外扩展倍率，请从下拉框选择添加",
+    "promptRatio": "提示倍率",
+    "completionRatio": "完成倍率",
+    "noAvailableRatios": "没有可用的扩展倍率",
+    "delMultipleInfoTip": "确定删除所选的 {{count}} 个价格吗？"
   },
   "redemption_edit": {
     "requiredQuota": "必须大于等于0",

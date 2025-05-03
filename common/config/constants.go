@@ -25,6 +25,9 @@ var ChatLinks = ""
 var QuotaPerUnit = 500 * 1000.0 // $0.002 / 1K tokens
 var DisplayInCurrencyEnabled = true
 
+// 是否开启用户月账单功能
+var UserInvoiceMonth = false
+
 // Any options with "Secret", "Token" in its key won't be return by GetOptions
 
 var SessionSecret = uuid.New().String()
@@ -147,10 +150,9 @@ var SMTPAccount = ""
 var SMTPFrom = ""
 var SMTPToken = ""
 
-var ExtraTokenPriceJson = ""
-
 var ChatImageRequestProxy = ""
 
+var GitHubProxy = ""
 var GitHubClientId = ""
 var GitHubClientSecret = ""
 var GitHubOldIdCloseEnabled = false
@@ -198,6 +200,8 @@ var RequestInterval time.Duration
 
 var BatchUpdateEnabled = false
 var BatchUpdateInterval = 5
+
+var MCP_ENABLE = false
 
 // Gemini
 var GeminiAPIEnabled = true
