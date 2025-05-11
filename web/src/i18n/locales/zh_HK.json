@@ -113,7 +113,23 @@
     "mapAddByJson": "透過 JSON 添加{{name}}",
     "mapJsonInput": "JSON 輸入",
     "listJsonError": "JSON格式錯誤，請確保輸入的是陣列格式。",
-    "listJsonHelperText": "請輸入JSON數組格式，例如：[\"項目1\", \"項目2\", \"項目3\"]"
+    "listJsonHelperText": "請輸入JSON數組格式，例如：[\"項目1\", \"項目2\", \"項目3\"]",
+    "otherModels": "其他模型",
+    "modelsFetched": "模型獲取成功",
+    "selectedMappingCount": "已選{{count}}個模型映射",
+    "addMapping": "添加模型映射",
+    "addToModelMapping": "添加到模型映射",
+    "modelMapping": "模型映射",
+    "modelMappingSettings": "模型映射設置",
+    "prefixOrSuffix": "前缀/後缀",
+    "removePrefixHelp": "請輸入你要刪除的前缀",
+    "removeSuffixHelp": "請輸入你要刪除的後缀",
+    "addPlusSign": "使用映射前計費",
+    "mappingPreview": "映射預覽",
+    "removePrefix": "刪除前缀",
+    "removeSuffix": "刪除後缀",
+    "collapseList": "收起列表",
+    "expandList": "展開列表"
   },
   "channel_index": {
     "AzureApiVersion": "Azure 版本號",
@@ -395,6 +411,13 @@
     "typeLabel": "類型",
     "userLabel": "用戶",
     "sourceIp": "Source IP",
+    "logType": {
+      "all": "全部",
+      "recharge": "充值",
+      "consumption": "消費",
+      "management": "管理",
+      "system": "系統"
+    },
     "content": {
       "calculate_steps": "計算步驟:",
       "calculate_steps_tip": "PS：本系統按照積分計算，所有金額均為積分換算而來，1積分=$0.000002，最低消費為1積分，本計算步驟僅供參考，以實際扣費為準。",
@@ -498,7 +521,9 @@
     "noExtraRatios": "冇擴展價格",
     "output": "輸出",
     "output_image_tokens": "輸出圖片倍率",
-    "price": "價格"
+    "price": "價格",
+    "showAll": "顯示所有",
+    "onlyAvailable": "只顯示可用"
   },
   "nova 映射": "nova 映射",
   "onyx 映射": "onyx 映射",

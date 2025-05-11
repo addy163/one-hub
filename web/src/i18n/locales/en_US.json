@@ -112,7 +112,22 @@
     "mapAddByJson": "Add {{name}} through JSON",
     "mapJsonInput": "JSON input",
     "listJsonError": "JSON format error, please make sure the input is in array format.",
-    "listJsonHelperText": "Please enter the JSON array format, for example: [\"item1\", \"item2\", \"item3\"]"
+    "listJsonHelperText": "Please enter the JSON array format, for example: [\"item1\", \"item2\", \"item3\"]",
+    "modelsFetched": "Models fetched successfully",
+    "selectedMappingCount": "Selected {{count}} model mappings",
+    "addMapping": "Add model mapping",
+    "addToModelMapping": "Add to model mapping",
+    "modelMapping": "Model mapping",
+    "modelMappingSettings": "Model mapping settings",
+    "prefixOrSuffix": "Prefix/Suffix",
+    "removePrefixHelp": "Enter the prefix you want to remove",
+    "removeSuffixHelp": "Enter the suffix you want to remove",
+    "addPlusSign": "Use mapping before billing",
+    "mappingPreview": "Mapping preview",
+    "removePrefix": "Remove prefix",
+    "removeSuffix": "Remove suffix",
+    "collapseList": "Collapse list",
+    "expandList": "Expand list"
   },
   "channel_index": {
     "AzureApiVersion": "Azure version number",
@@ -394,6 +409,13 @@
     "typeLabel": "Type",
     "userLabel": "User",
     "sourceIp": "Source IP",
+    "logType": {
+      "all": "All",
+      "recharge": "Recharge",
+      "consumption": "Consumption",
+      "management": "Management",
+      "system": "System"
+    },
     "content": {
       "calculate_steps": "Calculation steps:",
       "calculate_steps_tip": "PS: This system calculates based on points, and all amounts are converted from points. 1 point = $0.000002, with a minimum spending of 1 point. This calculation is for reference only; actual charges may vary.",
@@ -497,7 +519,9 @@
     "noExtraRatios": "No additional charge",
     "output": "output",
     "output_image_tokens": "Output image magnification",
-    "price": "Price"
+    "price": "Price",
+    "showAll": "Show all",
+    "onlyAvailable": "Only show available"
   },
   "nova 映射": "nova mapping",
   "onyx 映射": "onyx mapping",
