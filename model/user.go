@@ -1,19 +1,18 @@
 package model
 
 import (
-	"encoding/base64"
-	"errors"
-	"fmt"
-	"one-api/common"
-	"one-api/common/config"
-	"one-api/common/logger"
-	"one-api/common/redis"
-	"one-api/common/utils"
-	"strings"
-	"time"
+  "errors"
+  "fmt"
+  "one-api/common"
+  "one-api/common/config"
+  "one-api/common/logger"
+  "one-api/common/redis"
+  "one-api/common/utils"
+  "strings"
+  "time"
 
-	"github.com/go-webauthn/webauthn/webauthn"
-	"gorm.io/gorm"
+  "github.com/go-webauthn/webauthn/webauthn"
+  "gorm.io/gorm"
 )
 
 // User if you add sensitive fields, don't forget to clean them in setupLogin function.
@@ -590,8 +589,6 @@ func (user *User) WebAuthnIcon() string {
 }
 
 func (user *User) WebAuthnCredentials() []webauthn.Credential {
-	// 这里需要从数据库获取用户的WebAuthn凭据
-	// 你需要创建一个WebAuthnCredential表来存储这些信息
 	credentials := GetUserWebAuthnCredentials(user.Id)
 	return credentials
 }
@@ -600,7 +597,7 @@ func (user *User) WebAuthnCredentials() []webauthn.Credential {
 type WebAuthnCredential struct {
 	Id              int    `json:"id" gorm:"primaryKey"`
 	UserId          int    `json:"user_id" gorm:"index"`
-	CredentialId    string `json:"credential_id" gorm:"type:varbinary(255);uniqueIndex"` // 使用 varbinary
+  CredentialId []byte `json:"credential_id" gorm:"unique;size:255"`
 	PublicKey       []byte `json:"public_key"`
 	AttestationType string `json:"attestation_type"`
 	Alias           string `json:"alias" gorm:"type:varchar(255);default:''"`
@@ -622,15 +619,8 @@ func GetUserWebAuthnCredentials(userId int) []webauthn.Credential {
 
 	var webauthnCredentials []webauthn.Credential
 	for _, cred := range credentials {
-		// 需要将 base64 编码的字符串解码回字节数组
-		credentialIdBytes, err := base64.StdEncoding.DecodeString(cred.CredentialId)
-		if err != nil {
-			// 处理解码错误，可以记录日志或跳过该凭据
-			continue
-		}
-
 		webauthnCredentials = append(webauthnCredentials, webauthn.Credential{
-			ID:              credentialIdBytes,
+      ID: cred.CredentialId,
 			PublicKey:       cred.PublicKey,
 			AttestationType: cred.AttestationType,
 			Authenticator:   cred.Authenticator,
@@ -650,10 +640,9 @@ func SaveWebAuthnCredential(userId int, credential *webauthn.Credential, alias s
 	if alias == "" {
     alias = time.Now().Format("20060102150405")
 	}
-	credentialIdBase64 := base64.StdEncoding.EncodeToString(credential.ID)
 	webauthnCred := WebAuthnCredential{
 		UserId:          userId,
-		CredentialId:    credentialIdBase64,
+    CredentialId: credential.ID,
 		PublicKey:       credential.PublicKey,
 		AttestationType: credential.AttestationType,
 		Alias:           alias,
