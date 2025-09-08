@@ -745,7 +745,15 @@
     "usernameMinLength": "Username must be at least 3 characters long",
     "usernameRequired": "Username cannot be empty",
     "wechatBindSuccess": "WeChat account successfully bound!",
-    "yourTokenIs": "Your access token is:"
+    "yourTokenIs": "Your access token is:",
+    "registerWebauthn": "Register WebAuthn Credential",
+    "webauthnManagement": "WebAuthn Credential Management",
+    "webauthnDescription": "WebAuthn provides passwordless authentication, allowing you to log in using biometric methods like fingerprints, Face ID, or security keys.",
+    "registeredCredentials": "Registered Credentials",
+    "alias": "Alias:",
+    "credentialId": "Credential ID:",
+    "registerTime": "Register Time:",
+    "delete": "Delete"
   },
   "redemption": "Redemption",
   "redemptionPage": {
@@ -1200,7 +1208,10 @@
     "unlimited": "Unlimited",
     "unlimitedQuota": "Unlimited Quota",
     "usedQuota": "Used Quota",
-    "userGroup": "group",
+    "selectGroup": "Select group",
+    "selectGroupInfo": "Select the channel group you want to use here. When the channel group is unavailable, backup channels will be used",
+    "userGroup": "Group",
+    "userBackupGroup": "Backup group",
     "apiRate": "",
     "apiRateTip": "",
     "heartbeat": "Heartbeat setting (Experimental)",

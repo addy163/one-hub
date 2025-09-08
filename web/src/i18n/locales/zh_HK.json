@@ -734,7 +734,15 @@
     "usernameMinLength": "用戶名不能少於 3 個字符",
     "usernameRequired": "用戶名不能為空",
     "wechatBindSuccess": "微信帳戶綁定成功！",
-    "yourTokenIs": "你的訪問令牌是："
+    "yourTokenIs": "你的訪問令牌是：",
+    "registerWebauthn": "註冊 WebAuthn 憑證",
+    "webauthnManagement": "WebAuthn 憑證管理",
+    "webauthnDescription": "WebAuthn 提供無密碼身份驗證，您可以使用指紋、Face ID 或安全密鑰等生物識別方式進行登入。",
+    "registeredCredentials": "已註冊憑證",
+    "alias": "別名:",
+    "credentialId": "憑證 ID:",
+    "registerTime": "註冊時間:",
+    "delete": "刪除"
   },
   "redemption": "兌換",
   "redemptionPage": {
@@ -1190,7 +1198,10 @@
     "unlimited": "無限制",
     "unlimitedQuota": "無限額度",
     "usedQuota": "已用額度",
+    "selectGroup": "選擇分組",
+    "selectGroupInfo": "在這裡選擇你想要使用的渠道分組，當渠道分組不可用時，將會使用備用渠道",
     "userGroup": "分組",
+    "userBackupGroup": "備用分組",
     "apiRate": "API速率",
     "apiRateTip": "每分鐘允許的請求數,當速率小於60時，使用計數器限制器，當速率大於等於60時，使用令牌桶限制器，僅在啟用Redis時有效",
     "heartbeat": "心跳設置(實驗性)",
