@@ -80,6 +80,7 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.GET("/invoice/detail", controller.GetUserInvoiceDetail)
 				selfRoute.GET("/self", controller.GetSelf)
 				selfRoute.PUT("/self", controller.UpdateSelf)
+				selfRoute.POST("/unbind", controller.Unbind)
 				// selfRoute.DELETE("/self", controller.DeleteSelf)
 				selfRoute.GET("/token", controller.GenerateAccessToken)
 				selfRoute.GET("/aff", controller.GetAffCode)
@@ -126,6 +127,16 @@ func SetApiRouter(router *gin.Engine) {
 			modelOwnedByRoute.POST("/", controller.CreateModelOwnedBy)
 			modelOwnedByRoute.PUT("/", controller.UpdateModelOwnedBy)
 			modelOwnedByRoute.DELETE("/:id", controller.DeleteModelOwnedBy)
+		}
+
+		modelInfoRoute := apiRouter.Group("/model_info")
+		modelInfoRoute.GET("/", controller.GetAllModelInfo)
+		modelInfoRoute.Use(middleware.AdminAuth())
+		{
+			modelInfoRoute.GET("/:id", controller.GetModelInfo)
+			modelInfoRoute.POST("/", controller.CreateModelInfo)
+			modelInfoRoute.PUT("/", controller.UpdateModelInfo)
+			modelInfoRoute.DELETE("/:id", controller.DeleteModelInfo)
 		}
 
 		userGroup := apiRouter.Group("/user_group")
