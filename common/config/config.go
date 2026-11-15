@@ -18,6 +18,7 @@ func InitConf() {
 	// 拒绝部署模板里的占位密钥和过短密钥，避免攻击者伪造任意 role 的 Cookie
 	SessionSecret, WeakSessionSecretReplaced = NormalizeSessionSecret(utils.GetOrDefault("session_secret", SessionSecret))
 	InitSecurity()
+	InitRelay()
 	UserInvoiceMonth = viper.GetBool("user_invoice_month")
 	GitHubProxy = viper.GetString("github_proxy")
 	MCP_ENABLE = viper.GetBool("mcp.enable") != false
@@ -53,4 +54,7 @@ func defaultConfig() {
 	viper.SetDefault("uptime_kuma.enable", false)
 	viper.SetDefault("uptime_kuma.domain", "")
 	viper.SetDefault("uptime_kuma.status_page_name", "")
+	// 请求参数无损透传默认开启，解决固定 struct 重序列化丢弃新字段的问题
+	viper.SetDefault("passthrough_extra_body", true)
+	viper.SetDefault("passthrough_native_protocol", true)
 }

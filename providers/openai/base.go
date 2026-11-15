@@ -246,26 +246,34 @@ func (p *OpenAIProvider) mergeCustomParams(requestMap map[string]interface{}, cu
 	return requestMap
 }
 
-// mergeExtraBodyFromRawRequest 从原始请求基础上合并处理后的请求字段
-// 以用户原始请求为基础，用处理后的字段覆盖，这样额外字段自然保留
-func (p *OpenAIProvider) mergeExtraBodyFromRawRequest(requestMap map[string]interface{}) map[string]interface{} {
+// mergeExtraBodyFromRawRequest 把客户端原始请求里「程序未定义」的字段补进转发体。
+//
+// 注意不能以原始 body 打底：程序会主动清除某些上游不支持的参数（如 o 系列的
+// temperature、grok 的 stop/penalties），用 raw body 打底会让这些参数复活。
+// 因此只补充结构体里根本没有声明的键，已声明的字段一律以程序处理结果为准。
+func (p *OpenAIProvider) mergeExtraBodyFromRawRequest(requestMap map[string]interface{}, request any) map[string]interface{} {
 	rawBody, ok := p.GetRawBody()
 	if !ok || rawBody == nil {
 		return requestMap
 	}
 
 	var rawRequest map[string]interface{}
-	err := json.Unmarshal(rawBody, &rawRequest)
-	if err != nil {
+	if err := json.Unmarshal(rawBody, &rawRequest); err != nil {
 		return requestMap
 	}
 
-	// 以原始请求为基础，用处理后的请求字段覆盖
-	for key, value := range requestMap {
-		rawRequest[key] = value
+	known := types.KnownJSONFields(request)
+	for key, value := range rawRequest {
+		if known[key] {
+			continue
+		}
+		if _, exists := requestMap[key]; exists {
+			continue
+		}
+		requestMap[key] = value
 	}
 
-	return rawRequest
+	return requestMap
 }
 
 // 修改GetRequestTextBody函数中的对应部分
@@ -286,8 +294,14 @@ func (p *OpenAIProvider) GetRequestTextBody(relayMode int, ModelName string, req
 		return nil, common.ErrorWrapper(err, "custom_parameter_error", http.StatusInternalServerError)
 	}
 
+	// 是否保留客户端原始请求中程序未定义的字段。
+	// 全局默认开启；disable_extra_body 为逐渠道否决（优先级最高）；
+	// 全局关闭时，仍允许渠道用 allow_extra_body 单独强制开启。
+	allowExtraBody := !p.Channel.DisableExtraBody &&
+		(config.PassthroughExtraBody || p.Channel.AllowExtraBody)
+
 	// 检查是否需要合并额外字段（来自渠道配置的额外参数或用户请求中的extra_body）
-	needMerge := customParams != nil || p.Channel.AllowExtraBody
+	needMerge := customParams != nil || allowExtraBody
 
 	if needMerge {
 		// 将请求体转换为map，以便添加额外参数
@@ -303,8 +317,8 @@ func (p *OpenAIProvider) GetRequestTextBody(relayMode int, ModelName string, req
 		}
 
 		// 如果允许额外字段透传，从原始请求中获取额外字段
-		if p.Channel.AllowExtraBody {
-			requestMap = p.mergeExtraBodyFromRawRequest(requestMap)
+		if allowExtraBody {
+			requestMap = p.mergeExtraBodyFromRawRequest(requestMap, request)
 		}
 
 		// 处理自定义额外参数

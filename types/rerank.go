@@ -6,10 +6,13 @@ import (
 )
 
 type RerankRequest struct {
-	Model     string `json:"model" binding:"required"`
-	Query     string `json:"query" binding:"required"`
-	TopN      int    `json:"top_n"`
-	Documents []any  `json:"documents" binding:"required"`
+	Model           string `json:"model" binding:"required"`
+	Query           string `json:"query" binding:"required"`
+	TopN            int    `json:"top_n"`
+	Documents       []any  `json:"documents" binding:"required"`
+	ReturnDocuments *bool  `json:"return_documents,omitempty"`
+	MaxChunkPerDoc  *int   `json:"max_chunk_per_doc,omitempty"`
+	OverlapTokens   *int   `json:"overlap_tokens,omitempty"`
 }
 
 func (r *RerankRequest) GetDocumentsList() ([]string, error) {

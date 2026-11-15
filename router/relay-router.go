@@ -1,6 +1,7 @@
 package router
 
 import (
+	"one-api/common/config"
 	"one-api/middleware"
 	"one-api/relay"
 	"one-api/relay/midjourney"
@@ -15,6 +16,8 @@ func SetRelayRouter(router *gin.Engine) {
 	router.Use(middleware.CORS())
 	// https://platform.openai.com/docs/api-reference/introduction
 	setOpenAIRouter(router)
+	setNativeProtocolRouter(router)
+	setTaskQueryRouter(router)
 	setMJRouter(router)
 	setSunoRouter(router)
 	setClaudeRouter(router)
@@ -25,9 +28,9 @@ func SetRelayRouter(router *gin.Engine) {
 
 func setOpenAIRouter(router *gin.Engine) {
 	modelsRouter := router.Group("/v1/models")
-	modelsRouter.Use(middleware.OpenaiAuth(), middleware.Distribute())
+	modelsRouter.Use(middleware.UniversalAuth(), middleware.Distribute())
 	{
-		modelsRouter.GET("", relay.ListModelsByToken)
+		modelsRouter.GET("", relay.ListModelsAuto)
 		modelsRouter.GET("/:model", relay.RetrieveModel)
 	}
 	relayV1Router := router.Group("/v1")
@@ -58,10 +61,66 @@ func setOpenAIRouter(router *gin.Engine) {
 			relayV1Router.Any("/assistants/*any", relay.RelayOnly)
 			relayV1Router.Any("/threads", relay.RelayOnly)
 			relayV1Router.Any("/threads/*any", relay.RelayOnly)
-			relayV1Router.Any("/batches/*any", relay.RelayOnly)
-			relayV1Router.Any("/vector_stores/*any", relay.RelayOnly)
-			relayV1Router.DELETE("/models/:model", relay.RelayOnly)
-		}
+		relayV1Router.Any("/batches/*any", relay.RelayOnly)
+		relayV1Router.Any("/vector_stores/*any", relay.RelayOnly)
+		relayV1Router.DELETE("/models/:model", relay.RelayOnly)
+
+		// Responses API 的配套端点：retrieve / delete / cancel / input_items /
+		// compact / background 结果读取等，以及会话端点。这些请求没有 model 字段，
+		// 无法按模型选渠道，沿用上面 files/assistants 的约定（令牌带 #渠道ID），
+		// 路径、method 与 body 原样透传上游，不经过任何协议转换。
+		relayV1Router.Any("/responses/*any", relay.RelayOnly)
+		relayV1Router.Any("/conversations", relay.RelayOnly)
+		relayV1Router.Any("/conversations/*any", relay.RelayOnly)
+	}
+}
+}
+
+// setNativeProtocolRouter 为 Anthropic / Gemini 原生 SDK 提供标准路径别名。
+// 原有 /claude/v1/messages 与 /gemini/:version/models/:model 要求客户端额外配置
+// URL 前缀，Claude Code、Gemini SDK 开箱即用会失败。这里复用完全相同的中继与
+// 鉴权链路，只补一层标准路径。
+func setNativeProtocolRouter(router *gin.Engine) {
+	if !config.PassthroughNativeProtocol {
+		return
+	}
+
+	claudeNative := router.Group("/v1")
+	claudeNative.Use(middleware.RelayCluadePanicRecover(), middleware.ClaudeAuth(), middleware.Distribute(), middleware.DynamicRedisRateLimiter())
+	{
+		claudeNative.POST("/messages", relay.Relay)
+	}
+
+	geminiNative := router.Group("/v1beta")
+	geminiNative.Use(middleware.RelayGeminiPanicRecover(), middleware.GeminiAuth(), middleware.Distribute(), middleware.DynamicRedisRateLimiter())
+	{
+		geminiNative.GET("/models", relay.ListGeminiModelsByToken)
+		geminiNative.GET("/openai/models", relay.ListModelsByToken)
+		geminiNative.POST("/models/:model", relay.Relay)
+	}
+}
+
+// setTaskQueryRouter 提供与平台无关的只读任务状态查询，
+// 复用现有 Task 表，不改动 MJ / Suno / Kling 各自的私有查询路径。
+func setTaskQueryRouter(router *gin.Engine) {
+	tasks := router.Group("/v1/tasks")
+	tasks.Use(middleware.UniversalAuth())
+	{
+		tasks.GET("/:key", relay.GetTaskByKey)
+		tasks.GET("/:key/artifacts", relay.GetTaskArtifacts)
+	}
+
+	videos := router.Group("/v1/videos")
+	videos.Use(middleware.UniversalAuth())
+	{
+		// 本机任务表直出，供 one-hub 自己的 Suno / Kling / MJ 任务使用。
+		videos.GET("/:task_id", relay.GetVideoTaskByID)
+		// 下列端点交给上游处理：提交、remix、内容下载、删除。
+		// 没有 model 字段，因此要求令牌带 #渠道ID。
+		videos.POST("", middleware.SpecifiedChannel(), relay.RelayOnly)
+		videos.POST("/:task_id/remix", middleware.SpecifiedChannel(), relay.RelayOnly)
+		videos.GET("/:task_id/content", middleware.SpecifiedChannel(), relay.RelayOnly)
+		videos.DELETE("/:task_id", middleware.SpecifiedChannel(), relay.RelayOnly)
 	}
 }
 

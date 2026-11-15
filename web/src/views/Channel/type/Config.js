@@ -18,7 +18,8 @@ const defaultConfig = {
     pre_cost: 1,
     disabled_stream: [],
     compatible_response: false,
-    allow_extra_body: false
+    allow_extra_body: true,
+    disable_extra_body: false
   },
   inputLabel: {
     name: '渠道名称',
@@ -39,7 +40,8 @@ const defaultConfig = {
     pre_cost: '预计费选项',
     disabled_stream: '禁用流式的模型',
     compatible_response: '兼容Response API',
-    allow_extra_body: '允许额外字段透传'
+    allow_extra_body: '强制透传额外字段',
+    disable_extra_body: '禁止透传额外字段'
   },
   prompt: {
     type: '请选择渠道类型',
@@ -64,7 +66,10 @@ const defaultConfig = {
       '这里选择预计费选项，用于预估费用，如果你觉得计算图片占用太多资源，可以选择关闭图片计费。但是请注意：有些渠道在stream下是不会返回tokens的，这会导致输入tokens计算错误。',
     disabled_stream: '这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道',
     compatible_response: '兼容Response API',
-    allow_extra_body: '开启后，将会透传用户请求中的额外字段（如OpenAI SDK的extra_body参数），适用于需要传递自定义参数到上游API的场景'
+    allow_extra_body:
+      '默认已全局开启无损透传：客户端请求中程序未定义的字段（service_tier、store、metadata、prompt_cache_*、extra_body、各家扩展参数等）会原样送到上游，程序处理过的 model/stream 等字段仍以程序结果为准。全局关闭 passthrough_extra_body 后，可在此单独为渠道强制开启。',
+    disable_extra_body:
+      '勾选后该渠道不透传任何额外字段，只发送程序已定义的字段。仅当上游对未知字段返回 400 时需要勾选。此开关优先级高于全局设置。'
   },
   modelGroup: 'OpenAI'
 };

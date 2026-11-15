@@ -129,13 +129,47 @@ type ClaudeRequest struct {
 	ToolChoice    *ToolChoice `json:"tool_choice,omitempty"`
 	Thinking      *Thinking   `json:"thinking,omitempty"`
 	McpServers    any         `json:"mcp_servers,omitempty"`
-	//ClaudeMetadata    `json:"metadata,omitempty"`
-	Stream bool `json:"stream,omitempty"`
+	Stream        bool        `json:"stream,omitempty"`
+
+	// Claude 4.x / Opus 4.7 等新版本引入的字段
+	CacheControl       any  `json:"cache_control,omitempty"`
+	ContextManagement  any  `json:"context_management,omitempty"`
+	OutputConfig       any  `json:"output_config,omitempty"`
+	OutputFormat       any  `json:"output_format,omitempty"`
+	Container          any  `json:"container,omitempty"`
+	Metadata           any  `json:"metadata,omitempty"`
+	Speed              any  `json:"speed,omitempty"`
+	ServiceTier        any  `json:"service_tier,omitempty"`
+	InferenceGeo       any  `json:"inference_geo,omitempty"`
+	Safeguards         any  `json:"safeguards,omitempty"`
+	ChatTemplateKwargs any  `json:"chat_template_kwargs,omitempty"`
+	MaxTokensToSample  *int `json:"max_tokens_to_sample,omitempty"`
+
+	// Extra 保留所有未定义字段，让原生 /v1/messages 客户端的新参数不被吞掉
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (r *ClaudeRequest) UnmarshalJSON(data []byte) error {
+	type alias ClaudeRequest
+	var decoded alias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*r = ClaudeRequest(decoded)
+	r.Extra = types.CollectExtra(data, decoded)
+	return nil
+}
+
+func (r ClaudeRequest) MarshalJSON() ([]byte, error) {
+	type alias ClaudeRequest
+	return types.MarshalWithExtra(alias(r), r.Extra)
 }
 
 type Thinking struct {
 	Type         string `json:"type,omitempty"`
 	BudgetTokens int    `json:"budget_tokens,omitempty"`
+	Display      any    `json:"display,omitempty"`
+	BlockBinding any    `json:"block_binding,omitempty"`
 }
 type ToolChoice struct {
 	Type                   string `json:"type,omitempty"`

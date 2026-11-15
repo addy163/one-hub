@@ -71,6 +71,20 @@ func GetTaskByTaskId(platform string, userId int, taskId string) (task *Task, er
 	return
 }
 
+// GetTaskByTaskIdForUser 按任务 ID 查询，不限定平台。
+// 供 /v1/tasks/:key 这类通用任务查询端点使用，避免调用方必须知道平台名。
+func GetTaskByTaskIdForUser(userId int, taskId string) (task *Task, err error) {
+	task = &Task{}
+	err = DB.Omit("channel_id", "quota").
+		Where("user_id = ? and task_id = ?", userId, taskId).
+		Order("id desc").First(task).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return
+}
+
 func (Task *Task) Insert() error {
 	return DB.Create(Task).Error
 }

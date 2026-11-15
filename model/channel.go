@@ -40,7 +40,12 @@ type Channel struct {
 	OnlyChat           bool    `json:"only_chat" form:"only_chat" gorm:"default:false"`
 	PreCost            int     `json:"pre_cost" form:"pre_cost" gorm:"default:1"`
 	CompatibleResponse bool    `json:"compatible_response" gorm:"default:false"`
-	AllowExtraBody     bool    `json:"allow_extra_body" form:"allow_extra_body" gorm:"default:false"`
+	// AllowExtraBody 为逐渠道强制开启；全局 passthrough_extra_body 默认已开启，
+	// 老数据里该字段为 false 不代表用户主动关闭，因此不能拿它当否决票。
+	AllowExtraBody bool `json:"allow_extra_body" form:"allow_extra_body" gorm:"default:true"`
+	// DisableExtraBody 是显式的逐渠道否决开关，优先级最高。
+	// 某些上游对未知字段返回 400 时，可单独为该渠道关闭透传。
+	DisableExtraBody bool `json:"disable_extra_body" form:"disable_extra_body" gorm:"default:false"`
 
 	DisabledStream *datatypes.JSONSlice[string] `json:"disabled_stream,omitempty" gorm:"type:json"`
 

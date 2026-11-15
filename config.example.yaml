@@ -146,3 +146,30 @@ cors_allow_credentials: false
 # 默认 false：拒绝回环、私有网段与云元数据地址，防止 SSRF。
 ssrf_allow_private_image: false
 
+# ---------------------------------------------------------------------------
+# 请求参数保真（对标 new-api 的 RawMessage 无损透传）
+# ---------------------------------------------------------------------------
+# 默认 true：客户端请求中程序未定义的字段会原样送到上游，避免
+# service_tier / store / metadata / prompt_cache_* / extra_body / 各家扩展参数
+# 被固定结构体重序列化时静默丢弃。以程序处理后的请求为底，只补回未定义字段；
+# 程序已处理的 model、stream、temperature 等一律以程序结果为准，
+# 不会把程序主动清理掉的参数重新带给上游。
+# 若上游对未知字段返回 400，可在渠道里单独勾选「禁止透传额外字段」，
+# 或在此全局关闭（关闭后仅对显式勾选「强制透传额外字段」的渠道生效）。
+passthrough_extra_body: true
+
+# 默认 true：注册 Claude / Gemini 原生 SDK 的标准路径别名
+# （POST /v1/messages、GET /v1beta/models、POST /v1beta/models/:model），
+# 使 Claude Code / Gemini SDK 把 base_url 直接指向本站 /v1 即可使用。
+# 设为 false 时仍可用原有的 /claude/v1/messages 与 /gemini/:version/models/:model。
+passthrough_native_protocol: true
+
+# ---------------------------------------------------------------------------
+# 通用透传端点约定
+# ---------------------------------------------------------------------------
+# /v1/responses/*、/v1/conversations/*、POST /v1/videos、DELETE /v1/videos/:id、
+# GET /v1/videos/:id/content 等「无 model 字段」的端点按路径与 body 原样透传上游，
+# 无法按模型选渠道，因此沿用 /v1/files、/v1/assistants 的既有约定：
+# 令牌需带渠道后缀，例如 sk-xxxx#12（仅管理员令牌支持指定渠道）。
+# GET /v1/videos/:id 与 /v1/tasks/:key 仍由本机任务表直接返回状态，无需渠道后缀。
+

@@ -1,11 +1,16 @@
 package types
 
 type EmbeddingRequest struct {
-	Model          string `json:"model" binding:"required"`
-	Input          any    `json:"input" binding:"required"`
-	EncodingFormat string `json:"encoding_format,omitempty"`
-	Dimensions     int    `json:"dimensions,omitempty"`
-	User           string `json:"user,omitempty"`
+	Model            string   `json:"model" binding:"required"`
+	Input            any      `json:"input" binding:"required"`
+	EncodingFormat   string   `json:"encoding_format,omitempty"`
+	Dimensions       int      `json:"dimensions,omitempty"`
+	User             string   `json:"user,omitempty"`
+	Seed             *int     `json:"seed,omitempty"`
+	Temperature      *float64 `json:"temperature,omitempty"`
+	TopP             *float64 `json:"top_p,omitempty"`
+	FrequencyPenalty *float64 `json:"frequency_penalty,omitempty"`
+	PresencePenalty  *float64 `json:"presence_penalty,omitempty"`
 }
 
 type Embedding struct {

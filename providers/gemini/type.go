@@ -41,12 +41,37 @@ type GeminiChatRequest struct {
 	Tools             []GeminiChatTools          `json:"tools,omitempty"`
 	ToolConfig        *GeminiToolConfig          `json:"toolConfig,omitempty"`
 	SystemInstruction any                        `json:"systemInstruction,omitempty"`
+	CachedContent     string                     `json:"cachedContent,omitempty"`
+	ContinuationToken string                     `json:"continuationToken,omitempty"`
+
+	// Extra 保存原始请求中程序未定义的顶层字段，序列化时原样写回上游。
+	Extra map[string]json.RawMessage `json:"-"`
 
 	JsonRaw []byte `json:"-"`
 }
 
+// UnmarshalJSON 在解析已定义字段之外，收下所有未知字段。
+// Gemini 各版本会不断新增 generationConfig / 顶层字段，固定 struct 会静默丢弃它们。
+func (r *GeminiChatRequest) UnmarshalJSON(data []byte) error {
+	type alias GeminiChatRequest
+	var decoded alias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*r = GeminiChatRequest(decoded)
+	r.Extra = types.CollectExtra(data, decoded)
+	return nil
+}
+
+func (r GeminiChatRequest) MarshalJSON() ([]byte, error) {
+	type alias GeminiChatRequest
+	return types.MarshalWithExtra(alias(r), r.Extra)
+}
+
 type GeminiToolConfig struct {
-	FunctionCallingConfig *GeminiFunctionCallingConfig `json:"functionCallingConfig,omitempty"`
+	FunctionCallingConfig            *GeminiFunctionCallingConfig `json:"functionCallingConfig,omitempty"`
+	RetrievalConfig                  any                          `json:"retrievalConfig,omitempty"`
+	IncludeServerSideToolInvocations *bool                        `json:"includeServerSideToolInvocations,omitempty"`
 }
 
 type GeminiFunctionCallingConfig struct {
@@ -330,6 +355,37 @@ type GeminiChatGenerationConfig struct {
 	ResponseSchema     any             `json:"responseSchema,omitempty"`
 	ResponseModalities []string        `json:"responseModalities,omitempty"`
 	ThinkingConfig     *ThinkingConfig `json:"thinkingConfig,omitempty"`
+
+	// Gemini 2.5/3 的结构化输出与多模态生成参数
+	ResponseJsonSchema any      `json:"responseJsonSchema,omitempty"`
+	PresencePenalty    *float64 `json:"presencePenalty,omitempty"`
+	FrequencyPenalty   *float64 `json:"frequencyPenalty,omitempty"`
+	ResponseLogprobs   *bool    `json:"responseLogprobs,omitempty"`
+	Logprobs           *int     `json:"logprobs,omitempty"`
+	Seed               *int     `json:"seed,omitempty"`
+	MediaResolution    any      `json:"mediaResolution,omitempty"`
+	MediaProcessing    any      `json:"mediaProcessing,omitempty"`
+	SpeechConfig       any      `json:"speechConfig,omitempty"`
+	ImageConfig        any      `json:"imageConfig,omitempty"`
+
+	// Extra 保留 generationConfig 内程序未定义的扩展字段。
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (r *GeminiChatGenerationConfig) UnmarshalJSON(data []byte) error {
+	type alias GeminiChatGenerationConfig
+	var decoded alias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*r = GeminiChatGenerationConfig(decoded)
+	r.Extra = types.CollectExtra(data, decoded)
+	return nil
+}
+
+func (r GeminiChatGenerationConfig) MarshalJSON() ([]byte, error) {
+	type alias GeminiChatGenerationConfig
+	return types.MarshalWithExtra(alias(r), r.Extra)
 }
 
 type ThinkingConfig struct {

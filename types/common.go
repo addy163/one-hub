@@ -162,7 +162,9 @@ type OpenAIErrorResponse struct {
 }
 
 type StreamOptions struct {
-	IncludeUsage bool `json:"include_usage,omitempty"`
+	IncludeUsage         bool  `json:"include_usage,omitempty"`
+	IncludeObfuscation   *bool `json:"include_obfuscation,omitempty"`
+	ContinuousUsageStats *bool `json:"continuous_usage_stats,omitempty"`
 }
 
 func (u *Usage) IncExtraBilling(key string, bType string) {

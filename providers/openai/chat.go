@@ -209,8 +209,11 @@ func (h *OpenAIStreamHandler) HandlerChatStream(rawLine *[]byte, dataChan chan s
 }
 
 func otherProcessing(request *types.ChatCompletionRequest, otherArg string) {
+	// 覆盖 o 系列、gpt-5 / gpt-5.x / gpt-6 系列（含 5.1、5.2、5.4、6-sol 等快照）。
+	// 旧代码只认 ^o[1-9] 和 gpt-5 前缀，新快照会漏掉 max_completion_tokens 转换。
 	matched, _ := regexp.MatchString(`^o[1-9]`, request.Model)
-	if matched || strings.HasPrefix(request.Model, "gpt-5") {
+	isReasoningModel := matched || strings.HasPrefix(request.Model, "gpt-5") || strings.HasPrefix(request.Model, "gpt-6")
+	if isReasoningModel {
 		if request.MaxTokens > 0 {
 			request.MaxCompletionTokens = request.MaxTokens
 			request.MaxTokens = 0

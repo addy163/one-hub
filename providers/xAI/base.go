@@ -71,15 +71,16 @@ func usageHandler(usage *types.Usage) (ForcedFormatting bool) {
 
 func requestHandler(request *types.ChatCompletionRequest) (errWithCode *types.OpenAIErrorWithStatusCode) {
 
-	if strings.HasPrefix(request.Model, "grok-4") || strings.HasPrefix(request.Model, "grok-3-mini") || strings.HasPrefix(request.Model, "grok-3-mini-fast") {
+	// grok-3-mini 系列上游确实不接受 stop / penalties，保留原有清理。
+	if strings.HasPrefix(request.Model, "grok-3-mini") || strings.HasPrefix(request.Model, "grok-3-mini-fast") {
 		request.Stop = nil
 		request.FrequencyPenalty = nil
 		request.PresencePenalty = nil
 	}
 
-	if strings.HasPrefix(request.Model, "grok-4") {
-		request.ReasoningEffort = nil
-	}
-
+	// grok-4 不再无条件清除 reasoning_effort / stop / penalties：
+	// 新版 API 已支持推理强度参数，且无损透传会把客户端原始值送到上游，
+	// 主动清掉反而让新特性静默失效。上游若仍不支持会自行返回 400，
+	// 此时可在渠道上单独关闭透传。
 	return nil
 }

@@ -143,6 +143,8 @@ func (m *ChatCompletionMessage) IsSystemRole() bool {
 type ChatMessageImageURL struct {
 	URL    string `json:"url,omitempty"`
 	Detail string `json:"detail,omitempty"`
+
+	Extra map[string]json.RawMessage `json:"-"`
 }
 
 type ChatMessagePart struct {
@@ -153,21 +155,29 @@ type ChatMessagePart struct {
 	Refusal    string               `json:"refusal,omitempty"`
 
 	File *ChatMessageFile `json:"file,omitempty"`
+
+	Extra map[string]json.RawMessage `json:"-"`
 }
 
 type InputAudio struct {
-	Data   string `json:"data"`
-	Format string `json:"format"`
+	Data     string `json:"data"`
+	Format   string `json:"format"`
+	Filename string `json:"filename,omitempty"`
+	FileData string `json:"file_data,omitempty"`
+	FileId   string `json:"file_id,omitempty"`
 }
 
 type ChatMessageFile struct {
 	Filename string `json:"filename,omitempty"`
 	FileData string `json:"file_data,omitempty"`
+	FileId   string `json:"file_id,omitempty"`
 }
 
 type ChatCompletionResponseFormat struct {
 	Type       string            `json:"type,omitempty"`
 	JsonSchema *FormatJsonSchema `json:"json_schema,omitempty"`
+
+	Extra map[string]json.RawMessage `json:"-"`
 }
 
 type FormatJsonSchema struct {
@@ -175,6 +185,8 @@ type FormatJsonSchema struct {
 	Name        string `json:"name"`
 	Schema      any    `json:"schema,omitempty"`
 	Strict      any    `json:"strict,omitempty"`
+
+	Extra map[string]json.RawMessage `json:"-"`
 }
 
 type ChatCompletionRequest struct {
@@ -217,8 +229,22 @@ type ChatCompletionRequest struct {
 	ThinkingBudget *int  `json:"thinking_budget,omitempty"` // qwen3 思考长度，只有enable_thinking开启才生效
 	EnableSearch   *bool `json:"enable_search,omitempty"`   // qwen 搜索开关
 
-  Thinking *interface{} `json:"thinking,omitempty"` // thinking 思考开关，兼容火山引擎
-  
+	Thinking *interface{} `json:"thinking,omitempty"` // thinking 思考开关，兼容火山引擎
+
+	// OpenAI / 各家兼容协议里的常见新参数。结构体里声明一份便于程序感知与校验，
+	// 其余未知字段由 providers/openai 的无损透传与 types.Extra 兜底负责。
+	ServiceTier          *string `json:"service_tier,omitempty"`
+	Store                *bool   `json:"store,omitempty"`
+	Metadata             any     `json:"metadata,omitempty"`
+	SafetyIdentifier     *string `json:"safety_identifier,omitempty"`
+	PromptCacheKey       *string `json:"prompt_cache_key,omitempty"`
+	PromptCacheOptions   any     `json:"prompt_cache_options,omitempty"`
+	PromptCacheRetention any     `json:"prompt_cache_retention,omitempty"`
+	SearchParameters     any     `json:"search_parameters,omitempty"`
+	ChatTemplateKwargs   any     `json:"chat_template_kwargs,omitempty"`
+	SearchOptions        any     `json:"search_options,omitempty"`
+	Usage                any     `json:"usage,omitempty"`
+
 	OneOtherArg string `json:"-"`
 }
 
@@ -226,6 +252,8 @@ type ChatReasoning struct {
 	MaxTokens int     `json:"max_tokens,omitempty"`
 	Effort    string  `json:"effort,omitempty"`
 	Summary   *string `json:"summary,omitempty"`
+
+	Extra map[string]json.RawMessage `json:"-"`
 }
 
 type WebSearchOptions struct {
@@ -454,6 +482,8 @@ func (c *ChatCompletionStreamResponse) GetResponseText() (responseText string) {
 type ChatAudio struct {
 	Voice  string `json:"voice"`
 	Format string `json:"format"`
+
+	Extra map[string]json.RawMessage `json:"-"`
 }
 
 type MultimediaData struct {

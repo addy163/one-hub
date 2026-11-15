@@ -58,7 +58,7 @@ func (p *OpenAIProvider) getRequestImageBody(relayMode int, ModelName string, re
 	if p.OriginalModel != request.Model {
 		var formBody bytes.Buffer
 		builder := p.Requester.CreateFormBuilder(&formBody)
-		if err := imagesEditsMultipartForm(request, builder); err != nil {
+		if err := imagesEditsMultipartForm(p, request, builder); err != nil {
 			return nil, common.ErrorWrapper(err, "create_form_builder_failed", http.StatusInternalServerError)
 		}
 		req, err = p.Requester.NewRequest(
@@ -89,7 +89,7 @@ func (p *OpenAIProvider) getRequestImageBody(relayMode int, ModelName string, re
 	return req, nil
 }
 
-func imagesEditsMultipartForm(request *types.ImageEditRequest, b requester.FormBuilder) (err error) {
+func imagesEditsMultipartForm(p *OpenAIProvider, request *types.ImageEditRequest, b requester.FormBuilder) (err error) {
 	if request.Image != nil {
 		err = b.CreateFormFile("image", request.Image)
 		if err != nil {
@@ -148,6 +148,52 @@ func imagesEditsMultipartForm(request *types.ImageEditRequest, b requester.FormB
 		err = b.WriteField("user", request.User)
 		if err != nil {
 			return fmt.Errorf("writing user: %w", err)
+		}
+	}
+
+	// 新增图片模型参数：模型发生映射时必须显式写出，否则会被重建的 multipart 丢掉
+	extraFields := []struct {
+		name  string
+		value string
+	}{
+		{"quality", request.Quality},
+		{"background", request.Background},
+		{"moderation", request.Moderation},
+		{"output_format", request.OutputFormat},
+		{"output_compression", request.OutputCompression},
+		{"input_fidelity", request.InputFidelity},
+		{"seed", request.Seed},
+		{"watermark", request.Watermark},
+	}
+	for _, f := range extraFields {
+		if f.value == "" {
+			continue
+		}
+		if err = b.WriteField(f.name, f.value); err != nil {
+			return fmt.Errorf("writing %s: %w", f.name, err)
+		}
+	}
+
+	// 兜底：把客户端原始 multipart 中程序未定义的所有非文件字段原样带过去，
+	// 对标 new-api adaptor 遍历 mf.Value 的做法，避免上游新增参数被吞。
+	if p.Context != nil && p.Context.Request != nil && p.Context.Request.MultipartForm != nil {
+		written := make(map[string]bool)
+		for _, name := range []string{
+			"image", "image[]", "mask", "prompt", "model", "response_format",
+			"n", "size", "user", "quality", "background", "moderation",
+			"output_format", "output_compression", "input_fidelity", "seed", "watermark",
+		} {
+			written[name] = true
+		}
+		for name, values := range p.Context.Request.MultipartForm.Value {
+			if written[name] {
+				continue
+			}
+			for _, value := range values {
+				if err = b.WriteField(name, value); err != nil {
+					return fmt.Errorf("writing extra field %s: %w", name, err)
+				}
+			}
 		}
 	}
 

@@ -8,6 +8,9 @@ type SpeechAudioRequest struct {
 	Voice          string  `json:"voice" binding:"required"`
 	ResponseFormat string  `json:"response_format,omitempty"`
 	Speed          float64 `json:"speed,omitempty"`
+	Instructions   string  `json:"instructions,omitempty"`
+	StreamFormat   string  `json:"stream_format,omitempty"`
+	Metadata       any     `json:"metadata,omitempty"`
 }
 
 type AudioRequest struct {

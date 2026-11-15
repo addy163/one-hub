@@ -1,6 +1,9 @@
 package types
 
-import "mime/multipart"
+import (
+	"encoding/json"
+	"mime/multipart"
+)
 
 type ImageRequest struct {
 	Prompt           string  `json:"prompt,omitempty" binding:"required"`
@@ -20,12 +23,45 @@ type ImageRequest struct {
 	Moderation        *string `json:"moderation,omitempty"`
 	OutputCompression *int    `json:"output_compression,omitempty"`
 	OutputFormat      *string `json:"output_format,omitempty"`
+
+	// 新模型常见参数（gpt-image-1/1.5、flux、seedream、imagen 等）
+	Seed          *int  `json:"seed,omitempty"`
+	PartialImages *int  `json:"partial_images,omitempty"`
+	Stream        *bool `json:"stream,omitempty"`
+	Watermark     *bool `json:"watermark,omitempty"`
+
+	InputFidelity any `json:"input_fidelity,omitempty"`
+	Image         any `json:"image,omitempty"`
+	Images        any `json:"images,omitempty"`
+	Mask          any `json:"mask,omitempty"`
+	Metadata      any `json:"metadata,omitempty"`
+
+	// Extra 保存所有未在上述结构体中定义的字段，序列化时原样写回，
+	// 避免上游新增参数时被调用方静默丢弃。
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (r *ImageRequest) UnmarshalJSON(data []byte) error {
+	type alias ImageRequest
+	var decoded alias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*r = ImageRequest(decoded)
+	r.Extra = CollectExtra(data, decoded)
+	return nil
+}
+
+func (r ImageRequest) MarshalJSON() ([]byte, error) {
+	type alias ImageRequest
+	return MarshalWithExtra(alias(r), r.Extra)
 }
 
 type ImageResponse struct {
-	Created any                      `json:"created,omitempty"`
-	Data    []ImageResponseDataInner `json:"data,omitempty"`
-	Usage   *ResponsesUsage          `json:"usage,omitempty"`
+	Created  any                      `json:"created,omitempty"`
+	Data     []ImageResponseDataInner `json:"data,omitempty"`
+	Usage    *ResponsesUsage          `json:"usage,omitempty"`
+	Metadata any                      `json:"metadata,omitempty"`
 }
 
 type ImageResponseDataInner struct {
@@ -44,4 +80,13 @@ type ImageEditRequest struct {
 	Size           string                  `form:"size"`
 	ResponseFormat string                  `form:"response_format"`
 	User           string                  `form:"user"`
+
+	Quality           string `form:"quality"`
+	Background        string `form:"background"`
+	Moderation        string `form:"moderation"`
+	OutputFormat      string `form:"output_format"`
+	OutputCompression string `form:"output_compression"`
+	InputFidelity     string `form:"input_fidelity"`
+	Seed              string `form:"seed"`
+	Watermark         string `form:"watermark"`
 }

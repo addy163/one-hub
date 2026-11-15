@@ -1091,6 +1091,23 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
                     <FormHelperText id="helper-tex-allow_extra_body-label">{customizeT(inputPrompt.allow_extra_body)}</FormHelperText>
                   </FormControl>
                 )}
+                {inputPrompt.disable_extra_body && (
+                  <FormControl fullWidth>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          disabled={hasTag}
+                          checked={Boolean(values.disable_extra_body)}
+                          onChange={(event) => {
+                            setFieldValue('disable_extra_body', event.target.checked);
+                          }}
+                        />
+                      }
+                      label={customizeT(inputLabel.disable_extra_body)}
+                    />
+                    <FormHelperText id="helper-tex-disable_extra_body-label">{customizeT(inputPrompt.disable_extra_body)}</FormHelperText>
+                  </FormControl>
+                )}
                 {pluginList[values.type] &&
                   Object.keys(pluginList[values.type]).map((pluginId) => {
                     const plugin = pluginList[values.type][pluginId];
