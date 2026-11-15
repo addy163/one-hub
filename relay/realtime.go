@@ -28,8 +28,12 @@ type RelayModeChatRealtime struct {
 }
 
 var upgrader = websocket.Upgrader{
+	// 默认不限制 Origin（websocket_allowed_origins 为空时保持历史行为）。
+	// 这里不能无条件改成「默认白名单」：one-hub 是 API 代理，浏览器 Realtime SDK
+	// 来自任意站点；而本端点的鉴权只认令牌、不读 Cookie，因此不存在
+	// Cross-Site WebSocket Hijacking。仅当管理员显式配置白名单时才收紧。
 	CheckOrigin: func(r *http.Request) bool {
-		return true
+		return config.AllowWebsocketOrigin(r.Header.Get("Origin"))
 	},
 	Subprotocols: []string{"realtime"},
 }
@@ -43,8 +47,8 @@ func ChatRealtime(c *gin.Context) {
 
 	userConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		fmt.Println("upgrade failed", err)
-		common.AbortWithMessage(c, http.StatusInternalServerError, "upgrade_failed")
+		// Upgrade 失败时 gorilla 已经写入 HTTP 响应，不能再写一次 header。
+		logger.LogError(c.Request.Context(), fmt.Sprintf("websocket upgrade failed: %s", err.Error()))
 		return
 	}
 

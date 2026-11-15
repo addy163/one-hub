@@ -18,6 +18,12 @@ var (
 	SessionMaxAge = 7 * 24 * 60 * 60
 	SessionSecure = false
 
+	// WebsocketAllowedOrigins 是浏览器端 WebSocket 握手的 Origin 白名单。
+	// 默认空表示不限制：one-hub 是 API 代理，浏览器 Realtime SDK 本来就来自任意站点，
+	// 且 /v1/realtime 的鉴权只认令牌（不读 Cookie），不存在跨站 WebSocket 劫持。
+	// 需要收紧时才在 config.yaml 里显式配置，不影响 CORS 白名单。
+	WebsocketAllowedOrigins []string
+
 	// WeakSessionSecretReplaced 表示启动配置里的 session_secret 是弱值/占位值，
 	// 已被自动替换为随机密钥。此时所有旧会话会失效，属于预期的安全行为。
 	WeakSessionSecretReplaced = false
@@ -33,6 +39,28 @@ func InitSecurity() {
 		SessionMaxAge = v
 	}
 	SessionSecure = viper.GetBool("session_secure")
+	WebsocketAllowedOrigins = viper.GetStringSlice("websocket_allowed_origins")
+}
+
+// AllowWebsocketOrigin 判断一次 WebSocket 握手是否允许。
+//   - 无 Origin 头：服务端 SDK / curl 等非浏览器客户端，一律放行；
+//   - 白名单为空：维持历史行为，允许任意来源（API 代理的正常语义）；
+//   - 白名单非空：精确匹配 Origin，支持 "*" 显式放开。
+func AllowWebsocketOrigin(origin string) bool {
+	if origin == "" || len(WebsocketAllowedOrigins) == 0 {
+		return true
+	}
+	normalized := strings.TrimSuffix(strings.TrimSpace(origin), "/")
+	for _, allowed := range WebsocketAllowedOrigins {
+		allowed = strings.TrimSpace(allowed)
+		if allowed == "*" {
+			return true
+		}
+		if strings.EqualFold(normalized, strings.TrimSuffix(allowed, "/")) {
+			return true
+		}
+	}
+	return false
 }
 
 // NormalizeSessionSecret 拒绝空值、过短值和部署模板里的占位值。

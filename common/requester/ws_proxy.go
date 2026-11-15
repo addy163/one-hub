@@ -38,7 +38,9 @@ func NewWSProxy(userConn, supplierConn *websocket.Conn, timeout time.Duration, h
 		timeout:        timeout,
 		handler:        handler,
 		usageHandler:   usageHandler,
-		done:           make(chan struct{}),
+		// 两个 transfer 各写一次 done，但 Wait 只读一次；原来用无缓冲 channel，
+		// 后结束的那个 goroutine 会永久阻塞在发送上，每条连接泄漏一个 goroutine。
+		done:           make(chan struct{}, 2),
 		userClosed:     make(chan struct{}),
 		supplierClosed: make(chan struct{}),
 	}

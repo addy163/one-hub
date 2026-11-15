@@ -142,6 +142,16 @@ session_secure: false
 cors_allowed_origins: []
 cors_allow_credentials: false
 
+# 浏览器端 WebSocket（/v1/realtime）的 Origin 白名单，独立于上面的 CORS 配置。
+# 默认留空表示允许任意来源：one-hub 是 API 代理，浏览器 Realtime SDK 本来就来自
+# 各种站点；且该端点只认令牌、不读 Cookie，不存在跨站 WebSocket 劫持。
+# 只在确有需要时填写完整 Origin（含 scheme 与端口），例如：
+# websocket_allowed_origins:
+#   - https://chat.example.com
+#   - http://localhost:5173
+# 无 Origin 头的服务端 SDK / curl 始终放行；填 "*" 等价于不限制。
+websocket_allowed_origins: []
+
 # 允许用户提交的 image_url 指向内网地址（自建图床）。
 # 默认 false：拒绝回环、私有网段与云元数据地址，防止 SSRF。
 ssrf_allow_private_image: false

@@ -55,7 +55,8 @@ func (lh *LogHistory) AddEntry(level, message string) {
 	entry := LogEntry{
 		Timestamp: time.Now(),
 		Level:     level,
-		Message:   message,
+		// 内存日志会直接展示在管理后台，同样必须脱敏
+		Message: RedactSensitive(message),
 	}
 
 	// Add the new entry
@@ -108,7 +109,8 @@ func SetupLogger() {
 		writeSyncer,
 		zap.NewAtomicLevelAt(getLogLevel()),
 	)
-	Logger = zap.New(core, zap.AddCaller())
+	// 统一在写入前脱敏，覆盖访问日志、系统日志和第三方渠道抛回的完整 URL
+	Logger = zap.New(redactCore{Core: core}, zap.AddCaller())
 }
 
 func getEncoder() zapcore.Encoder {
