@@ -155,7 +155,13 @@ func SyncOptions(frequency int) {
 
 // DeleteOption 删除后台设置对某个配置项的覆盖，使 config.yaml 默认值重新生效。
 func DeleteOption(key string) error {
-	return DB.Where("key = ?", key).Delete(&Option{}).Error
+	// "key" 是 MySQL / PostgreSQL 的保留字，必须按方言显式加引号，
+	// 否则后台「恢复配置文件默认」会报 1064 且覆盖值无法清除。
+	keyCol := "`key`"
+	if common.UsingPostgreSQL {
+		keyCol = `"key"`
+	}
+	return DB.Where(keyCol+" = ?", key).Delete(&Option{}).Error
 }
 
 func UpdateOption(key string, value string) error {
