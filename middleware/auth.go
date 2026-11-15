@@ -48,8 +48,55 @@ func authHelper(c *gin.Context, minRole int) {
 			c.Abort()
 			return
 		}
+	} else {
+		// 会话分支：原实现完全信任 Cookie 里的 role/status，导致用户被封禁、降权、
+		// 改密、删除后旧 Cookie 依旧可用， Cookie 泄露也无法应急止损。
+		// 现在每次请求都以数据库为准复核，并校验由 access_token 派生的会话版本号：
+		// 用户改密 / 重置个人令牌后，所有已签发 Cookie 立即失效。
+		userID, ok := id.(int)
+		if !ok || userID <= 0 {
+			abortSession(c, session, "登录状态异常，请重新登录")
+			return
+		}
+		user, err := model.GetUserById(userID, true)
+		if err != nil || user == nil || user.Id == 0 {
+			abortSession(c, session, "账号不存在，请重新登录")
+			return
+		}
+		if user.Status == config.UserStatusDisabled {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": "用户已被封禁",
+			})
+			c.Abort()
+			return
+		}
+		if user.Role < minRole {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": "无权进行此操作，权限不足",
+			})
+			c.Abort()
+			return
+		}
+		sv, _ := session.Get("sv").(string)
+		if sv == "" || sv != config.SessionVersion(user.AccessToken) {
+			abortSession(c, session, "登录状态已失效，请重新登录")
+			return
+		}
+		// 使用数据库里的权威值，而不是 Cookie 里可能过期的值
+		username = user.Username
+		role = user.Role
+		id = user.Id
+		status = user.Status
 	}
-	if status.(int) == config.UserStatusDisabled {
+
+	statusInt, ok := status.(int)
+	if !ok {
+		abortSession(c, session, "登录状态异常，请重新登录")
+		return
+	}
+	if statusInt == config.UserStatusDisabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "用户已被封禁",
@@ -57,7 +104,12 @@ func authHelper(c *gin.Context, minRole int) {
 		c.Abort()
 		return
 	}
-	if role.(int) < minRole {
+	roleInt, ok := role.(int)
+	if !ok {
+		abortSession(c, session, "登录状态异常，请重新登录")
+		return
+	}
+	if roleInt < minRole {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "无权进行此操作，权限不足",
@@ -66,9 +118,20 @@ func authHelper(c *gin.Context, minRole int) {
 		return
 	}
 	c.Set("username", username)
-	c.Set("role", role)
+	c.Set("role", roleInt)
 	c.Set("id", id)
 	c.Next()
+}
+
+// abortSession 让当前浏览器中失效的会话立即清理，避免反复跳登录。
+func abortSession(c *gin.Context, session sessions.Session, message string) {
+	session.Clear()
+	_ = session.Save()
+	c.JSON(http.StatusOK, gin.H{
+		"success": false,
+		"message": message,
+	})
+	c.Abort()
 }
 
 func TrySetUserBySession() func(c *gin.Context) {

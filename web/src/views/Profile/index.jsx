@@ -63,6 +63,7 @@ import { useTheme } from '@mui/material/styles';
 const validationSchema = Yup.object().shape({
   username: Yup.string().required('用户名 不能为空').min(3, '用户名 不能小于 3 个字符'),
   display_name: Yup.string(),
+  old_password: Yup.string(),
   password: Yup.string().test('password', '密码不能小于 8 个字符', (val) => {
     return !val || val.length >= 8;
   }),
@@ -258,7 +259,7 @@ export default function Profile() {
       const res = await API.get('/api/user/token');
       const { success, message, data } = res.data;
       if (success) {
-        setInputs((inputs) => ({ ...inputs, access_token: data }));
+        setInputs((inputs) => ({ ...inputs, access_token: data, has_access_token: true }));
         copy(data, t('profilePage.token'));
       } else {
         showError(message);
@@ -375,6 +376,21 @@ export default function Profile() {
                         onChange={handleInputChange}
                         name="display_name"
                         placeholder={t('profilePage.inputDisplayNamePlaceholder')}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid xs={12}>
+                    <FormControl fullWidth variant="outlined">
+                      <InputLabel htmlFor="old_password">{t('profilePage.currentPassword')}</InputLabel>
+                      <OutlinedInput
+                        id="old_password"
+                        label={t('profilePage.currentPassword')}
+                        type="password"
+                        value={inputs.old_password || ''}
+                        onChange={handleInputChange}
+                        name="old_password"
+                        placeholder={t('profilePage.currentPasswordPlaceholder')}
+                        autoComplete="current-password"
                       />
                     </FormControl>
                   </Grid>
@@ -726,7 +742,7 @@ export default function Profile() {
               )}
               <Grid xs={12}>
                 <Button variant="contained" onClick={generateAccessToken}>
-                  {inputs.access_token ? t('profilePage.resetToken') : t('profilePage.generateToken')}
+                  {inputs.has_access_token ? t('profilePage.resetToken') : t('profilePage.generateToken')}
                 </Button>
               </Grid>
             </Grid>

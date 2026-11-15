@@ -734,6 +734,8 @@
   },
   "profile": "個人設定",
   "profilePage": {
+    "currentPassword": "目前密碼",
+    "currentPasswordPlaceholder": "修改密碼時需要填寫目前密碼",
     "accountBinding": "帳號綁定",
     "bindEmail": "綁定電郵",
     "bindGitHubAccount": "綁定 GitHub 帳號",

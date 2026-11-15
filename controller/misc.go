@@ -219,6 +219,14 @@ func ResetPassword(c *gin.Context) {
 		return
 	}
 	common.DeleteKey(req.Email, common.PasswordResetPurpose)
+
+	// 密码重置成功后立即吊销该用户全部会话与旧个人令牌，
+	// 避免账号此前已泄露的 Cookie / access_token 继续可用。
+	resetUser := &model.User{Email: req.Email}
+	if err := resetUser.FillUserByEmail(); err == nil {
+		_, _ = rotateAccessToken(resetUser.Id)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",

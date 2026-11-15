@@ -131,12 +131,21 @@ func initHttpServer() {
 		server.TrustedPlatform = trustedHeader
 	}
 
-	store := cookie.NewStore([]byte(config.SessionSecret))
+	if config.WeakSessionSecretReplaced {
+		logger.SysError("SECURITY: session_secret 为空或为弱占位值，已自动替换为随机密钥；所有旧会话需要重新登录。生产环境请在 config.yaml 中配置 32 位以上固定随机串。")
+	}
+	if !config.SessionSecure {
+		logger.SysError("SECURITY: 会话 Cookie 当前未启用 Secure 标记；若站点通过公网 HTTPS 访问，请在 config.yaml 中设置 session_secure: true。")
+	}
+
+	// 第二个参数为加密密钥：原实现只签名不加密，Cookie 内容可被直接解出 id/role。
+	// 注意：启用加密后所有旧版 Cookie 会失效，用户需重新登录一次。
+	store := cookie.NewStore([]byte(config.SessionSecret), config.SessionBlockKey())
 	store.Options(sessions.Options{
 		Path:     "/",
-		MaxAge:   2592000, // 30 days
+		MaxAge:   config.SessionMaxAge,
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   config.SessionSecure,
 		SameSite: http.SameSiteStrictMode,
 	})
 	server.Use(sessions.Sessions("session", store))

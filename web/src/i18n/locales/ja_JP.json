@@ -732,6 +732,8 @@
   },
   "profile": "プロフィール",
   "profilePage": {
+    "currentPassword": "現在のパスワード",
+    "currentPasswordPlaceholder": "パスワード変更時に入力してください",
     "accountBinding": "アカウントのバインディング",
     "bindEmail": "メールアドレスのバインド",
     "bindGitHubAccount": "GitHubアカウントのバインド",

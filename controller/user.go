@@ -67,10 +67,19 @@ func Login(c *gin.Context) {
 // setup session & cookies and then return user info
 func setupLogin(user *model.User, c *gin.Context) {
 	session := sessions.Default(c)
+	// 会话版本号由用户当前 access_token 派生。轮换该 token 即可吊销全部已签发 Cookie。
+	accessToken := user.AccessToken
+	if accessToken == "" {
+		accessToken = utils.GetUUID()
+		if err := model.UpdateUser(user.Id, map[string]interface{}{"access_token": accessToken}); err == nil {
+			user.AccessToken = accessToken
+		}
+	}
 	session.Set("id", user.Id)
 	session.Set("username", user.Username)
 	session.Set("role", user.Role)
 	session.Set("status", user.Status)
+	session.Set("sv", config.SessionVersion(accessToken))
 	err := session.Save()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -97,6 +106,25 @@ func setupLogin(user *model.User, c *gin.Context) {
 		"success": true,
 		"data":    cleanUser,
 	})
+}
+
+// refreshSessionVersion 在凭据轮换后刷新当前会话，避免合法用户把自己踢下线。
+func refreshSessionVersion(c *gin.Context, accessToken string) {
+	session := sessions.Default(c)
+	if session.Get("username") == nil {
+		return
+	}
+	session.Set("sv", config.SessionVersion(accessToken))
+	_ = session.Save()
+}
+
+// rotateAccessToken 轮换用户 access_token：所有已签发会话 Cookie 与旧个人令牌立即失效。
+func rotateAccessToken(userID int) (string, error) {
+	newToken := utils.GetUUID()
+	if err := model.UpdateUser(userID, map[string]interface{}{"access_token": newToken}); err != nil {
+		return "", err
+	}
+	return newToken, nil
 }
 
 func Logout(c *gin.Context) {
@@ -334,6 +362,8 @@ func GenerateAccessToken(c *gin.Context) {
 		return
 	}
 
+	// 轮换后刷新当前会话，避免用户把自己踢下线；其它设备/攻击者会话全部失效
+	refreshSessionVersion(c, user.AccessToken)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -378,6 +408,11 @@ func GetSelf(c *gin.Context) {
 		})
 		return
 	}
+	// access_token 是永久有效的管理凭据，不再随个人资料接口回显：
+	// 否则 Cookie 一旦泄露，攻击者可一次请求取走它，之后即使会话全部失效仍能冒充。
+	// 用户仍可在「重置令牌」时获取一次新值，并借此吊销所有会话。
+	user.HasAccessToken = user.AccessToken != ""
+	user.AccessToken = ""
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -439,6 +474,10 @@ func UpdateUser(c *gin.Context) {
 		})
 		return
 	}
+	if updatePassword {
+		// 管理员重置密码后立即吊销该用户全部会话与旧个人令牌
+		_, _ = rotateAccessToken(updatedUser.Id)
+	}
 	if originUser.Quota != updatedUser.Quota {
 		model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf("管理员将用户额度从 %s修改为 %s", common.LogQuota(originUser.Quota), common.LogQuota(updatedUser.Quota)))
 	}
@@ -480,12 +519,39 @@ func UpdateSelf(c *gin.Context) {
 		cleanUser.Password = ""
 	}
 	updatePassword := user.Password != ""
+	if updatePassword {
+		// 修改密码必须校验当前密码：否则拿到 Cookie 的攻击者可以直接改密接管账号，
+		// 并让「改密即吊销所有会话」的应急机制反过来被攻击者利用。
+		origin, err := model.GetUserById(c.GetInt("id"), true)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": "账号状态异常，请重新登录",
+			})
+			return
+		}
+		if origin.Password != "" &&
+			(user.OldPassword == "" || !common.ValidatePasswordAndHash(user.OldPassword, origin.Password)) {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": "当前密码不正确，无法修改密码",
+			})
+			return
+		}
+	}
 	if err := cleanUser.Update(updatePassword); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": err.Error(),
 		})
 		return
+	}
+
+	if updatePassword {
+		// 改密成功后轮换凭据，踢掉包括攻击者在内的所有其它会话
+		if newToken, err := rotateAccessToken(c.GetInt("id")); err == nil {
+			refreshSessionVersion(c, newToken)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{

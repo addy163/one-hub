@@ -565,6 +565,8 @@
     "quotaRemark": "备注"
   },
   "profilePage": {
+    "currentPassword": "当前密码",
+    "currentPasswordPlaceholder": "修改密码时需要填写当前密码",
     "personalInfo": "个人信息",
     "general": "一般",
     "binding": "绑定",

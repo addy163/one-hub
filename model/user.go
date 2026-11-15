@@ -46,7 +46,10 @@ type User struct {
 	LastLoginTime    int64          `json:"last_login_time" gorm:"bigint;default:0"`
 	LastLoginIp      string         `json:"last_login_ip" gorm:"type:varchar(128);default:''"`
 	CreatedTime      int64          `json:"created_time" gorm:"bigint"`
-	DeletedAt        gorm.DeletedAt `json:"-" gorm:"index"`
+	// 以下两个字段只用于接口入参/出参，不写入数据库
+	OldPassword    string `json:"old_password" gorm:"-"`
+	HasAccessToken bool   `json:"has_access_token" gorm:"-"`
+	DeletedAt      gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 type UserUpdates func(*User)

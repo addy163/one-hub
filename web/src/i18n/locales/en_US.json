@@ -744,6 +744,8 @@
   },
   "profile": "Profile",
   "profilePage": {
+    "currentPassword": "Current Password",
+    "currentPasswordPlaceholder": "Required when changing your password",
     "accountBinding": "Account Binding",
     "bindEmail": "Bind Email",
     "bindGitHubAccount": "Bind GitHub Account",

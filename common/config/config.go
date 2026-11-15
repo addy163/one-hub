@@ -15,7 +15,9 @@ func InitConf() {
 	Language = viper.GetString("language")
 	IsMasterNode = viper.GetString("node_type") != "slave"
 	RequestInterval = time.Duration(viper.GetInt("polling_interval")) * time.Second
-	SessionSecret = utils.GetOrDefault("session_secret", SessionSecret)
+	// 拒绝部署模板里的占位密钥和过短密钥，避免攻击者伪造任意 role 的 Cookie
+	SessionSecret, WeakSessionSecretReplaced = NormalizeSessionSecret(utils.GetOrDefault("session_secret", SessionSecret))
+	InitSecurity()
 	UserInvoiceMonth = viper.GetBool("user_invoice_month")
 	GitHubProxy = viper.GetString("github_proxy")
 	MCP_ENABLE = viper.GetBool("mcp.enable") != false
