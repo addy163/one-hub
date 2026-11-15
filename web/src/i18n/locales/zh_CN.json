@@ -1523,5 +1523,90 @@
     "nameTip": "渠道名称"
   },
   "禁用流式的模型": "禁用流式的模型",
-  "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道": "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道"
+  "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道": "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道",
+  "homePage": {
+    "hero": {
+      "badge": "一站式 AI 模型 API 聚合网关",
+      "title1": "一个接口，",
+      "title2": "连接全球顶尖 AI 模型",
+      "desc": "{{brand}} 为您连接全球领先的 AI 服务。统一鉴权、统一计费、统一格式，一次接入即可调用语言、视觉、音频与图像模型，让创意不受接口限制。",
+      "ctaStart": "立即开始使用",
+      "ctaConsole": "进入控制台",
+      "ctaPricing": "查看模型与价格",
+      "tag1": "OpenAI 兼容",
+      "tag2": "按量计费",
+      "tag3": "多通道容灾",
+      "tag4": "实时用量可查"
+    },
+    "terminal": {
+      "routing": "智能路由 · 自动选择可用通道",
+      "latency": "延迟",
+      "billing": "计费",
+      "payg": "按量",
+      "auth": "统一鉴权",
+      "failover": "故障自动切换"
+    },
+    "stats": {
+      "free": "¥0",
+      "vendors": "接入服务商",
+      "compat": "OpenAI 格式兼容",
+      "monthlyFee": "月费 · 纯按量计费",
+      "uptime": "稳定运行"
+    },
+    "vendors": {
+      "eyebrow": "Ecosystem",
+      "title": "已接入 {{total}} 家主流服务商",
+      "subtitle": "OpenAI、Anthropic、Google Gemini、DeepSeek、通义千问、智谱、Kimi、xAI……无需逐个对接，一个 Key 全部可用。",
+      "cta": "浏览全部模型与价格"
+    },
+    "features": {
+      "eyebrow": "Why UUAI",
+      "title": "为稳定生产而生",
+      "subtitle": "从接入到计费，从并发到安全，每一个环节都为长期稳定运行设计。",
+      "integration": {
+        "title": "无缝集成",
+        "desc": "使用 OpenAI 输入 / 输出格式调用当前主流 AI 模型，同时支持 Midjourney 等作图调用，一套代码接入全部能力。"
+      },
+      "stability": {
+        "title": "超级稳定",
+        "desc": "快速、稳定且安全地调用语言、视觉、音频与图像模型，多通道自动容错，故障自动切换。"
+      },
+      "payg": {
+        "title": "按量付费",
+        "desc": "无月费、无门槛，所有功能均按量计费，每种型号的定价与官方价目表保持一致，用多少付多少。"
+      },
+      "concurrency": {
+        "title": "高并发",
+        "desc": "面向大规模请求场景设计，具备卓越的并发处理能力，业务高峰期依然从容。"
+      },
+      "latency": {
+        "title": "快速响应",
+        "desc": "所有关键业务逻辑在内存中执行，链路精简、转发高效，确保超快的首字响应。"
+      },
+      "security": {
+        "title": "安全设计",
+        "desc": "零信任安全设计，核心数据加密存储，令牌权限与额度独立隔离，调用可追溯。"
+      }
+    },
+    "quickstart": {
+      "eyebrow": "Quick Start",
+      "title": "三行代码，接入所有模型",
+      "subtitle": "完全兼容 OpenAI 官方 SDK。不需要改业务逻辑，只需替换 base_url 与 api_key，即可切换到任意大模型。",
+      "point1": "统一 API Key，集中管理额度与权限",
+      "point2": "按模型实时计价，用量与账单清晰可查",
+      "point3": "多通道负载均衡，单点故障自动切换",
+      "point4": "完整兼容 Python / Node.js / cURL 生态",
+      "cta": "查看模型定价表",
+      "copy": "复制代码",
+      "copied": "已复制",
+      "codeComment": "# 兼容 OpenAI SDK，只需替换两处\n",
+      "tokenPlaceholder": "sk-你的令牌",
+      "hello": "你好"
+    },
+    "cta": {
+      "title": "准备好开始构建了吗？",
+      "desc": "注册即享按量计费，无月费、无门槛。一个 Key，开启全部 AI 能力。",
+      "secondary": "了解更多"
+    }
+  }
 }

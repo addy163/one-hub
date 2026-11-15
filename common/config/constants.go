@@ -306,6 +306,17 @@ const (
 	ChannelTypeAzureDatabricks = 54
 	ChannelTypeAzureV1         = 55
 	ChannelTypeXAI             = 56
+
+	// 2026-11 新增：OpenAI 兼容的主流大厂渠道。
+	// 这些类型无需注册独立的 ProviderFactory，providers.GetProvider 会自动回退到
+	// OpenAI 兼容适配器，使用渠道上配置的 BaseURL 发起请求。
+	ChannelTypeVolcEngine = 57 // 火山方舟 / 豆包
+	ChannelTypeBaiduV2    = 58 // 百度千帆 V2
+	ChannelTypeStepFun    = 59 // 阶跃星辰
+	ChannelTypePerplexity = 60
+	ChannelTypeDify       = 61
+	ChannelTypeVLLM       = 62
+	ChannelTypeSGLang     = 63
 )
 
 const (

@@ -1574,5 +1574,90 @@
       }
     }
   },
-  "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道": "Fill in here to disable the streaming model. Note: If you fill in to disable the streaming model, these models will be skipped for streaming requests on that channel."
+  "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道": "Fill in here to disable the streaming model. Note: If you fill in to disable the streaming model, these models will be skipped for streaming requests on that channel.",
+  "homePage": {
+    "hero": {
+      "badge": "One-stop AI Model API Gateway",
+      "title1": "One API,",
+      "title2": "Every AI Model",
+      "desc": "{{brand}} connects you to the world's leading AI services. Unified auth, unified billing, unified format — integrate once to call language, vision, audio, and image models, with no API boundaries on your ideas.",
+      "ctaStart": "Get Started",
+      "ctaConsole": "Open Console",
+      "ctaPricing": "View Models & Pricing",
+      "tag1": "OpenAI Compatible",
+      "tag2": "Pay-as-you-go",
+      "tag3": "Multi-channel Failover",
+      "tag4": "Live Usage"
+    },
+    "terminal": {
+      "routing": "Smart routing · auto-selects an available channel",
+      "latency": "Latency",
+      "billing": "Billing",
+      "payg": "PAYG",
+      "auth": "Unified Auth",
+      "failover": "Auto Failover"
+    },
+    "stats": {
+      "free": "$0",
+      "vendors": "Providers Connected",
+      "compat": "OpenAI API Compatible",
+      "monthlyFee": "Monthly Fee · Pure PAYG",
+      "uptime": "Stable Uptime"
+    },
+    "vendors": {
+      "eyebrow": "Ecosystem",
+      "title": "{{total}} Leading Providers Connected",
+      "subtitle": "OpenAI, Anthropic, Google Gemini, DeepSeek, Qwen, Zhipu, Kimi, xAI — no per-vendor integration, one key works for all.",
+      "cta": "Browse All Models & Pricing"
+    },
+    "features": {
+      "eyebrow": "Why UUAI",
+      "title": "Built for Production",
+      "subtitle": "From integration to billing, from concurrency to security — every layer is engineered for long-term reliability.",
+      "integration": {
+        "title": "Seamless Integration",
+        "desc": "Call today's leading AI models with OpenAI-compatible input and output, plus image generation like Midjourney — one codebase, every capability."
+      },
+      "stability": {
+        "title": "Rock-solid Reliability",
+        "desc": "Fast, stable, and secure access to language, vision, audio, and image models, with automatic multi-channel failover."
+      },
+      "payg": {
+        "title": "Pay As You Go",
+        "desc": "No monthly fee, no minimums. Every feature is usage-based, with per-model pricing aligned to official rates — pay only for what you use."
+      },
+      "concurrency": {
+        "title": "High Concurrency",
+        "desc": "Designed for large-scale request volumes with excellent concurrent throughput, so peak traffic stays effortless."
+      },
+      "latency": {
+        "title": "Low Latency",
+        "desc": "Core business logic runs in memory with a lean forwarding path, delivering an exceptionally fast time-to-first-token."
+      },
+      "security": {
+        "title": "Secure by Design",
+        "desc": "Zero-trust architecture, encrypted sensitive data, isolated token permissions and quotas, and fully traceable requests."
+      }
+    },
+    "quickstart": {
+      "eyebrow": "Quick Start",
+      "title": "Three Lines to Every Model",
+      "subtitle": "Fully compatible with the official OpenAI SDK. No business logic changes — just swap base_url and api_key to switch to any model.",
+      "point1": "One API key with centralized quota and permission control",
+      "point2": "Real-time per-model pricing with transparent usage and billing",
+      "point3": "Multi-channel load balancing with automatic failover",
+      "point4": "Works with the full Python / Node.js / cURL ecosystem",
+      "cta": "View Model Pricing",
+      "copy": "Copy Code",
+      "copied": "Copied!",
+      "codeComment": "# Compatible with the OpenAI SDK - just change two lines\n",
+      "tokenPlaceholder": "sk-your-api-key",
+      "hello": "Hello"
+    },
+    "cta": {
+      "title": "Ready to Start Building?",
+      "desc": "Sign up for usage-based billing — no monthly fee, no minimums. One key unlocks every AI capability.",
+      "secondary": "Learn More"
+    }
+  }
 }

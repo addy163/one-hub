@@ -277,5 +277,54 @@ export const CHANNEL_OPTIONS = {
     value: 8,
     color: 'primary',
     url: ''
+  },
+  57: {
+    key: 57,
+    text: '火山方舟 / 豆包',
+    value: 57,
+    color: 'orange',
+    url: 'https://console.volcengine.com/ark'
+  },
+  58: {
+    key: 58,
+    text: '百度千帆 V2',
+    value: 58,
+    color: 'info',
+    url: 'https://console.bce.baidu.com/qianfan/overview'
+  },
+  59: {
+    key: 59,
+    text: '阶跃星辰',
+    value: 59,
+    color: 'primary',
+    url: 'https://platform.stepfun.com/'
+  },
+  60: {
+    key: 60,
+    text: 'Perplexity',
+    value: 60,
+    color: 'secondary',
+    url: 'https://www.perplexity.ai/settings/api'
+  },
+  61: {
+    key: 61,
+    text: 'Dify',
+    value: 61,
+    color: 'default',
+    url: ''
+  },
+  62: {
+    key: 62,
+    text: 'vLLM',
+    value: 62,
+    color: 'default',
+    url: ''
+  },
+  63: {
+    key: 63,
+    text: 'SGLang',
+    value: 63,
+    color: 'default',
+    url: ''
   }
 };

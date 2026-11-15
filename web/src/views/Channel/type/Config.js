@@ -567,4 +567,146 @@ const typeConfig = {
   }
 };
 
+// ===== 2026-11 主流大厂模型预设（对照 QuantumNous/new-api 更新）=====
+// 仅补充新建渠道时的默认可选模型，不改动已有渠道数据，也不影响计费。
+const MODEL_PRESETS_2026 = {
+  1: {
+    models: [
+      'gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-5.1', 'gpt-5.2',
+      'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano',
+      'gpt-4o', 'gpt-4o-mini', 'chatgpt-4o-latest',
+      'o1', 'o3', 'o3-mini', 'o4-mini',
+      'gpt-image-1', 'dall-e-3', 'tts-1', 'tts-1-hd', 'whisper-1'
+    ],
+    test_model: 'gpt-4.1-mini'
+  },
+  3: {
+    models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-5', 'o3', 'o4-mini'],
+    test_model: 'gpt-4o-mini'
+  },
+  14: {
+    models: [
+      'claude-opus-4-8', 'claude-opus-4-7', 'claude-opus-4-6', 'claude-opus-4-5-20251101',
+      'claude-sonnet-4-5-20250929', 'claude-sonnet-4-20250514',
+      'claude-haiku-4-5-20251001', 'claude-3-7-sonnet-20250219',
+      'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022'
+    ],
+    test_model: 'claude-haiku-4-5-20251001'
+  },
+  15: {
+    models: ['ERNIE-4.5-8K', 'ERNIE-4.0-Turbo-8K', 'ERNIE-X1-32K', 'ERNIE-Speed-8K', 'ERNIE-Lite-8K'],
+    test_model: 'ERNIE-Speed'
+  },
+  16: {
+    models: ['glm-4.6', 'glm-4.5', 'glm-4.5-air', 'glm-4-plus', 'glm-4-air', 'glm-4-flash', 'glm-4v-plus', 'cogview-3'],
+    test_model: 'glm-4-flash'
+  },
+  17: {
+    models: ['qwen3-max', 'qwen3-235b-a22b', 'qwen3-32b', 'qwen-plus', 'qwen-turbo', 'qwen-max', 'qwen-vl-max', 'text-embedding-v3'],
+    test_model: 'qwen-plus'
+  },
+  25: {
+    models: [
+      'gemini-3-pro-preview', 'gemini-3-flash-preview',
+      'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite',
+      'gemini-2.0-flash', 'gemini-1.5-pro-latest', 'gemini-embedding-001'
+    ],
+    test_model: 'gemini-2.5-flash'
+  },
+  27: {
+    models: ['MiniMax-M2', 'MiniMax-Text-01', 'abab6.5s-chat', 'speech-01-turbo'],
+    test_model: 'MiniMax-Text-01'
+  },
+  28: {
+    models: ['deepseek-chat', 'deepseek-coder', 'deepseek-reasoner', 'deepseek-v3.2', 'deepseek-r1'],
+    test_model: 'deepseek-chat'
+  },
+  29: {
+    models: ['kimi-k2', 'kimi-k2-thinking', 'moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'],
+    test_model: 'moonshot-v1-8k'
+  },
+  30: {
+    models: ['mistral-large-latest', 'mistral-medium-latest', 'mistral-small-latest', 'magistral-medium-latest', 'codestral-latest'],
+    test_model: 'mistral-small-latest'
+  },
+  31: {
+    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'],
+    test_model: 'llama-3.1-8b-instant'
+  },
+  45: {
+    models: ['deepseek-ai/DeepSeek-V3.1', 'Qwen/Qwen3-235B-A22B-Instruct-2507', 'zai-org/GLM-4.5-FP8'],
+    test_model: 'deepseek-ai/DeepSeek-V3.1'
+  },
+  56: {
+    models: ['grok-4', 'grok-4-fast', 'grok-code-fast-1', 'grok-3-beta', 'grok-3-mini-beta', 'grok-2-vision'],
+    test_model: 'grok-3-mini-beta'
+  },
+  20: {
+    models: ['openai/gpt-5', 'anthropic/claude-sonnet-4.5', 'google/gemini-2.5-pro', 'x-ai/grok-4', 'deepseek/deepseek-chat'],
+    test_model: 'openai/gpt-4o-mini'
+  }
+};
+
+// 新增的 OpenAI 兼容渠道：预置 API 地址与表单提示，走通用适配器
+const NEW_CHANNEL_CONFIG_2026 = {
+  57: {
+    input: { base_url: 'https://ark.cn-beijing.volces.com/api/v3', models: ['doubao-seed-1-6-250615', 'doubao-1-5-pro-32k-250115'] },
+    inputLabel: { base_url: '火山方舟 API 地址', provider_models_list: '从火山方舟获取模型列表' },
+    prompt: { base_url: '默认 https://ark.cn-beijing.volces.com/api/v3；模型名可填接入点 ID 或 doubao-* 模型名' },
+    modelGroup: 'VolcEngine'
+  },
+  58: {
+    input: { base_url: 'https://qianfan.bce.baidu.com/v2', models: ['ernie-4.5-8k', 'ernie-x1-32k', 'ernie-4.0-turbo-8k'] },
+    inputLabel: { base_url: '千帆 V2 API 地址', provider_models_list: '从千帆获取模型列表' },
+    prompt: { base_url: '默认 https://qianfan.bce.baidu.com/v2，使用 OpenAI 兼容接口' },
+    modelGroup: 'Baidu V2'
+  },
+  59: {
+    input: { base_url: 'https://api.stepfun.com/v1', models: ['step-3', 'step-2-16k', 'step-1-8k'] },
+    inputLabel: { base_url: '阶跃星辰 API 地址', provider_models_list: '从阶跃星辰获取模型列表' },
+    prompt: { base_url: '默认 https://api.stepfun.com/v1' },
+    modelGroup: 'StepFun'
+  },
+  60: {
+    input: { base_url: 'https://api.perplexity.ai', models: ['sonar', 'sonar-pro', 'sonar-reasoning', 'sonar-deep-research'] },
+    inputLabel: { base_url: 'Perplexity API 地址', provider_models_list: '从 Perplexity 获取模型列表' },
+    prompt: { base_url: '默认 https://api.perplexity.ai' },
+    modelGroup: 'Perplexity'
+  },
+  61: {
+    input: { base_url: '', models: [] },
+    inputLabel: { base_url: 'Dify API 地址', provider_models_list: '从 Dify 获取模型列表' },
+    prompt: { base_url: '请填写 Dify 的 /v1 地址，例如 http://127.0.0.1/v1' },
+    modelGroup: 'Dify'
+  },
+  62: {
+    input: { base_url: '', models: [] },
+    inputLabel: { base_url: 'vLLM API 地址', provider_models_list: '从 vLLM 获取模型列表' },
+    prompt: { base_url: '请填写 vLLM 的 OpenAI 兼容地址，例如 http://127.0.0.1:8000/v1' },
+    modelGroup: 'vLLM'
+  },
+  63: {
+    input: { base_url: '', models: [] },
+    inputLabel: { base_url: 'SGLang API 地址', provider_models_list: '从 SGLang 获取模型列表' },
+    prompt: { base_url: '请填写 SGLang 的 OpenAI 兼容地址，例如 http://127.0.0.1:30000/v1' },
+    modelGroup: 'SGLang'
+  }
+};
+
+// 追加式合并：保留原有模型，只补充新模型，避免影响已有渠道配置
+Object.keys(MODEL_PRESETS_2026).forEach((type) => {
+  const cfg = typeConfig[type];
+  if (!cfg) return;
+  const preset = MODEL_PRESETS_2026[type];
+  const current = (cfg.input && cfg.input.models) || [];
+  cfg.input = Object.assign({}, cfg.input, {
+    models: Array.from(new Set(current.concat(preset.models || []))),
+    test_model: preset.test_model || (cfg.input && cfg.input.test_model) || ''
+  });
+});
+
+Object.keys(NEW_CHANNEL_CONFIG_2026).forEach((type) => {
+  typeConfig[type] = NEW_CHANNEL_CONFIG_2026[type];
+});
+
 export { defaultConfig, typeConfig };

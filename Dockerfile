@@ -1,21 +1,23 @@
-FROM node:22.20 as builder
+FROM node:22.22.2 as builder
 
 WORKDIR /build
 
 COPY web/package.json .
 COPY web/yarn.lock .
 
+RUN yarn config set registry https://registry.npmmirror.com
 RUN yarn --frozen-lockfile
 
 COPY ./web .
 COPY ./VERSION .
 RUN DISABLE_ESLINT_PLUGIN='true' VITE_APP_VERSION=$(cat VERSION) npm run build
 
-FROM golang:1.25.0 AS builder2
+FROM golang:1.25.9 AS builder2
 
 ENV GO111MODULE=on \
     CGO_ENABLED=1 \
-    GOOS=linux
+    GOOS=linux \
+    GOPROXY=https://goproxy.cn,https://mirrors.aliyun.com/goproxy/,direct
 
 WORKDIR /build
 ADD go.mod go.sum ./

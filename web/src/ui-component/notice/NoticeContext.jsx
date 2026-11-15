@@ -4,6 +4,12 @@ import { useMemo, useState, useEffect, useContext, useCallback, createContext } 
 
 import { API } from 'utils/api';
 
+// 首页自动弹公告开关。
+// false：访问首页时不自动弹出公告弹窗，也不把公告标记为已读；
+//        导航栏的公告按钮仍可随时查看，用户进入控制台等其他页面时仍会正常弹出一次。
+// true ：保持原有行为（公告内容变更时，任何页面首次访问都弹窗）。
+const AUTO_POPUP_ON_HOME = false;
+
 export const NoticeContext = createContext(undefined);
 
 export function NoticeProvider({ children }) {
@@ -25,6 +31,12 @@ export function NoticeProvider({ children }) {
 
           setNotice(htmlNotice);
           if (content !== oldNotice) {
+            // 首页只静默缓存公告内容供铃铛查看，不弹窗、不标记已读，
+            // 避免整屏公告遮挡品牌首页；其他页面行为不变。
+            const onHome = window.location.pathname === '/' || window.location.pathname === '';
+            if (onHome && !AUTO_POPUP_ON_HOME) {
+              return;
+            }
             setOpen(true);
             localStorage.setItem('notice', content || '');
           }

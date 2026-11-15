@@ -200,5 +200,12 @@ func GetDefaultModelOwnedBy() []*ModelOwnedBy {
 		{Id: config.ChannelTypeKling, Name: "Kling", Icon: "https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/kling-color.svg"},
 		{Id: config.ChannelTypeOpenRouter, Name: "OpenRouter", Icon: "https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/openrouter.svg"},
 		{Id: config.ChannelTypeXAI, Name: "xAI", Icon: "https://registry.npmmirror.com/@lobehub/icons-static-webp/1.24.0/files/light/xai.webp"},
+		{Id: config.ChannelTypeVolcEngine, Name: "VolcEngine", Icon: "https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/doubao-color.svg"},
+		{Id: config.ChannelTypeBaiduV2, Name: "Baidu V2", Icon: "https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/wenxin-color.svg"},
+		{Id: config.ChannelTypeStepFun, Name: "StepFun", Icon: "https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/stepfun-color.svg"},
+		{Id: config.ChannelTypePerplexity, Name: "Perplexity", Icon: "https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/perplexity-color.svg"},
+		{Id: config.ChannelTypeDify, Name: "Dify", Icon: ""},
+		{Id: config.ChannelTypeVLLM, Name: "vLLM", Icon: ""},
+		{Id: config.ChannelTypeSGLang, Name: "SGLang", Icon: ""},
 	}
 }
