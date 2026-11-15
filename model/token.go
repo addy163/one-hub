@@ -100,6 +100,15 @@ func GetUserTokensList(userId int, params *GenericParams) (*DataResult[Token], e
 	return PaginateAndOrder(db, &params.PaginationParams, &tokens, allowedTokenOrderFields)
 }
 
+// DisableAllUserTokens 紧急停用某用户名下所有启用中的令牌。
+// 用于 Cookie / API key 泄露后的快速止损，不需要改表结构或重建令牌。
+func DisableAllUserTokens(userId int) (int64, error) {
+	result := DB.Model(&Token{}).
+		Where("user_id = ? AND status = ?", userId, config.TokenStatusEnabled).
+		Update("status", config.TokenStatusDisabled)
+	return result.RowsAffected, result.Error
+}
+
 // AdminSearchTokensParams 管理员搜索令牌的参数
 type AdminSearchTokensParams struct {
 	GenericParams

@@ -1,8 +1,11 @@
 package model
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"net/url"
+	"os"
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/logger"
@@ -42,8 +45,20 @@ func createRootAccountIfNeed() error {
 	var user User
 	//if user.Status != common.UserStatusEnabled {
 	if err := DB.First(&user).Error; err != nil {
-		logger.SysLog("no user exists, create a root user for you: username is root, password is 123456")
-		hashedPassword, err := common.Password2Hash("123456")
+		// 原实现硬编码 root/123456，首次部署若不主动改密等于门户大开。
+		// 现在默认生成强随机密码并只打印一次，也可用 INITIAL_ROOT_PASSWORD 指定。
+		initialPassword := os.Getenv("INITIAL_ROOT_PASSWORD")
+		if initialPassword == "" {
+			buf := make([]byte, 12)
+			if _, err := rand.Read(buf); err != nil {
+				return err
+			}
+			initialPassword = hex.EncodeToString(buf)
+			logger.SysLog("SECURITY: 已为 root 生成随机初始密码（仅显示一次，请立即保存并登录后修改）: " + initialPassword)
+		} else {
+			logger.SysLog("SECURITY: 使用 INITIAL_ROOT_PASSWORD 初始化 root 账号，请在首次登录后立即修改密码")
+		}
+		hashedPassword, err := common.Password2Hash(initialPassword)
 		if err != nil {
 			return err
 		}

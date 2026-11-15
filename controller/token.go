@@ -2,15 +2,48 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"one-api/common"
 	"one-api/common/config"
+	"one-api/common/logger"
 	"one-api/common/utils"
 	"one-api/model"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
+
+// 令牌 key 目前仍以明文随列表接口返回（保持现有交互），
+// 因此对每一次「读取密钥」的动作单独打审计日志，便于泄露后回溯异常 IP 与批量扫描。
+func auditTokenKeyAccess(c *gin.Context, action string) {
+	logger.SysLog(fmt.Sprintf(
+		"SECURITY_AUDIT token_key_read action=%s user_id=%d ip=%s ua=%s",
+		action, c.GetInt("id"), c.ClientIP(), c.Request.UserAgent()))
+}
+
+// DisableAllUserTokens 紧急停用当前用户名下全部 API 令牌。
+// 怀疑 Cookie / 密钥泄露时调用一次即可让所有旧 sk- key 立刻失效，
+// 是保留现有「列表显示明文」交互前提下的快速止损手段。
+func DisableAllUserTokens(c *gin.Context) {
+	userId := c.GetInt("id")
+	affected, err := model.DisableAllUserTokens(userId)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	logger.SysLog(fmt.Sprintf(
+		"SECURITY_AUDIT token_disable_all user_id=%d ip=%s affected=%d",
+		userId, c.ClientIP(), affected))
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    affected,
+	})
+}
 
 func GetUserTokensList(c *gin.Context) {
 	userId := c.GetInt("id")
@@ -36,6 +69,7 @@ func GetUserTokensList(c *gin.Context) {
 		}
 	}
 
+	auditTokenKeyAccess(c, "list")
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -57,6 +91,7 @@ func GetTokensListByAdmin(c *gin.Context) {
 		return
 	}
 
+	auditTokenKeyAccess(c, "admin_list")
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -91,6 +126,7 @@ func GetToken(c *gin.Context) {
 		token.Setting.Set(setting)
 	}
 
+	auditTokenKeyAccess(c, "detail")
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -124,6 +160,7 @@ func GetPlaygroundToken(c *gin.Context) {
 		token = &cleanToken
 	}
 
+	auditTokenKeyAccess(c, "playground")
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",

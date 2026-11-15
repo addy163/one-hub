@@ -1,8 +1,16 @@
+# 安全提示：
+# 1. 使用前在同目录创建 .env，写入 SQL_DSN / SESSION_SECRET / USER_TOKEN_SECRET /
+#    MYSQL_ROOT_PASSWORD / MYSQL_PASSWORD。未设置时 compose 会直接拒绝启动，
+#    避免把 random_string / 123456 之类的弱凭据带到生产环境。
+# 2. SESSION_SECRET、USER_TOKEN_SECRET 请使用 32 位以上随机串：
+#    openssl rand -hex 32
+# 3. 数据库端口不再映射到宿主机；如需临时维护请自行用 docker exec 进入容器。
 version: "3.4"
 
 services:
   one-hub:
-    image: martialbe/one-api:latest
+    # 固定 tag，避免 latest 不可复现；先执行：docker build -t one-hub:local .
+    image: one-hub:local
     container_name: one-hub
     restart: always
     ports:
@@ -10,12 +18,14 @@ services:
     volumes:
       - ./data:/data
     environment:
-      - SQL_DSN=oneapi:123456@tcp(db:3306)/one-api # 修改此行，或注释掉以使用 SQLite 作为数据库
-      - REDIS_CONN_STRING=redis://redis # redis
-      - SESSION_SECRET=random_string # 修改为随机字符串
-      - USER_TOKEN_SECRET=random_string # 修改为随机字符串,32位以上
+      - SQL_DSN=${SQL_DSN:?请在 .env 中配置 SQL_DSN}
+      - REDIS_CONN_STRING=redis://redis
+      - SESSION_SECRET=${SESSION_SECRET:?请在 .env 中配置 32 位以上随机串}
+      - USER_TOKEN_SECRET=${USER_TOKEN_SECRET:?请在 .env 中配置 32 位以上随机串}
       - TZ=Asia/Shanghai
-      # - HASHIDS_SALT=random_string # 可空，建议设置，字符串元素不能重复
+      # - HASHIDS_SALT=${HASHIDS_SALT} # 可空，建议设置，字符串元素不能重复
+    security_opt:
+      - no-new-privileges:true
     #      - NODE_TYPE=slave  # 多机部署时从节点取消注释该行
     #      - SYNC_FREQUENCY=60  # 需要定期从数据库加载数据时取消注释该行
     #      - FRONTEND_BASE_URL=https://openai.justsong.cn  # 多机部署时从节点取消注释该行
@@ -33,9 +43,11 @@ services:
       retries: 3
 
   redis:
-    image: redis:latest
+    image: redis:7.4-alpine
     container_name: redis
     restart: always
+    security_opt:
+      - no-new-privileges:true
 
   db:
     image: mysql:8.2.0
@@ -43,11 +55,14 @@ services:
     container_name: mysql
     volumes:
       - ./data/mysql:/var/lib/mysql # 挂载目录，持久化存储
-    ports:
-      - "3306:3306"
+    # 数据库不暴露到宿主机，仅容器网络内可访问
+    # ports:
+    #   - "3306:3306"
     environment:
-      TZ: Asia/Shanghai # 设置时区
-      MYSQL_ROOT_PASSWORD: "OneAPI@justsong" # 设置 root 用户的密码
-      MYSQL_USER: oneapi # 创建专用用户
-      MYSQL_PASSWORD: "123456" # 设置专用用户密码
-      MYSQL_DATABASE: one-api # 自动创建数据库
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中配置}
+      MYSQL_USER: ${MYSQL_USER:-oneapi}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?请在 .env 中配置}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-one-api}
+    security_opt:
+      - no-new-privileges:true

@@ -122,3 +122,27 @@ uptime_kuma:
   domain: ""     # uptime-kuma项目地址 例如https://status.xxxxx.com
   status_page_name: "" #  uptime-kuma状态页面slug
 
+# ---------------------------------------------------------------------------
+# 安全加固相关配置（均可留空使用默认值）
+# ---------------------------------------------------------------------------
+# session_secret 必须是 32 位以上随机串。留空或使用 random_string 等占位值时，
+# 程序会忽略该值并自动生成随机密钥（每次重启都会让所有人重新登录）。
+# 生成方式： openssl rand -hex 32
+session_secret: ""
+
+# 会话 Cookie 有效期（秒），默认 604800（7 天，原为 30 天）
+session_max_age: 604800
+
+# 公网 HTTPS 部署请设为 true，使 Cookie 只在 HTTPS 上发送。
+# 内网 HTTP 访问必须保持 false，否则无法登录。
+session_secure: false
+
+# CORS 白名单。留空表示允许任意来源，但此时一律禁止携带 Cookie 凭据；
+# 若确有跨域管理台需求，请在此填写明确来源并按需打开 cors_allow_credentials。
+cors_allowed_origins: []
+cors_allow_credentials: false
+
+# 允许用户提交的 image_url 指向内网地址（自建图床）。
+# 默认 false：拒绝回环、私有网段与云元数据地址，防止 SSRF。
+ssrf_allow_private_image: false
+
