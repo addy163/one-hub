@@ -138,6 +138,10 @@ func TestCookieSecureForRequest(t *testing.T) {
 	httpsProxy := httptestRequestWithHeaders(map[string]string{"X-Forwarded-Proto": "https, http"})
 	httpDirect := httptestRequestWithHeaders(nil)
 	forwarded := httptestRequestWithHeaders(map[string]string{"Forwarded": "for=1.2.3.4;proto=https"})
+	schemeProxy := httptestRequestWithHeaders(map[string]string{"X-Forwarded-Scheme": "https"})
+	urlSchemeProxy := httptestRequestWithHeaders(map[string]string{"X-Url-Scheme": "https"})
+	sslProxy := httptestRequestWithHeaders(map[string]string{"X-Forwarded-Ssl": "on"})
+	frontEndHttps := httptestRequestWithHeaders(map[string]string{"Front-End-Https": "on"})
 	tlsRequest := httptestRequestWithHeaders(nil)
 	tlsRequest.TLS = &tls.ConnectionState{}
 
@@ -150,6 +154,10 @@ func TestCookieSecureForRequest(t *testing.T) {
 		{"auto http direct", SessionSecureAuto, httpDirect, false},
 		{"auto https proxy", SessionSecureAuto, httpsProxy, true},
 		{"auto forwarded proto", SessionSecureAuto, forwarded, true},
+		{"auto x-forwarded-scheme", SessionSecureAuto, schemeProxy, true},
+		{"auto x-url-scheme", SessionSecureAuto, urlSchemeProxy, true},
+		{"auto x-forwarded-ssl", SessionSecureAuto, sslProxy, true},
+		{"auto front-end-https", SessionSecureAuto, frontEndHttps, true},
 		{"auto direct tls", SessionSecureAuto, tlsRequest, true},
 		{"off ignores proxy", SessionSecureOff, httpsProxy, false},
 		{"on ignores http", SessionSecureOn, httpDirect, true},

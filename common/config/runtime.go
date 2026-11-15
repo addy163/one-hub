@@ -434,14 +434,29 @@ func CookieSecureForRequest(r *http.Request) bool {
 		if r.TLS != nil {
 			return true
 		}
-		proto := strings.TrimSpace(strings.Split(r.Header.Get("X-Forwarded-Proto"), ",")[0])
-		if strings.EqualFold(proto, "https") {
+		// 公网入口可能不止一个：本机 1Panel 反代会传 X-Forwarded-Proto，
+		// 但外部 CDN / 二级反代常用其它写法。全部兼容，避免该入口漏加 Secure。
+		if firstForwardedValue(r.Header.Get("X-Forwarded-Proto")) == "https" ||
+			firstForwardedValue(r.Header.Get("X-Forwarded-Scheme")) == "https" ||
+			firstForwardedValue(r.Header.Get("X-Url-Scheme")) == "https" {
+			return true
+		}
+		if headerFlagOn(r.Header.Get("X-Forwarded-Ssl")) ||
+			headerFlagOn(r.Header.Get("Front-End-Https")) {
 			return true
 		}
 		return strings.Contains(strings.ToLower(r.Header.Get("Forwarded")), "proto=https")
 	default:
 		return false
 	}
+}
+
+func firstForwardedValue(raw string) string {
+	return strings.ToLower(strings.TrimSpace(strings.Split(raw, ",")[0]))
+}
+
+func headerFlagOn(raw string) bool {
+	return strings.EqualFold(strings.TrimSpace(raw), "on")
 }
 
 func CorsSettings() ([]string, bool) {

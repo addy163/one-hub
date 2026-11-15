@@ -137,6 +137,8 @@ session_max_age: 604800
 
 # 公网 HTTPS 反代部署推荐 auto：反代带 X-Forwarded-Proto: https 时自动加 Secure，
 # 内网 HTTP 直连不加，两个入口都能正常登录。
+# 同时兼容 X-Forwarded-Scheme / X-Url-Scheme / X-Forwarded-Ssl /
+# Front-End-Https / Forwarded，便于多域名、CDN 或二级反代入口。
 # on = 总是加 Secure（纯 HTTPS 站点）；off = 完全不加（不推荐用于公网）。
 # 兼容历史布尔写法：true 等同 on，false 等同 off。
 session_secure: auto
