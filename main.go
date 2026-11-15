@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 )
@@ -131,21 +130,29 @@ func initHttpServer() {
 		server.TrustedPlatform = trustedHeader
 	}
 
+	// 公网反代场景下，只信任来自可信代理的 X-Forwarded-For，避免客户端伪造 IP
+	// 绕过全局速率限制。可在 config.yaml 的 trusted_proxies 或后台设置里调整。
+	if err := server.SetTrustedProxies(config.TrustedProxyList()); err != nil {
+		logger.SysError("SECURITY: trusted_proxies 配置无效，已退回 gin 默认信任策略: " + err.Error())
+	}
+
 	if config.WeakSessionSecretReplaced {
 		logger.SysError("SECURITY: session_secret 为空或为弱占位值，已自动替换为随机密钥；所有旧会话需要重新登录。生产环境请在 config.yaml 中配置 32 位以上固定随机串。")
 	}
-	if !config.SessionSecure {
-		logger.SysError("SECURITY: 会话 Cookie 当前未启用 Secure 标记；若站点通过公网 HTTPS 访问，请在 config.yaml 中设置 session_secure: true。")
+	switch config.CookieMode() {
+	case config.SessionSecureOff:
+		logger.SysError("SECURITY: 会话 Cookie 当前完全禁用 Secure 标记；公网 HTTPS 部署建议设置 session_secure: auto 或 on。")
+	case config.SessionSecureAuto:
+		logger.SysLog("SECURITY: 会话 Cookie 使用 auto 模式（HTTPS / 反代请求加 Secure，内网 HTTP 不加）。")
 	}
 
 	// 第二个参数为加密密钥：原实现只签名不加密，Cookie 内容可被直接解出 id/role。
 	// 注意：启用加密后所有旧版 Cookie 会失效，用户需重新登录一次。
-	store := cookie.NewStore([]byte(config.SessionSecret), config.SessionBlockKey())
+	store := middleware.NewDynamicCookieStore([]byte(config.SessionSecret), config.SessionBlockKey())
 	store.Options(sessions.Options{
 		Path:     "/",
-		MaxAge:   config.SessionMaxAge,
+		MaxAge:   config.CookieMaxAge(),
 		HttpOnly: true,
-		Secure:   config.SessionSecure,
 		SameSite: http.SameSiteStrictMode,
 	})
 	server.Use(sessions.Sessions("session", store))

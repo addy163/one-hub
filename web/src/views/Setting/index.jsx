@@ -5,6 +5,7 @@ import { IconWorldCog, IconCpu, IconServerCog } from '@tabler/icons-react';
 import OperationSetting from './component/OperationSetting';
 import SystemSetting from './component/SystemSetting';
 import OtherSetting from './component/OtherSetting';
+import RuntimeSetting from './component/RuntimeSetting';
 import AdminContainer from 'ui-component/AdminContainer';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +42,8 @@ const Setting = () => {
     () => ({
       operation: 0,
       system: 1,
-      other: 2
+      other: 2,
+      runtime: 3
     }),
     []
   );
@@ -74,6 +76,7 @@ const Setting = () => {
                 <Tab label={t('setting_index.operationSettings.title')} {...a11yProps(0)} icon={<IconCpu />} iconPosition="start" />
                 <Tab label={t('setting_index.systemSettings.title')} {...a11yProps(1)} icon={<IconServerCog />} iconPosition="start" />
                 <Tab label={t('setting_index.otherSettings.title')} {...a11yProps(2)} icon={<IconWorldCog />} iconPosition="start" />
+                <Tab label={t('setting_index.runtimeSettings.title')} {...a11yProps(3)} />
               </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
@@ -84,6 +87,9 @@ const Setting = () => {
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
               <OtherSetting />
+            </CustomTabPanel>
+            <CustomTabPanel value={value} index={3}>
+              <RuntimeSetting />
             </CustomTabPanel>
           </Box>
         </AdminContainer>

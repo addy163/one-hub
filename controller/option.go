@@ -45,6 +45,50 @@ func GetOptions(c *gin.Context) {
 	return
 }
 
+// GetRuntimeOptions 返回后台「安全与透传」面板需要的配置描述与当前生效值。
+// source = database 表示该值来自后台设置（优先），config 表示来自 config.yaml / 代码默认值。
+func GetRuntimeOptions(c *gin.Context) {
+	specs := config.RuntimeOptions()
+	sources := make(map[string]bool)
+	if options, err := model.AllOption(); err == nil {
+		for _, option := range options {
+			sources[option.Key] = true
+		}
+	}
+	for i := range specs {
+		specs[i].Source = "config"
+		if sources[specs[i].Key] {
+			specs[i].Source = "database"
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    specs,
+	})
+}
+
+// DeleteRuntimeOption 删除后台覆盖值，恢复 config.yaml / 代码默认值。
+func DeleteRuntimeOption(c *gin.Context) {
+	key := c.Param("key")
+	if !config.IsRuntimeOption(key) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "不是可恢复的运行时配置项",
+		})
+		return
+	}
+	if err := model.DeleteOption(key); err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+	if err := config.ResetRuntimeOption(key); err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
+}
+
 func GetSafeTools(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -64,6 +108,18 @@ func UpdateOption(c *gin.Context) {
 		})
 		return
 	}
+	// 运行时配置先校验再落库：model.UpdateOption 会先写数据库再更新内存，
+	// 若不预校验，非法值会留在 options 表并在下次启动时覆盖默认配置。
+	if config.IsRuntimeOption(option.Key) {
+		if err := config.ValidateRuntimeOption(option.Key, option.Value); err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": "配置值无效：" + err.Error(),
+			})
+			return
+		}
+	}
+
 	switch option.Key {
 	case "GitHubOAuthEnabled":
 		if option.Value == "true" && config.GitHubClientId == "" {

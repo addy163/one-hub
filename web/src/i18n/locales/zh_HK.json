@@ -848,6 +848,108 @@
   },
   "setting": "設定",
   "setting_index": {
+    "runtimeSettings": {
+      "title": "安全與透傳",
+      "subtitle": "這些設定可在 config.yaml 配置，也可在後台即時修改；後台設定優先。標示「配置檔 / 預設」者目前由配置檔生效。",
+      "groups": {
+        "passthrough": {
+          "title": "請求參數透傳",
+          "description": "控制客戶端請求中程式未定義欄位是否原樣轉發給上游。"
+        },
+        "session": {
+          "title": "工作階段與反向代理",
+          "description": "公開 HTTPS 反代下的 Cookie 與真實客戶端 IP 處理。"
+        },
+        "cors": {
+          "title": "跨域（CORS）",
+          "description": "管理台跨域存取策略，預設禁止攜帶 Cookie 憑據。"
+        },
+        "ssrf": {
+          "title": "SSRF 防護",
+          "description": "使用者提交的圖片位址校驗。"
+        },
+        "websocket": {
+          "title": "WebSocket 連線治理",
+          "description": "/v1/realtime 的併發、逾時與心跳限制。"
+        }
+      },
+      "fields": {
+        "PassthroughExtraBody": {
+          "label": "透傳未知請求欄位",
+          "help": "程式未定義的欄位原樣送到上游；上游回報 400 時可單獨為渠道勾選「禁止透傳」。"
+        },
+        "PassthroughNativeProtocol": {
+          "label": "原生 SDK 路徑別名",
+          "help": "註冊 /v1/messages、/v1beta/models 等標準路徑，Claude Code / Gemini SDK 可直接指向本站。"
+        },
+        "SessionSecureMode": {
+          "label": "工作階段 Cookie Secure 模式",
+          "help": "auto：HTTPS 反代自動加 Secure、內網 HTTP 不加；on：總是加；off：不加。"
+        },
+        "SessionMaxAge": {
+          "label": "工作階段有效期（秒）",
+          "help": "預設 604800（7 天），修改後新登入的工作階段生效。"
+        },
+        "TrustedProxies": {
+          "label": "可信代理清單",
+          "help": "逗號分隔的 IP 或 CIDR；只有來自這些代理的 X-Forwarded-For 才用於限流與日誌。需重啟。"
+        },
+        "CorsAllowedOrigins": {
+          "label": "CORS 來源白名單",
+          "help": "逗號分隔的完整 Origin。留空允許任意來源但禁止攜帶 Cookie。範例：https://api.uuz.ai,https://api.uuai.cc"
+        },
+        "CorsAllowCredentials": {
+          "label": "允許跨域攜帶憑據",
+          "help": "僅在白名單非空時生效，與通配來源互斥。"
+        },
+        "SsrfAllowPrivateImage": {
+          "label": "允許內網圖床位址",
+          "help": "預設關閉，拒絕 image_url 指向回環、私有網段與雲端中繼資料。"
+        },
+        "WebsocketAllowedOrigins": {
+          "label": "WebSocket Origin 白名單",
+          "help": "留空不限制（此端點只認令牌、不讀 Cookie）；填寫後僅允許列出的瀏覽器來源。"
+        },
+        "WsMaxConnections": {
+          "label": "全域最大併發連線",
+          "help": "/v1/realtime 同時存在的連線總數上限。"
+        },
+        "WsMaxConnectionsPerToken": {
+          "label": "單令牌最大併發連線",
+          "help": "防止單一令牌占滿即時通道。"
+        },
+        "WsIdleTimeoutSeconds": {
+          "label": "閒置讀取逾時（秒）",
+          "help": "超過該時間沒有資料也沒有心跳回應就關閉連線。"
+        },
+        "WsMaxConnectionSeconds": {
+          "label": "單連線最大時長（秒）",
+          "help": "到時自動關閉並結算配額。"
+        },
+        "WsPingIntervalSeconds": {
+          "label": "心跳間隔（秒）",
+          "help": "0 表示關閉主動 ping；建議小於閒置逾時。"
+        }
+      },
+      "actions": {
+        "save": "儲存本組",
+        "reset": "恢復配置檔預設",
+        "reload": "重新載入",
+        "sourceConfig": "配置檔 / 預設",
+        "sourceDatabase": "後台設定（優先）",
+        "restartRequired": "需重啟生效",
+        "saved": "儲存成功",
+        "resetDone": "已恢復配置檔預設值",
+        "loadFailed": "載入設定失敗",
+        "dirty": "有未儲存的修改",
+        "boolOn": "開啟",
+        "boolOff": "關閉",
+        "modeAuto": "自動（推薦）",
+        "modeOn": "強制開啟",
+        "modeOff": "關閉",
+        "listHint": "多個值用英文逗號分隔"
+      }
+    },
     "operationSettings": {
       "chatLinkSettings": {
         "info": "配置聊天鏈接，該配置在令牌中的聊天生效以及首頁的Playground中的聊天生效。<br />鏈接中可以使&#123;key&#125;替換用戶的令牌，&#123;server&#125;替換伺服器地址，base64<[xxxxxx]>進行base64編碼。例如：{'https://chat.oneapi.pro/#/?settings={\"key\":\"sk-{key}\",\"url\":\"{server}\"}'}<br />如果未配置，會默認配置以下4個鏈接：<br />ChatGPT Next：{'https://chat.oneapi.pro/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />chatgpt-web-midjourney-proxy：{'https://vercel.ddaiai.com/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />AMA 問天：{'ama://set-api-key?server={server}&key={key}'}<br />opencat：{'opencat://team/join?domain={server}&token={key}'}<br />排序規則：值越大越靠前，值相同則按照配置順序",

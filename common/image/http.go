@@ -7,8 +7,6 @@ import (
 	"one-api/common/config"
 	"one-api/common/utils"
 	"time"
-
-	"github.com/spf13/viper"
 )
 
 var ImageHttpClients = &http.Client{
@@ -16,8 +14,11 @@ var ImageHttpClients = &http.Client{
 		DialContext: utils.Socks5ProxyFunc,
 		Proxy:       utils.ProxyFunc,
 	},
-	Timeout:       15 * time.Second,
-	CheckRedirect: utils.SSRFCheckRedirect(true),
+	Timeout: 15 * time.Second,
+	// 与 RequestFile 保持同一份运行时配置，后台修改后无需重启。
+	CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		return utils.SSRFCheckRedirect(!config.PrivateImageAllowed())(req, via)
+	},
 }
 
 var maxFileSize int64 = 20 * 1024 * 1024 // 20MB
@@ -38,7 +39,7 @@ type CFResponse struct {
 func RequestFile(url, action string) (*http.Response, error) {
 	// image_url 由 API 请求体直接提供，是普通用户级 SSRF 入口。
 	// 默认拒绝内网/回环/云元数据地址；确有内网图床需求可设置 ssrf_allow_private_image: true。
-	blockPrivate := !viper.GetBool("ssrf_allow_private_image")
+	blockPrivate := !config.PrivateImageAllowed()
 	if err := utils.ValidatePublicURL(url, blockPrivate); err != nil {
 		return nil, err
 	}

@@ -1,7 +1,6 @@
 package router
 
 import (
-	"one-api/common/config"
 	"one-api/middleware"
 	"one-api/relay"
 	"one-api/relay/midjourney"
@@ -61,19 +60,19 @@ func setOpenAIRouter(router *gin.Engine) {
 			relayV1Router.Any("/assistants/*any", relay.RelayOnly)
 			relayV1Router.Any("/threads", relay.RelayOnly)
 			relayV1Router.Any("/threads/*any", relay.RelayOnly)
-		relayV1Router.Any("/batches/*any", relay.RelayOnly)
-		relayV1Router.Any("/vector_stores/*any", relay.RelayOnly)
-		relayV1Router.DELETE("/models/:model", relay.RelayOnly)
+			relayV1Router.Any("/batches/*any", relay.RelayOnly)
+			relayV1Router.Any("/vector_stores/*any", relay.RelayOnly)
+			relayV1Router.DELETE("/models/:model", relay.RelayOnly)
 
-		// Responses API 的配套端点：retrieve / delete / cancel / input_items /
-		// compact / background 结果读取等，以及会话端点。这些请求没有 model 字段，
-		// 无法按模型选渠道，沿用上面 files/assistants 的约定（令牌带 #渠道ID），
-		// 路径、method 与 body 原样透传上游，不经过任何协议转换。
-		relayV1Router.Any("/responses/*any", relay.RelayOnly)
-		relayV1Router.Any("/conversations", relay.RelayOnly)
-		relayV1Router.Any("/conversations/*any", relay.RelayOnly)
+			// Responses API 的配套端点：retrieve / delete / cancel / input_items /
+			// compact / background 结果读取等，以及会话端点。这些请求没有 model 字段，
+			// 无法按模型选渠道，沿用上面 files/assistants 的约定（令牌带 #渠道ID），
+			// 路径、method 与 body 原样透传上游，不经过任何协议转换。
+			relayV1Router.Any("/responses/*any", relay.RelayOnly)
+			relayV1Router.Any("/conversations", relay.RelayOnly)
+			relayV1Router.Any("/conversations/*any", relay.RelayOnly)
+		}
 	}
-}
 }
 
 // setNativeProtocolRouter 为 Anthropic / Gemini 原生 SDK 提供标准路径别名。
@@ -81,18 +80,16 @@ func setOpenAIRouter(router *gin.Engine) {
 // URL 前缀，Claude Code、Gemini SDK 开箱即用会失败。这里复用完全相同的中继与
 // 鉴权链路，只补一层标准路径。
 func setNativeProtocolRouter(router *gin.Engine) {
-	if !config.PassthroughNativeProtocol {
-		return
-	}
-
+	// 路由始终注册，由 NativeProtocolGate 在请求时读取开关，
+	// 后台修改 passthrough_native_protocol 后即可立即生效。
 	claudeNative := router.Group("/v1")
-	claudeNative.Use(middleware.RelayCluadePanicRecover(), middleware.ClaudeAuth(), middleware.Distribute(), middleware.DynamicRedisRateLimiter())
+	claudeNative.Use(middleware.NativeProtocolGate(), middleware.RelayCluadePanicRecover(), middleware.ClaudeAuth(), middleware.Distribute(), middleware.DynamicRedisRateLimiter())
 	{
 		claudeNative.POST("/messages", relay.Relay)
 	}
 
 	geminiNative := router.Group("/v1beta")
-	geminiNative.Use(middleware.RelayGeminiPanicRecover(), middleware.GeminiAuth(), middleware.Distribute(), middleware.DynamicRedisRateLimiter())
+	geminiNative.Use(middleware.NativeProtocolGate(), middleware.RelayGeminiPanicRecover(), middleware.GeminiAuth(), middleware.Distribute(), middleware.DynamicRedisRateLimiter())
 	{
 		geminiNative.GET("/models", relay.ListGeminiModelsByToken)
 		geminiNative.GET("/openai/models", relay.ListModelsByToken)

@@ -858,6 +858,108 @@
   },
   "setting": "Setting",
   "setting_index": {
+    "runtimeSettings": {
+      "title": "Security & Passthrough",
+      "subtitle": "These options can be set in config.yaml or changed here instantly; values saved in the admin panel take precedence. Items marked \"config / default\" currently come from config.yaml.",
+      "groups": {
+        "passthrough": {
+          "title": "Request passthrough",
+          "description": "Whether fields not defined by the program are forwarded to upstream providers."
+        },
+        "session": {
+          "title": "Session & reverse proxy",
+          "description": "Cookie and real client IP handling behind a public HTTPS reverse proxy."
+        },
+        "cors": {
+          "title": "CORS",
+          "description": "Cross-origin policy for the dashboard; credentialed requests are denied by default."
+        },
+        "ssrf": {
+          "title": "SSRF protection",
+          "description": "Validation of user-supplied image URLs."
+        },
+        "websocket": {
+          "title": "WebSocket governance",
+          "description": "Concurrency, timeout and heartbeat limits for /v1/realtime."
+        }
+      },
+      "fields": {
+        "PassthroughExtraBody": {
+          "label": "Passthrough unknown body fields",
+          "help": "Forward fields not defined by the program; use a channel override if an upstream returns 400."
+        },
+        "PassthroughNativeProtocol": {
+          "label": "Native SDK path aliases",
+          "help": "Register /v1/messages and /v1beta/models so Claude Code and Gemini SDKs can use this host as base_url."
+        },
+        "SessionSecureMode": {
+          "label": "Session cookie Secure mode",
+          "help": "auto: Secure on HTTPS proxied requests only, not on internal HTTP; on: always; off: never. Use auto behind a public proxy."
+        },
+        "SessionMaxAge": {
+          "label": "Session lifetime (seconds)",
+          "help": "Default 604800 (7 days). Applies to newly created sessions."
+        },
+        "TrustedProxies": {
+          "label": "Trusted proxies",
+          "help": "Comma-separated IPs or CIDRs. Only X-Forwarded-For from these peers is trusted. Restart required."
+        },
+        "CorsAllowedOrigins": {
+          "label": "CORS allowlist",
+          "help": "Comma-separated full origins. Empty allows any origin but never credentials. Example: https://api.uuz.ai,https://api.uuai.cc"
+        },
+        "CorsAllowCredentials": {
+          "label": "Allow cross-origin credentials",
+          "help": "Only effective with a non-empty allowlist; mutually exclusive with wildcard origin."
+        },
+        "SsrfAllowPrivateImage": {
+          "label": "Allow private image hosts",
+          "help": "Off by default: image_url pointing to loopback, private ranges or cloud metadata is rejected."
+        },
+        "WebsocketAllowedOrigins": {
+          "label": "WebSocket origin allowlist",
+          "help": "Empty allows any origin (this endpoint uses tokens, not cookies). List browser origins to restrict."
+        },
+        "WsMaxConnections": {
+          "label": "Global connection limit",
+          "help": "Maximum simultaneous /v1/realtime connections."
+        },
+        "WsMaxConnectionsPerToken": {
+          "label": "Per-token connection limit",
+          "help": "Prevents one token from occupying all realtime slots."
+        },
+        "WsIdleTimeoutSeconds": {
+          "label": "Idle read timeout (seconds)",
+          "help": "Close when neither data nor pong arrives in time."
+        },
+        "WsMaxConnectionSeconds": {
+          "label": "Max connection duration (seconds)",
+          "help": "Auto-close and settle quota to avoid unbounded long connections."
+        },
+        "WsPingIntervalSeconds": {
+          "label": "Heartbeat interval (seconds)",
+          "help": "0 disables active ping; keep it below the idle timeout."
+        }
+      },
+      "actions": {
+        "save": "Save group",
+        "reset": "Restore config default",
+        "reload": "Reload",
+        "sourceConfig": "config / default",
+        "sourceDatabase": "admin override",
+        "restartRequired": "restart required",
+        "saved": "Saved",
+        "resetDone": "Restored config default",
+        "loadFailed": "Failed to load options",
+        "dirty": "Unsaved changes",
+        "boolOn": "On",
+        "boolOff": "Off",
+        "modeAuto": "Auto (recommended)",
+        "modeOn": "Always on",
+        "modeOff": "Off",
+        "listHint": "Separate multiple values with commas"
+      }
+    },
     "operationSettings": {
       "chatLinkSettings": {
         "info": "Configure chat links that take effect for chat in tokens and chat in Playground on the homepage. <br />In the links, you can use {key} to replace the user's token, {server} to replace the server address, and base64<[xxxxxx]> for base64 encoding. For example: {'https://chat.oneapi.pro/#/?settings={\"key\":\"sk-{key}\",\"url\":\"{server}\"}'}<br />If not configured, the following 4 links will be configured by default:<br />ChatGPT Next: {'https://chat.oneapi.pro/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />chatgpt-web-midjourney-proxy: {'https://vercel.ddaiai.com/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />AMA: {'ama://set-api-key?server={server}&key={key}'}<br />opencat: {'opencat://team/join?domain={server}&token={key}'}<br />Sort order: Higher values first, if values are equal then by configuration order",

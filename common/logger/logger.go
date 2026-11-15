@@ -197,6 +197,12 @@ func SysLog(s string) {
 	// Add to in-memory log history
 	logHistory.AddEntry(loggerINFO, message)
 
+	// 库代码可能在 SetupLogger 之前被调用（单测、CLI、早期初始化），
+	// 此时只保留内存历史，避免全局 Logger 为空导致进程 panic。
+	if Logger == nil {
+		return
+	}
+
 	// Write to log file
 	entry := zapcore.Entry{
 		Level:   zapcore.InfoLevel,
@@ -216,7 +222,9 @@ func SysError(s string) {
 	// Add to in-memory log history
 	logHistory.AddEntry(loggerError, message)
 
-	// Write to log file
+	if Logger == nil {
+		return
+	}
 	Logger.Error(message)
 }
 
@@ -226,7 +234,9 @@ func SysDebug(s string) {
 	// Add to in-memory log history
 	logHistory.AddEntry(loggerDEBUG, message)
 
-	// Write to log file
+	if Logger == nil {
+		return
+	}
 	Logger.Debug(message)
 }
 
@@ -256,6 +266,10 @@ func logHelper(ctx context.Context, level string, msg string) {
 
 	// Add to in-memory log history
 	logHistory.AddEntry(level, logMsg)
+
+	if Logger == nil {
+		return
+	}
 
 	// Write to log file
 	switch level {

@@ -3,7 +3,7 @@ port: 3000 # 服务端口
 gin_mode: "release" # gin 模式，可选值为 "release" 或 "debug"，默认为 "release"。
 log_level: "info" # 日志级别，可选值为 "debug"、"info"、"warn"、"error"、"fatal"、"panic"，默认为 "info"。
 log_dir: "./logs" # 日志目录
-session_secret: "" # 会话密钥，未设置则使用随机值。
+session_secret: "" # 会话密钥，留空会自动生成随机值（每次重启都需重新登录）。公网部署务必设置为 32 位以上固定随机串：openssl rand -hex 32
 disable_token_encoders: false # 是否禁用 token 编码器计算tokens。启用后 内存占用可减少 40MB 左右，但是stream模式下tokens计算不准确
 trusted_header: "" # 可信头部，"CF-Connecting-IP" 用于 Cloudflare，"X-Appengine-Remote-Addr" 用于 Google App Engine，未设置则不使用。 可以解决一些代理问题，如获取用户真实IP
 language: "zh_CN" #国际化默认语言 目前支持`zh_CN`/`en_US`/ja_JP`/`zh_HK`
@@ -123,26 +123,44 @@ uptime_kuma:
   status_page_name: "" #  uptime-kuma状态页面slug
 
 # ---------------------------------------------------------------------------
-# 安全加固相关配置（均可留空使用默认值）
+# 安全 / 反向代理 / 连接治理配置
 # ---------------------------------------------------------------------------
-# session_secret 必须是 32 位以上随机串。留空或使用 random_string 等占位值时，
-# 程序会忽略该值并自动生成随机密钥（每次重启都会让所有人重新登录）。
-# 生成方式： openssl rand -hex 32
-session_secret: ""
+# 本节所有开关都有两个入口：
+#   1) 写进 config.yaml —— 部署默认值，随镜像 / 编排一起版本化；
+#   2) 后台「系统设置 → 安全与透传」—— 立即生效，保存在数据库 options 表。
+# 优先级：后台设置 > config.yaml > 代码默认值。后台面板会标明每项当前值的来源，
+# 并可一键「恢复配置文件默认」。除 trusted_proxies 外，修改后都不需要重启。
+# session_secret 已在文件顶部定义一次，这里不再重复。
 
 # 会话 Cookie 有效期（秒），默认 604800（7 天，原为 30 天）
 session_max_age: 604800
 
-# 公网 HTTPS 部署请设为 true，使 Cookie 只在 HTTPS 上发送。
-# 内网 HTTP 访问必须保持 false，否则无法登录。
-session_secure: false
+# 公网 HTTPS 反代部署推荐 auto：反代带 X-Forwarded-Proto: https 时自动加 Secure，
+# 内网 HTTP 直连不加，两个入口都能正常登录。
+# on = 总是加 Secure（纯 HTTPS 站点）；off = 完全不加（不推荐用于公网）。
+# 兼容历史布尔写法：true 等同 on，false 等同 off。
+session_secure: auto
 
-# CORS 白名单。留空表示允许任意来源，但此时一律禁止携带 Cookie 凭据；
-# 若确有跨域管理台需求，请在此填写明确来源并按需打开 cors_allow_credentials。
+# 可信反向代理（IP 或 CIDR）。只有来自这些地址的请求才采信 X-Forwarded-For，
+# 避免公网客户端伪造 IP 绕过速率限制。修改后需重启。
+# 1Panel / Nginx / Docker bridge 场景保持默认即可。
+trusted_proxies:
+  - 127.0.0.1
+  - ::1
+  - 10.0.0.0/8
+  - 172.16.0.0/12
+  - 192.168.0.0/16
+
+# CORS 白名单。留空允许任意来源，但一律禁止携带 Cookie 凭据；
+# 若确有跨域管理台需求，填写明确的完整 Origin 并按需打开 credentials。
+# 公网反代域名示例：
+# cors_allowed_origins:
+#   - https://api.uuz.ai
+#   - https://api.uuai.cc
 cors_allowed_origins: []
 cors_allow_credentials: false
 
-# 浏览器端 WebSocket（/v1/realtime）的 Origin 白名单，独立于上面的 CORS 配置。
+# 浏览器端 WebSocket（/v1/realtime）的 Origin 白名单，独立于 CORS 配置。
 # 默认留空表示允许任意来源：one-hub 是 API 代理，浏览器 Realtime SDK 本来就来自
 # 各种站点；且该端点只认令牌、不读 Cookie，不存在跨站 WebSocket 劫持。
 # 只在确有需要时填写完整 Origin（含 scheme 与端口），例如：
@@ -152,12 +170,21 @@ cors_allow_credentials: false
 # 无 Origin 头的服务端 SDK / curl 始终放行；填 "*" 等价于不限制。
 websocket_allowed_origins: []
 
+# /v1/realtime 连接治理：全局并发、单令牌并发、空闲读超时、最大连接时长、心跳间隔。
+# 后台可热更新；心跳间隔设为 0 表示关闭主动 ping。
+ws_max_connections: 200
+ws_max_connections_per_token: 10
+ws_idle_timeout_seconds: 120
+ws_max_connection_seconds: 3600
+ws_ping_interval_seconds: 30
+
 # 允许用户提交的 image_url 指向内网地址（自建图床）。
 # 默认 false：拒绝回环、私有网段与云元数据地址，防止 SSRF。
 ssrf_allow_private_image: false
 
 # ---------------------------------------------------------------------------
 # 请求参数保真（对标 new-api 的 RawMessage 无损透传）
+# 同样支持「config.yaml 默认值 + 后台即时覆盖」双通道，见上一节说明。
 # ---------------------------------------------------------------------------
 # 默认 true：客户端请求中程序未定义的字段会原样送到上游，避免
 # service_tier / store / metadata / prompt_cache_* / extra_body / 各家扩展参数

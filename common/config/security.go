@@ -12,11 +12,14 @@ import (
 
 // 会话安全配置。
 // SessionMaxAge 默认 7 天（原来是 30 天），可通过 session_max_age 覆盖。
-// SessionSecure 默认 false：内网 HTTP 部署若强制 Secure 会导致无法登录，
-// 公网 HTTPS 部署请在 config.yaml 中显式设置 session_secure: true。
+// session_secure 默认 auto：经 HTTPS 反代访问时自动加 Secure，内网 HTTP 直连不加，
+// 因此不需要为了公网部署把内网管理入口一起锁死。也可显式设为 on / off。
 var (
 	SessionMaxAge = 7 * 24 * 60 * 60
 	SessionSecure = false
+
+	// SessionSecureMode 见 runtime.go：auto 时按请求协议动态决定是否加 Secure。
+	SessionSecureMode = SessionSecureAuto
 
 	// WebsocketAllowedOrigins 是浏览器端 WebSocket 握手的 Origin 白名单。
 	// 默认空表示不限制：one-hub 是 API 代理，浏览器 Realtime SDK 本来就来自任意站点，
@@ -30,16 +33,17 @@ var (
 )
 
 const (
-	sessionVersionContext = "one-hub/session-version/v1"
+	sessionVersionContext  = "one-hub/session-version/v1"
 	sessionBlockKeyContext = "one-hub/session-encryption/v1"
 )
 
 func InitSecurity() {
+	runtimeMu.Lock()
+	defer runtimeMu.Unlock()
 	if v := viper.GetInt("session_max_age"); v > 0 {
 		SessionMaxAge = v
 	}
-	SessionSecure = viper.GetBool("session_secure")
-	WebsocketAllowedOrigins = viper.GetStringSlice("websocket_allowed_origins")
+	WebsocketAllowedOrigins = normalizeList(viper.GetStringSlice("websocket_allowed_origins"))
 }
 
 // AllowWebsocketOrigin 判断一次 WebSocket 握手是否允许。
@@ -47,11 +51,12 @@ func InitSecurity() {
 //   - 白名单为空：维持历史行为，允许任意来源（API 代理的正常语义）；
 //   - 白名单非空：精确匹配 Origin，支持 "*" 显式放开。
 func AllowWebsocketOrigin(origin string) bool {
-	if origin == "" || len(WebsocketAllowedOrigins) == 0 {
+	origins := WebsocketOrigins()
+	if origin == "" || len(origins) == 0 {
 		return true
 	}
 	normalized := strings.TrimSuffix(strings.TrimSpace(origin), "/")
-	for _, allowed := range WebsocketAllowedOrigins {
+	for _, allowed := range origins {
 		allowed = strings.TrimSpace(allowed)
 		if allowed == "*" {
 			return true

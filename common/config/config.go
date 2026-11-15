@@ -18,7 +18,10 @@ func InitConf() {
 	// 拒绝部署模板里的占位密钥和过短密钥，避免攻击者伪造任意 role 的 Cookie
 	SessionSecret, WeakSessionSecretReplaced = NormalizeSessionSecret(utils.GetOrDefault("session_secret", SessionSecret))
 	InitSecurity()
+	InitSessionMode()
 	InitRelay()
+	InitRuntime()
+	CaptureRuntimeConfigDefaults()
 	UserInvoiceMonth = viper.GetBool("user_invoice_month")
 	GitHubProxy = viper.GetString("github_proxy")
 	MCP_ENABLE = viper.GetBool("mcp.enable") != false
@@ -57,4 +60,21 @@ func defaultConfig() {
 	// 请求参数无损透传默认开启，解决固定 struct 重序列化丢弃新字段的问题
 	viper.SetDefault("passthrough_extra_body", true)
 	viper.SetDefault("passthrough_native_protocol", true)
+
+	// 安全 / 反代 / WebSocket 治理：全部显式注册默认值，
+	// 这样 viper.IsSet 与后台配置面板看到的默认值一致，不再依赖零值巧合。
+	viper.SetDefault("session_secure", SessionSecureAuto)
+	viper.SetDefault("session_max_age", 7*24*60*60)
+	viper.SetDefault("cors_allowed_origins", []string{})
+	viper.SetDefault("cors_allow_credentials", false)
+	viper.SetDefault("websocket_allowed_origins", []string{})
+	viper.SetDefault("ssrf_allow_private_image", false)
+	viper.SetDefault("trusted_proxies", []string{
+		"127.0.0.1", "::1", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16",
+	})
+	viper.SetDefault("ws_max_connections", 200)
+	viper.SetDefault("ws_max_connections_per_token", 10)
+	viper.SetDefault("ws_idle_timeout_seconds", 120)
+	viper.SetDefault("ws_max_connection_seconds", 3600)
+	viper.SetDefault("ws_ping_interval_seconds", 30)
 }

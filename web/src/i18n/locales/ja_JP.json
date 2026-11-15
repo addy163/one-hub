@@ -846,6 +846,108 @@
   },
   "setting": "設定",
   "setting_index": {
+    "runtimeSettings": {
+      "title": "セキュリティと透過",
+      "subtitle": "これらの設定は config.yaml または管理画面から変更できます。管理画面の値が優先されます。「config / 既定」は現在 config.yaml の値です。",
+      "groups": {
+        "passthrough": {
+          "title": "リクエスト透過",
+          "description": "プログラム未定義のフィールドを上流へ転送するかどうか。"
+        },
+        "session": {
+          "title": "セッションとリバースプロキシ",
+          "description": "公開 HTTPS リバースプロキシ配下の Cookie とクライアント IP の扱い。"
+        },
+        "cors": {
+          "title": "CORS",
+          "description": "管理画面のクロスオリジン方針。既定では Cookie 送信を許可しません。"
+        },
+        "ssrf": {
+          "title": "SSRF 防御",
+          "description": "ユーザー指定の画像 URL の検証。"
+        },
+        "websocket": {
+          "title": "WebSocket 接続制御",
+          "description": "/v1/realtime の同時接続数・タイムアウト・ハートビート。"
+        }
+      },
+      "fields": {
+        "PassthroughExtraBody": {
+          "label": "未知フィールドを透過",
+          "help": "未定義フィールドを上流へ転送します。上流が 400 を返す場合はチャネル側で無効化できます。"
+        },
+        "PassthroughNativeProtocol": {
+          "label": "ネイティブ SDK パス別名",
+          "help": "/v1/messages と /v1beta/models を登録し、Claude Code / Gemini SDK がそのまま利用できます。"
+        },
+        "SessionSecureMode": {
+          "label": "Cookie Secure モード",
+          "help": "auto：HTTPS プロキシ経由のみ Secure、内部 HTTP は付与しない／on：常に付与／off：付与しない。"
+        },
+        "SessionMaxAge": {
+          "label": "セッション有効期間（秒）",
+          "help": "既定 604800（7 日）。新規ログインから適用。"
+        },
+        "TrustedProxies": {
+          "label": "信頼するプロキシ",
+          "help": "カンマ区切りの IP / CIDR。この経由の X-Forwarded-For のみ信頼。再起動が必要。"
+        },
+        "CorsAllowedOrigins": {
+          "label": "CORS 許可オリジン",
+          "help": "カンマ区切りの完全な Origin。空欄は全許可だが Cookie は不可。例：https://api.uuz.ai,https://api.uuai.cc"
+        },
+        "CorsAllowCredentials": {
+          "label": "クロスオリジン資格情報",
+          "help": "許可リストがある場合のみ有効。ワイルドカードとは併用不可。"
+        },
+        "SsrfAllowPrivateImage": {
+          "label": "プライベート画像ホストを許可",
+          "help": "既定ではループバック・プライベート網・メタデータを拒否。"
+        },
+        "WebsocketAllowedOrigins": {
+          "label": "WebSocket Origin 許可リスト",
+          "help": "空欄は無制限（トークン認証のみ）。ブラウザの Origin を制限できます。"
+        },
+        "WsMaxConnections": {
+          "label": "全体の最大同時接続数",
+          "help": "/v1/realtime の同時接続上限。"
+        },
+        "WsMaxConnectionsPerToken": {
+          "label": "トークン毎の最大同時接続数",
+          "help": "1 トークンによる占有を防止。"
+        },
+        "WsIdleTimeoutSeconds": {
+          "label": "アイドル読取タイムアウト（秒）",
+          "help": "データも pong も無い場合に切断。"
+        },
+        "WsMaxConnectionSeconds": {
+          "label": "接続の最大持続時間（秒）",
+          "help": "到達時に切断して課金を確定。"
+        },
+        "WsPingIntervalSeconds": {
+          "label": "ハートビート間隔（秒）",
+          "help": "0 で ping 無効。アイドルTimeoutより短く設定。"
+        }
+      },
+      "actions": {
+        "save": "このグループを保存",
+        "reset": "config 既定に戻す",
+        "reload": "再読み込み",
+        "sourceConfig": "config / 既定",
+        "sourceDatabase": "管理画面の設定（優先）",
+        "restartRequired": "再起動が必要",
+        "saved": "保存しました",
+        "resetDone": "config 既定に戻しました",
+        "loadFailed": "設定の読み込みに失敗",
+        "dirty": "未保存の変更",
+        "boolOn": "オン",
+        "boolOff": "オフ",
+        "modeAuto": "自動（推奨）",
+        "modeOn": "常にオン",
+        "modeOff": "オフ",
+        "listHint": "複数値はカンマ区切り"
+      }
+    },
     "operationSettings": {
       "chatLinkSettings": {
         "info": "チャット リンクを設定します。この設定はトークンのチャットと、ホームページの Playground のチャットに適用されます。<br />リンク内で &#123;key&#125; をユーザーのトークンに、&#123;server&#125; をサーバーアドレスに置き換えることができます。base64<[xxxxxx]> で base64 エンコードを行うことができます。例：{'https://chat.oneapi.pro/#/?settings={\"key\":\"sk-{key}\",\"url\":\"{server}\"}'}<br />設定しない場合、デフォルトで以下の4つのリンクが設定されます:<br />ChatGPT Next：{'https://chat.oneapi.pro/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />chatgpt-web-midjourney-proxy：{'https://vercel.ddaiai.com/#/?settings={\"key\":\"{key}\",\"url\":\"{server}\"}'}<br />AMA 问天：{'ama://set-api-key?server={server}&key={key}'}<br />opencat：{'opencat://team/join?domain={server}&token={key}'}<br />並び順：値が大きいほど上位に表示され、値が同じ場合は設定順に表示されます。",

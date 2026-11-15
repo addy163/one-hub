@@ -106,6 +106,8 @@ func SetApiRouter(router *gin.Engine) {
 		optionRoute.Use(middleware.RootAuth())
 		{
 			optionRoute.GET("/", controller.GetOptions)
+			optionRoute.GET("/runtime", controller.GetRuntimeOptions)
+			optionRoute.DELETE("/runtime/:key", controller.DeleteRuntimeOption)
 			optionRoute.PUT("/", controller.UpdateOption)
 			optionRoute.GET("/telegram", controller.GetTelegramMenuList)
 			optionRoute.POST("/telegram", controller.AddOrUpdateTelegramMenu)

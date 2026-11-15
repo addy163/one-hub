@@ -25,6 +25,9 @@ func GetOption(key string) (option Option, err error) {
 }
 
 func InitOptionMap() {
+	// 安全 / 透传 / WebSocket 治理等运行时配置：config.yaml 提供默认值，
+	// 只有 options 表里显式存在同 key 的记录才会覆盖（见 loadOptionsFromDatabase）。
+	config.RegisterRuntimeOptions()
 
 	config.GlobalOption.RegisterBool("PasswordLoginEnabled", &config.PasswordLoginEnabled)
 	config.GlobalOption.RegisterBool("PasswordRegisterEnabled", &config.PasswordRegisterEnabled)
@@ -148,6 +151,11 @@ func SyncOptions(frequency int) {
 		logger.SysLog("syncing options from database")
 		loadOptionsFromDatabase()
 	}
+}
+
+// DeleteOption 删除后台设置对某个配置项的覆盖，使 config.yaml 默认值重新生效。
+func DeleteOption(key string) error {
+	return DB.Where("key = ?", key).Delete(&Option{}).Error
 }
 
 func UpdateOption(key string, value string) error {

@@ -767,6 +767,108 @@
     }
   },
   "setting_index": {
+    "runtimeSettings": {
+      "title": "安全与透传",
+      "subtitle": "这些设置既可在 config.yaml 中配置，也可在后台即时修改；后台设置优先。带「配置文件 / 默认」标记的项目前由配置文件生效。",
+      "groups": {
+        "passthrough": {
+          "title": "请求参数透传",
+          "description": "控制客户端请求里程序未定义字段是否原样转发给上游。"
+        },
+        "session": {
+          "title": "会话与反向代理",
+          "description": "公网 HTTPS 反代下的 Cookie 与真实客户端 IP 处理。"
+        },
+        "cors": {
+          "title": "跨域（CORS）",
+          "description": "管理台跨域访问策略，默认禁止携带 Cookie 凭据。"
+        },
+        "ssrf": {
+          "title": "SSRF 防护",
+          "description": "用户提交的图片地址校验。"
+        },
+        "websocket": {
+          "title": "WebSocket 连接治理",
+          "description": "/v1/realtime 的并发、超时与心跳限制。"
+        }
+      },
+      "fields": {
+        "PassthroughExtraBody": {
+          "label": "透传未知请求字段",
+          "help": "客户端请求中程序未定义的字段原样送到上游；上游报 400 时可单独给渠道勾选「禁止透传」。"
+        },
+        "PassthroughNativeProtocol": {
+          "label": "原生 SDK 路径别名",
+          "help": "注册 /v1/messages、/v1beta/models 等标准路径，Claude Code / Gemini SDK 可直接把 base_url 指向本站。"
+        },
+        "SessionSecureMode": {
+          "label": "会话 Cookie Secure 模式",
+          "help": "auto：HTTPS 反代自动加 Secure、内网 HTTP 不加；on：总是加；off：不加。公网反代推荐 auto。"
+        },
+        "SessionMaxAge": {
+          "label": "会话有效期（秒）",
+          "help": "默认 604800（7 天），修改后新登录的会话生效。"
+        },
+        "TrustedProxies": {
+          "label": "可信代理列表",
+          "help": "逗号分隔的 IP 或 CIDR；只有来自这些代理的 X-Forwarded-For 才用于限流与日志。需重启生效。"
+        },
+        "CorsAllowedOrigins": {
+          "label": "CORS 来源白名单",
+          "help": "逗号分隔的完整 Origin。留空允许任意来源但禁止携带 Cookie 凭据。示例：https://api.uuz.ai,https://api.uuai.cc"
+        },
+        "CorsAllowCredentials": {
+          "label": "允许跨域携带凭据",
+          "help": "仅在白名单非空时生效，与通配来源互斥。"
+        },
+        "SsrfAllowPrivateImage": {
+          "label": "允许内网图床地址",
+          "help": "默认关闭，拒绝 image_url 指向回环、私有网段与云元数据；自建内网图床可开启。"
+        },
+        "WebsocketAllowedOrigins": {
+          "label": "WebSocket Origin 白名单",
+          "help": "留空不限制（该端点只认令牌、不读 Cookie）；填写后仅允许列出的浏览器来源。"
+        },
+        "WsMaxConnections": {
+          "label": "全局最大并发连接",
+          "help": "/v1/realtime 同时存在的连接总数上限。"
+        },
+        "WsMaxConnectionsPerToken": {
+          "label": "单令牌最大并发连接",
+          "help": "防止单个令牌占满实时通道。"
+        },
+        "WsIdleTimeoutSeconds": {
+          "label": "空闲读超时（秒）",
+          "help": "超过该时间没有数据也没有心跳回应就关闭连接。"
+        },
+        "WsMaxConnectionSeconds": {
+          "label": "单连接最大时长（秒）",
+          "help": "到时自动关闭并结算配额，避免长连接无限占用。"
+        },
+        "WsPingIntervalSeconds": {
+          "label": "心跳间隔（秒）",
+          "help": "0 表示关闭主动 ping；建议小于空闲超时。"
+        }
+      },
+      "actions": {
+        "save": "保存本组",
+        "reset": "恢复配置文件默认",
+        "reload": "刷新",
+        "sourceConfig": "配置文件 / 默认",
+        "sourceDatabase": "后台设置（优先）",
+        "restartRequired": "需重启生效",
+        "saved": "保存成功",
+        "resetDone": "已恢复配置文件默认值",
+        "loadFailed": "加载配置失败",
+        "dirty": "有未保存的修改",
+        "boolOn": "开启",
+        "boolOff": "关闭",
+        "modeAuto": "自动（推荐）",
+        "modeOn": "强制开启",
+        "modeOff": "关闭",
+        "listHint": "多个值用英文逗号分隔"
+      }
+    },
     "operationSettings": {
       "title": "运营设置",
       "generalSettings": {

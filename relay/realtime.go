@@ -45,6 +45,13 @@ func ChatRealtime(c *gin.Context) {
 		return
 	}
 
+	// 在 Upgrade 之前拒绝：超限握手返回 429 JSON，客户端不会误以为连接已建立。
+	if !wsLimiter.acquire(c) {
+		common.AbortWithMessage(c, http.StatusTooManyRequests, "too_many_realtime_connections")
+		return
+	}
+	defer wsLimiter.release(c)
+
 	userConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		// Upgrade 失败时 gorilla 已经写入 HTTP 响应，不能再写一次 header。
@@ -68,26 +75,35 @@ func ChatRealtime(c *gin.Context) {
 
 	relay.usage = &types.UsageEvent{}
 
-	wsProxy := requester.NewWSProxy(relay.userConn, relay.providerConn, time.Minute*2, relay.messageHandler, relay.usageHandler)
+	limits := config.CurrentWsLimits()
+	wsProxy := requester.NewWSProxy(
+		relay.userConn,
+		relay.providerConn,
+		time.Duration(limits.IdleTimeoutSeconds)*time.Second,
+		relay.messageHandler,
+		relay.usageHandler,
+		requester.WithWsPingInterval(time.Duration(limits.PingIntervalSeconds)*time.Second),
+		requester.WithWsMaxDuration(time.Duration(limits.MaxConnectionSeconds)*time.Second),
+	)
 
 	wsProxy.Start()
-
-	go func() {
-		var closedBy string
-		select {
-		case <-wsProxy.UserClosed():
-			closedBy = "user"
-		case <-wsProxy.SupplierClosed():
-			closedBy = "provider"
-		}
-
-		logger.LogInfo(relay.c.Request.Context(), fmt.Sprintf("连接由%s关闭", closedBy))
-		wsProxy.Close()
-		relay.quota.Consume(relay.c, relay.usage.ToChatUsage(), false)
-
-	}()
-
 	wsProxy.Wait()
+
+	closedBy := "timeout_or_error"
+	select {
+	case <-wsProxy.UserClosed():
+		closedBy = "user"
+	case <-wsProxy.SupplierClosed():
+		closedBy = "provider"
+	default:
+	}
+	logger.LogInfo(relay.c.Request.Context(), fmt.Sprintf("连接由%s关闭，当前活跃连接数 %d", closedBy, ActiveRealtimeConnections()))
+
+	// 先关掉另一侧还在读的 goroutine，再同步结算配额。
+	// 原来把结算放在独立 goroutine 里，handler 返回后 Gin context 已回收，
+	// 存在生命周期竞态；这里改成同步执行，也不用担心重复扣费。
+	wsProxy.Close()
+	relay.quota.Consume(relay.c, relay.usage.ToChatUsage(), false)
 }
 
 func (r *RelayModeChatRealtime) abortWithMessage(message string) {
@@ -95,6 +111,10 @@ func (r *RelayModeChatRealtime) abortWithMessage(message string) {
 
 	r.userConn.WriteMessage(websocket.TextMessage, []byte(eventErr.Error()))
 	r.userConn.Close()
+	// 首帧校验失败 / 重试全部失败时，已建立的上游连接也要关掉，否则会一直挂着。
+	if r.providerConn != nil {
+		r.providerConn.Close()
+	}
 }
 
 func (r *RelayModeChatRealtime) getProvider() bool {

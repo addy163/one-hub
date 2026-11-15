@@ -8,6 +8,7 @@ import (
 	_ "image/png"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -44,7 +45,18 @@ var (
 	}
 )
 
+// skipUnlessNetworkTests 决定这些依赖 upload.wikimedia.org 的用例是否运行。
+// 内网 / CI 环境访问不了外网站点时，图片解码会返回 "image: unknown format" 甚至 panic；
+// 显式开关既能保持本地测试稳定，也保留在有外网时完整回归的能力。
+func skipUnlessNetworkTests(t *testing.T) {
+	t.Helper()
+	if os.Getenv("ONE_HUB_IMAGE_NETWORK_TESTS") != "1" {
+		t.Skip("需要访问 upload.wikimedia.org；设置 ONE_HUB_IMAGE_NETWORK_TESTS=1 可开启")
+	}
+}
+
 func TestDecode(t *testing.T) {
+	skipUnlessNetworkTests(t)
 	// Bytes read: varies sometimes
 	// jpeg: 1063892
 	// png: 294462
@@ -90,6 +102,7 @@ func TestDecode(t *testing.T) {
 }
 
 func TestBase64(t *testing.T) {
+	skipUnlessNetworkTests(t)
 	// Bytes read:
 	// jpeg: 1063892
 	// png: 294462
@@ -143,6 +156,7 @@ func TestBase64(t *testing.T) {
 }
 
 func TestGetImageSize(t *testing.T) {
+	skipUnlessNetworkTests(t)
 	for i, c := range cases {
 		t.Run("Decode:"+strconv.Itoa(i), func(t *testing.T) {
 			width, height, err := img.GetImageSize(c.url)
@@ -154,6 +168,7 @@ func TestGetImageSize(t *testing.T) {
 }
 
 func TestGetImageSizeFromBase64(t *testing.T) {
+	skipUnlessNetworkTests(t)
 	for i, c := range cases {
 		t.Run("Decode:"+strconv.Itoa(i), func(t *testing.T) {
 			resp, err := http.Get(c.url)
@@ -171,6 +186,7 @@ func TestGetImageSizeFromBase64(t *testing.T) {
 }
 
 func TestGetImageFromUrl(t *testing.T) {
+	skipUnlessNetworkTests(t)
 	for i, c := range cases {
 		t.Run("Decode:"+strconv.Itoa(i), func(t *testing.T) {
 			resp, err := http.Get(c.url)
