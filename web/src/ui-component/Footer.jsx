@@ -3,6 +3,7 @@ import { Link, Container, Box } from '@mui/material';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { sanitizeHtml } from 'utils/sanitize';
 
 // ==============================|| FOOTER - AUTHENTICATION 2 & 3 ||============================== //
 
@@ -14,7 +15,7 @@ const Footer = () => {
     <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '64px', borderRadius: 0 }}>
       <Box sx={{ textAlign: 'center' }}>
         {siteInfo.footer_html ? (
-          <div className="custom-footer" dangerouslySetInnerHTML={{ __html: siteInfo.footer_html }}></div>
+          <div className="custom-footer" dangerouslySetInnerHTML={{ __html: sanitizeHtml(siteInfo.footer_html) }}></div>
         ) : (
           <>
             <Link href="https://github.com/MartialBE/one-hub" target="_blank">

@@ -12,10 +12,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 以 Key / Password 结尾的敏感配置，后缀黑名单原本漏掉了
+var sensitiveOptionKeys = map[string]bool{
+	"TurnstileSecretKey": true,
+	"CFWorkerImageKey":   true,
+}
+
+func isSensitiveOptionKey(k string) bool {
+	if strings.HasSuffix(k, "Token") || strings.HasSuffix(k, "Secret") ||
+		strings.HasSuffix(k, "SecretKey") || strings.HasSuffix(k, "Password") {
+		return true
+	}
+	return sensitiveOptionKeys[k]
+}
+
 func GetOptions(c *gin.Context) {
 	var options []*model.Option
 	for k, v := range config.GlobalOption.GetAll() {
-		if strings.HasSuffix(k, "Token") || strings.HasSuffix(k, "Secret") {
+		if isSensitiveOptionKey(k) {
 			continue
 		}
 		options = append(options, &model.Option{

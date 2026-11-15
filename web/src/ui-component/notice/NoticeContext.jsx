@@ -3,6 +3,7 @@ import { marked } from 'marked';
 import { useMemo, useState, useEffect, useContext, useCallback, createContext } from 'react';
 
 import { API } from 'utils/api';
+import { sanitizeHtml } from 'utils/sanitize';
 
 // 首页自动弹公告开关。
 // false：访问首页时不自动弹出公告弹窗，也不把公告标记为已读；
@@ -27,7 +28,9 @@ export function NoticeProvider({ children }) {
         const oldNotice = localStorage.getItem('notice');
 
         const processAndSetNotice = async (content) => {
-          const htmlNotice = marked(content).toString();
+          // 公告内容来自后台且会被 dangerouslySetInnerHTML 渲染；
+          // localStorage 里缓存的旧公告同样会走这里，必须统一消毒。
+          const htmlNotice = sanitizeHtml(marked(content || '').toString());
 
           setNotice(htmlNotice);
           if (content !== oldNotice) {

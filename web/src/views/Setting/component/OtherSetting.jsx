@@ -18,6 +18,7 @@ import {
 import Grid from '@mui/material/Unstable_Grid2';
 import { showError, showSuccess } from 'utils/common'; //,
 import { API } from 'utils/api';
+import { sanitizeHtml } from 'utils/sanitize';
 import { marked } from 'marked';
 import { LoadStatusContext } from 'contexts/StatusContext';
 import { useTranslation } from 'react-i18next';
@@ -331,7 +332,7 @@ const OtherSetting = () => {
         <Divider />
         <DialogContent>
           {' '}
-          <div dangerouslySetInnerHTML={{ __html: updateData.content }}></div>
+          <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(updateData.content) }}></div>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowUpdateModal(false)}>{t('setting_index.otherSettings.updateDialog.close')}</Button>

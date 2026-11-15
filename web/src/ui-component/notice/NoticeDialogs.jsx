@@ -6,6 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { Icon } from '@iconify/react';
 
 import { useNotice } from './NoticeContext';
+import { sanitizeHtml } from 'utils/sanitize';
 
 export const NoticeDialogs = () => {
   const { isOpen, closeNotice, notice } = useNotice();
@@ -37,7 +38,7 @@ export const NoticeDialogs = () => {
         <Icon icon="solar:close-circle-bold" />
       </IconButton>
       <DialogContent dividers>
-        <div dangerouslySetInnerHTML={{ __html: notice || '' }} />
+        <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(notice) }} />
       </DialogContent>
     </Dialog>
   );

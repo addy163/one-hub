@@ -2,6 +2,7 @@ import Decimal from 'decimal.js';
 import { enqueueSnackbar } from 'notistack';
 import { snackbarConstants } from 'constants/SnackbarConstants';
 import { API } from './api';
+import { sanitizeHtml } from './sanitize';
 import { CHAT_LINKS } from 'constants/chatLinks';
 import { useSelector } from 'react-redux';
 
@@ -17,7 +18,7 @@ export function isMobile() {
 
 // eslint-disable-next-line
 export function SnackbarHTMLContent({ htmlContent }) {
-  return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  return <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }} />;
 }
 
 export function getSnackbarOptions(variant) {

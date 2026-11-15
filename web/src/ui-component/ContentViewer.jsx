@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { marked } from 'marked';
+import { sanitizeHtml } from 'utils/sanitize';
 import { Box, Paper, Typography, CircularProgress } from '@mui/material';
 import 'assets/css/content-viewer.css';
 
@@ -34,21 +35,21 @@ const ContentViewer = ({ content, loading = false, errorMessage = '', containerS
       return;
     }
 
-    // Check if content is already HTML
+    // Check if content is already HTML —— 后台内容可被管理员写入任意脚本，必须消毒
     if (content.trim().startsWith('<') && content.includes('</')) {
       setIsUrl(false);
-      setParsedContent(content);
+      setParsedContent(sanitizeHtml(content));
       return;
     }
 
-    // Parse as Markdown
+    // Parse as Markdown —— marked 默认允许内联 HTML，输出同样需要消毒
     try {
       const parsed = marked.parse(content);
-      setParsedContent(parsed);
+      setParsedContent(sanitizeHtml(parsed));
       setIsUrl(false);
     } catch (error) {
       console.error('Error parsing markdown:', error);
-      setParsedContent(content); // Fallback to raw content
+      setParsedContent(sanitizeHtml(content));
       setIsUrl(false);
     }
   }, [content]);
@@ -104,6 +105,8 @@ const ContentViewer = ({ content, loading = false, errorMessage = '', containerS
         <iframe
           title="content-frame"
           src={parsedContent}
+          sandbox="allow-popups allow-forms"
+          referrerPolicy="no-referrer"
           style={{
             width: '100%',
             height: iframeHeight,

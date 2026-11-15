@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"one-api/common"
 	"one-api/common/logger"
+	"one-api/common/utils"
 	"one-api/controller"
 	"one-api/model"
 	provider "one-api/providers/midjourney"
@@ -33,7 +34,17 @@ func RelayMidjourneyImage(c *gin.Context) {
 		})
 		return
 	}
-	resp, err := http.Get(midjourneyTask.ImageUrl)
+	// 该接口原本完全公开且把上游响应体原样回显，构成完整回显型 SSRF：
+	// 数据库中被污染的 ImageUrl 可指向 169.254.169.254 或内网接口。
+	// 这里限制目标必须为公网地址、响应必须是图片，并加超时与大小上限。
+	if err := utils.ValidatePublicURL(midjourneyTask.ImageUrl, true); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "image_url_not_allowed",
+		})
+		return
+	}
+	client := utils.NewSafeHTTPClient(10*time.Second, true)
+	resp, err := client.Get(midjourneyTask.ImageUrl)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "http_get_image_failed",
@@ -42,22 +53,22 @@ func RelayMidjourneyImage(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		responseBody, _ := io.ReadAll(resp.Body)
-		c.JSON(resp.StatusCode, gin.H{
-			"error": string(responseBody),
+		// 不再回显上游响应体，避免把内网响应内容通过本接口带出
+		c.JSON(http.StatusBadGateway, gin.H{
+			"error": "upstream_image_unavailable",
 		})
 		return
 	}
-	// 从Content-Type头获取MIME类型
 	contentType := resp.Header.Get("Content-Type")
-	if contentType == "" {
-		// 如果无法确定内容类型，则默认为jpeg
-		contentType = "image/jpeg"
+	if !strings.HasPrefix(strings.ToLower(contentType), "image/") {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"error": "upstream_not_an_image",
+		})
+		return
 	}
-	// 设置响应的内容类型
 	c.Writer.Header().Set("Content-Type", contentType)
-	// 将图片流式传输到响应体
-	_, err = io.Copy(c.Writer, resp.Body)
+	c.Writer.Header().Set("X-Content-Type-Options", "nosniff")
+	_, err = io.Copy(c.Writer, io.LimitReader(resp.Body, 20<<20))
 	if err != nil {
 		log.Println("Failed to stream image:", err)
 	}

@@ -17,24 +17,37 @@ func SetUpLogger(server *gin.Engine) {
 	server.Use(GinzapWithConfig())
 }
 
+// 旧实现只匹配 "key=sk-" 前缀且只替换第一处，导致新版 token key、
+// 密码重置 token、OAuth code/state、Turnstile 响应等明文进入访问日志。
+var sensitiveQueryKeys = map[string]bool{
+	"key": true, "token": true, "access_token": true, "code": true,
+	"state": true, "secret": true, "signature": true, "sign": true,
+	"password": true, "turnstile": true, "aff": true, "api_key": true,
+	"accesskey": true, "session": true, "email_verification_code": true,
+}
+
+func redactQuery(raw string) string {
+	if raw == "" {
+		return ""
+	}
+	parts := strings.Split(raw, "&")
+	for i, part := range parts {
+		kv := strings.SplitN(part, "=", 2)
+		if len(kv) != 2 || kv[1] == "" {
+			continue
+		}
+		if sensitiveQueryKeys[strings.ToLower(kv[0])] {
+			parts[i] = kv[0] + "=***"
+		}
+	}
+	return strings.Join(parts, "&")
+}
+
 func GinzapWithConfig() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
-		query := c.Request.URL.RawQuery
-		// 如果query的值包含key=sk-fsdfsdfsdf 则把sk-fsdfsdfsdf脱敏处理
-		if query != "" {
-			if i := strings.Index(query, "key=sk-"); i >= 0 {
-				start := i + 4 // "key=" length
-				end := strings.Index(query[start:], "&")
-				if end == -1 {
-					end = len(query)
-				} else {
-					end += start
-				}
-				query = query[:start] + "sk-***" + query[end:]
-			}
-		}
+		query := redactQuery(c.Request.URL.RawQuery)
 		c.Next()
 		end := time.Now()
 		latency := end.Sub(start)
