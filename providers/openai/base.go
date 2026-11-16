@@ -295,10 +295,9 @@ func (p *OpenAIProvider) GetRequestTextBody(relayMode int, ModelName string, req
 	}
 
 	// 是否保留客户端原始请求中程序未定义的字段。
-	// 全局默认开启；disable_extra_body 为逐渠道否决（优先级最高）；
+	// 默认开启；disable_extra_body 为逐渠道否决（优先级最高）；
 	// 全局关闭时，仍允许渠道用 allow_extra_body 单独强制开启。
-	allowExtraBody := !p.Channel.DisableExtraBody &&
-		(config.PassthroughExtraBodyEnabled() || p.Channel.AllowExtraBody)
+	allowExtraBody := config.ShouldPassthroughExtraBody(p.Channel.DisableExtraBody, p.Channel.AllowExtraBody)
 
 	// 检查是否需要合并额外字段（来自渠道配置的额外参数或用户请求中的extra_body）
 	needMerge := customParams != nil || allowExtraBody

@@ -27,3 +27,21 @@ func InitRelay() {
 	PassthroughExtraBody = viper.GetBool("passthrough_extra_body")
 	PassthroughNativeProtocol = viper.GetBool("passthrough_native_protocol")
 }
+
+// ShouldPassthroughExtraBody 判定单个渠道是否透传客户端未定义的字段。
+//
+// 判定顺序（三层，不要调换）：
+//  1. disable_extra_body 是渠道级否决票，优先级最高，勾选后该渠道一律不透传。
+//     仅在上游对未知字段返回 400 时才需要勾选。
+//  2. 全局 passthrough_extra_body 默认开启。开启时，所有未被否决的渠道都透传。
+//  3. 全局关闭时，allow_extra_body 可作为单渠道例外重新开启。
+//
+// 注意：全局开启时 allow_extra_body 不参与判定。它是「全局关闭时的白名单」，
+// 而不是「必须勾选才透传」的开关；历史数据里 allow_extra_body=0 不代表用户
+// 主动关闭过透传，因此不能把它当成否决票使用。
+func ShouldPassthroughExtraBody(disableForChannel, allowForChannel bool) bool {
+	if disableForChannel {
+		return false
+	}
+	return PassthroughExtraBodyEnabled() || allowForChannel
+}
