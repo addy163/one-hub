@@ -141,7 +141,7 @@ export default function ModelPrice() {
     )
   ];
 
-  // 格式化价格
+  // 格式化价格（null 表示该分组无权限使用，不是免费）
   const formatPrice = (value, type) => {
     if (typeof value === 'number') {
       let nowUnit = '';
@@ -154,7 +154,7 @@ export default function ModelPrice() {
       }
       return ValueFormatter(value, true, isM) + nowUnit;
     }
-    return value;
+    return value == null ? '—' : value;
   };
 
   // 过滤模型
@@ -221,14 +221,15 @@ export default function ModelPrice() {
             }
           : { input: t('modelpricePage.noneGroup'), output: t('modelpricePage.noneGroup') };
 
-        // 计算所有用户组的价格F
+        // 计算所有用户组的价格（无权限的分组返回 null，而不是 0：0 会被渲染成 Free）
         const allGroupPrices = Object.entries(userGroupMap).map(([key, grp]) => {
           const hasGroupAccess = model.groups.includes(key);
           return {
             groupName: grp.name,
             groupKey: key,
-            input: hasGroupAccess ? grp.ratio * model.price.input : 0,
-            output: hasGroupAccess ? grp.ratio * model.price.output : 0,
+            available: hasGroupAccess,
+            input: hasGroupAccess ? grp.ratio * model.price.input : null,
+            output: hasGroupAccess ? grp.ratio * model.price.output : null,
             type: model.price.type,
             ratio: grp.ratio,
             extraRatios:
@@ -1168,12 +1169,16 @@ export default function ModelPrice() {
                                 <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
                                   {groupPrice.groupName}:
                                 </Typography>
-                                <Typography variant="body2" color="success.main" fontWeight="bold">
-                                  {groupPrice.input > 0
+                                <Typography
+                                  variant="body2"
+                                  color={groupPrice.available ? 'success.main' : 'text.disabled'}
+                                  fontWeight="bold"
+                                >
+                                  {groupPrice.available
                                     ? formatPrice(groupPrice.input, model.type === 'tokens' ? 'tokens' : 'times')
-                                    : t('modelpricePage.free')}
+                                    : 'N/A'}
                                 </Typography>
-                                {groupPrice.input > 0 && (
+                                {groupPrice.available && (
                                   <Typography variant="caption" color="success.main">
                                     (x{groupPrice.ratio})
                                   </Typography>
@@ -1189,12 +1194,16 @@ export default function ModelPrice() {
                                 <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
                                   {groupPrice.groupName}:
                                 </Typography>
-                                <Typography variant="body2" color="success.main" fontWeight="bold">
-                                  {groupPrice.output > 0
+                                <Typography
+                                  variant="body2"
+                                  color={groupPrice.available ? 'success.main' : 'text.disabled'}
+                                  fontWeight="bold"
+                                >
+                                  {groupPrice.available
                                     ? formatPrice(groupPrice.output, model.type === 'tokens' ? 'tokens' : 'times')
-                                    : t('modelpricePage.free')}
+                                    : 'N/A'}
                                 </Typography>
-                                {groupPrice.output > 0 && (
+                                {groupPrice.available && (
                                   <Typography variant="caption" color="success.main">
                                     (x{groupPrice.ratio})
                                   </Typography>

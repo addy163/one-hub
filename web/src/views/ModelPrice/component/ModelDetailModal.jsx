@@ -264,22 +264,36 @@ export default function ModelDetailModal({ open, onClose, model, provider, model
               </TableHead>
               <TableBody>
                 {priceData?.allGroupPrices?.map((groupPrice, index) => {
+                  // available === false 表示该分组没有开通此模型，属于「不可用」而非「免费」
+                  const available = groupPrice.available !== false;
                   return (
-                    <TableRow key={index} hover>
+                    <TableRow key={index} hover sx={available ? undefined : { opacity: 0.55 }}>
                       <TableCell>
-                        <Label color="primary" variant="soft">
+                        <Label color={available ? 'primary' : 'default'} variant="soft">
                           {groupPrice.groupName}
                         </Label>
                       </TableCell>
                       <TableCell>
-                        <Label color="success" variant="outlined">
-                          {formatPrice(groupPrice.input, groupPrice?.type)}
-                        </Label>
+                        {available ? (
+                          <Label color="success" variant="outlined">
+                            {formatPrice(groupPrice.input, groupPrice?.type)}
+                          </Label>
+                        ) : (
+                          <Label color="default" variant="outlined">
+                            {'N/A'}
+                          </Label>
+                        )}
                       </TableCell>
                       <TableCell>
-                        <Label color="warning" variant="outlined">
-                          {formatPrice(groupPrice.output, groupPrice?.type)}
-                        </Label>
+                        {available ? (
+                          <Label color="warning" variant="outlined">
+                            {formatPrice(groupPrice.output, groupPrice?.type)}
+                          </Label>
+                        ) : (
+                          <Label color="default" variant="outlined">
+                            {'N/A'}
+                          </Label>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
