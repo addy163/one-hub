@@ -1,4 +1,4 @@
-import { Stack, Typography, Box, Button, Divider } from '@mui/material';
+import { Stack, Typography, Box, Button, Divider, Select, MenuItem, FormControl } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import SubCard from 'ui-component/cards/SubCard';
 import { IconMessageChatbot } from '@tabler/icons-react';
@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { useState, useCallback } from 'react';
 import { API } from 'utils/api';
 import { replaceChatPlaceholders, getChatLinks } from 'utils/common';
+import useRelayEndpoint from 'hooks/useRelayEndpoint';
 import { IconAppWindow } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
@@ -15,7 +16,8 @@ const QuickStartCard = () => {
   const theme = useTheme();
   const siteInfo = useSelector((state) => state.siteInfo);
   const chatLinks = getChatLinks(false);
-  const baseServer = siteInfo.server_address;
+  const { endpoints: relayEndpoints, endpoint: relayEndpoint, url: relayUrl, choose: chooseRelayEndpoint } = useRelayEndpoint();
+  const baseServer = relayUrl || siteInfo.server_address;
 
   const getProcessedUrl = useCallback(
     (url, key) => {
@@ -56,6 +58,32 @@ const QuickStartCard = () => {
           <Typography variant="body1" color="textSecondary">
             {t('dashboard_index.quickStartTip')}
           </Typography>
+
+          {relayEndpoints.length > 1 && (
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="body2" color="textSecondary">
+                当前线路
+              </Typography>
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <Select
+                  value={relayEndpoint?.id || ''}
+                  onChange={(event) => {
+                    const next = relayEndpoints.find((item) => item.id === event.target.value);
+                    if (next) chooseRelayEndpoint(next);
+                  }}
+                >
+                  {relayEndpoints.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Typography variant="caption" color="textSecondary">
+                {relayUrl}
+              </Typography>
+            </Stack>
+          )}
 
           <Stack direction="row" flexWrap="wrap" sx={{ gap: 2 }}>
             {chatLinks.map(

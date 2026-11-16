@@ -21,6 +21,7 @@ const config = {
     logo: '',
     quota_per_unit: 500000,
     server_address: '',
+    relay_endpoints: [],
     start_time: 0,
     system_name: 'One Hub',
     language: 'zh_CN',

@@ -20,6 +20,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import ChatLinksDataGrid from './ChatLinksDataGrid';
+import RelayEndpointsDataGrid from './RelayEndpointsDataGrid';
 import dayjs from 'dayjs';
 import { LoadStatusContext } from 'contexts/StatusContext';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,7 @@ const OperationSetting = () => {
     TopUpLink: '',
     ChatLink: '',
     ChatLinks: '',
+    RelayEndpoints: '',
     QuotaPerUnit: 0,
     AutomaticDisableChannelEnabled: '',
     AutomaticEnableChannelEnabled: '',
@@ -201,6 +203,15 @@ const OperationSetting = () => {
               return;
             }
             await updateOption('ChatLinks', inputs.ChatLinks);
+          }
+          break;
+        case 'relayendpoints':
+          if ((originInputs['RelayEndpoints'] || '') !== (inputs.RelayEndpoints || '')) {
+            if (!verifyJSON(inputs.RelayEndpoints || '[]')) {
+              showError('线路配置不是合法的 JSON 字符串');
+              return;
+            }
+            await updateOption('RelayEndpoints', inputs.RelayEndpoints || '[]');
           }
           break;
         case 'quota':
@@ -889,6 +900,29 @@ const OperationSetting = () => {
               }}
             >
               {t('setting_index.operationSettings.chatLinkSettings.save')}
+            </Button>
+          </Stack>
+        </Stack>
+      </SubCard>
+
+      <SubCard title="线路管理（多地址分发）">
+        <Stack spacing={2}>
+          <Alert severity="info">
+            <div>
+              这里维护下发给用户的 API 地址清单。用户只能看到自己所在分组的线路；「可见分组」填用户组标识（如 vip,svip），留空表示所有分组可见。
+              未配置任何线路时，前端自动回落到「服务器地址」，行为与升级前一致。
+            </div>
+          </Alert>
+          <Stack justifyContent="flex-start" alignItems="flex-start" spacing={2}>
+            <RelayEndpointsDataGrid endpoints={inputs.RelayEndpoints || '[]'} onChange={handleInputChange} />
+
+            <Button
+              variant="contained"
+              onClick={() => {
+                submitConfig('relayendpoints').then();
+              }}
+            >
+              保存线路配置
             </Button>
           </Stack>
         </Stack>

@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useState, useCallback } from 'react';
 import { API } from 'utils/api';
 import { getChatLinks, showError, replaceChatPlaceholders } from 'utils/common';
+import useRelayEndpoint from 'hooks/useRelayEndpoint';
 import { Typography, Tabs, Tab, Box, Card } from '@mui/material';
 import SubCard from 'ui-component/cards/SubCard';
 // import { Link } from 'react-router-dom';
@@ -45,6 +46,7 @@ const Playground = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const siteInfo = useSelector((state) => state.siteInfo);
+  const { url: relayUrl } = useRelayEndpoint();
   const chatLinks = getChatLinks(true);
   const [iframeSrc, setIframeSrc] = useState(null);
 
@@ -63,18 +65,13 @@ const Playground = () => {
   const handleTabChange = useCallback(
     (event, newIndex) => {
       setTabIndex(newIndex);
-      let server = '';
-      if (siteInfo?.server_address) {
-        server = siteInfo.server_address;
-      } else {
-        server = window.location.host;
-      }
+      let server = relayUrl || siteInfo?.server_address || window.location.host;
       server = encodeURIComponent(server);
       const key = 'sk-' + value;
 
       setIframeSrc(replaceChatPlaceholders(chatLinks[newIndex].url, key, server));
     },
-    [siteInfo, value, chatLinks]
+    [relayUrl, siteInfo, value, chatLinks]
   );
 
   useEffect(() => {

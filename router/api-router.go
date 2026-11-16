@@ -25,7 +25,7 @@ func SetApiRouter(router *gin.Engine) {
 	apiRouter.Use(middleware.GlobalAPIRateLimit())
 	{
 		apiRouter.GET("/image/:id", controller.CheckImg)
-		apiRouter.GET("/status", controller.GetStatus)
+		apiRouter.GET("/status", middleware.TrySetUserBySession(), controller.GetStatus)
 		apiRouter.GET("/notice", controller.GetNotice)
 		apiRouter.GET("/about", controller.GetAbout)
 		apiRouter.GET("/prices", middleware.PricesAuth(), middleware.CORS(), controller.GetPricesList)

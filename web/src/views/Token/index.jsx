@@ -22,12 +22,15 @@ import {
   InputLabel,
   OutlinedInput,
   InputAdornment,
-  Collapse
+  Collapse,
+  Select,
+  MenuItem
 } from '@mui/material';
 import TokensTableRow from './component/TableRow';
 import KeywordTableHead from 'ui-component/TableHead';
 import TableToolBar from 'ui-component/TableToolBar';
 import { API } from 'utils/api';
+import useRelayEndpoint from 'hooks/useRelayEndpoint';
 import { Icon } from '@iconify/react';
 import EditeModal from './component/EditModal';
 import { useSelector } from 'react-redux';
@@ -55,6 +58,7 @@ export default function Token() {
   const [openModal, setOpenModal] = useState(false);
   const [editTokenId, setEditTokenId] = useState(0);
   const siteInfo = useSelector((state) => state.siteInfo);
+  const { endpoints: relayEndpoints, endpoint: relayEndpoint, url: relayUrl, choose: chooseRelayEndpoint } = useRelayEndpoint();
   const { userGroup } = useSelector((state) => state.account);
   const userIsReliable = useIsReliable();
   const userIsAdmin = useIsAdmin();
@@ -230,27 +234,53 @@ export default function Token() {
       </Stack>
       <Stack mb={5}>
         <Alert severity="info">
-          {t('token_index.replaceApiAddress1')}
-          <Box
-            component="span"
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              backgroundColor: 'rgba(0, 0, 0, 0.08)',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              margin: '0 4px',
-              cursor: 'pointer',
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.12)'
-              }
-            }}
-            onClick={() => copy(siteInfo.server_address, 'API地址')}
-          >
-            <b>{siteInfo.server_address}</b>
-            <Icon icon="solar:copy-line-duotone" style={{ marginLeft: '8px', fontSize: '18px' }} />
-          </Box>
-          {t('token_index.replaceApiAddress2')}
+          <Stack spacing={1}>
+            <Box>
+              {t('token_index.replaceApiAddress1')}
+              {relayEndpoints.length > 1 && (
+                <FormControl size="small" sx={{ margin: '0 4px', minWidth: 120, verticalAlign: 'middle' }}>
+                  <Select
+                    value={relayEndpoint?.id || ''}
+                    onChange={(event) => {
+                      const next = relayEndpoints.find((item) => item.id === event.target.value);
+                      if (next) chooseRelayEndpoint(next);
+                    }}
+                  >
+                    {relayEndpoints.map((item) => (
+                      <MenuItem key={item.id} value={item.id}>
+                        {item.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+              <Box
+                component="span"
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(0, 0, 0, 0.08)',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  margin: '0 4px',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.12)'
+                  }
+                }}
+                onClick={() => copy(relayUrl, 'API地址')}
+              >
+                <b>{relayUrl}</b>
+                <Icon icon="solar:copy-line-duotone" style={{ marginLeft: '8px', fontSize: '18px' }} />
+              </Box>
+              {t('token_index.replaceApiAddress2')}
+            </Box>
+            {relayEndpoint?.note && (
+              <Typography variant="caption" color="text.secondary">
+                {relayEndpoint.note}
+              </Typography>
+            )}
+          </Stack>
         </Alert>
       </Stack>
 

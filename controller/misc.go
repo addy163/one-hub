@@ -39,6 +39,7 @@ func GetStatus(c *gin.Context) {
 			"wechat_qrcode":       config.WeChatAccountQRCodeImageURL,
 			"wechat_login":        config.WeChatAuthEnabled,
 			"server_address":      config.ServerAddress,
+			"relay_endpoints":     config.RelayEndpointsForGroup(config.RelayEndpoints, c.GetString("group")),
 			"turnstile_check":     config.TurnstileCheckEnabled,
 			"turnstile_site_key":  config.TurnstileSiteKey,
 			"top_up_link":         config.TopUpLink,

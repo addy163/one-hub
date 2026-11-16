@@ -22,6 +22,11 @@ var Logo = ""
 var TopUpLink = ""
 var ChatLink = ""
 var ChatLinks = ""
+
+// RelayEndpoints 是多线路地址清单（JSON 数组），按用户分组下发。
+// 格式：[{"id":"main","name":"主线路","url":"https://api.example.com","groups":["vip"],"note":"","enabled":true,"sort":100}]
+// groups 为空表示所有分组可见；空列表时前端回落到 ServerAddress。
+var RelayEndpoints = ""
 var AnalyticsCode = ""
 var QuotaPerUnit = 500 * 1000.0 // $0.002 / 1K tokens
 var DisplayInCurrencyEnabled = true
