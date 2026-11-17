@@ -36,17 +36,18 @@ type seedModelInfo struct {
 	Desc  string   `json:"desc"`
 }
 
-// SeedForkDefaults 补齐二次开发引入的数据：线路配置项、qwen4-max 价格行、模型规格表。
+// SeedForkDefaults 补齐二次开发引入的数据：线路配置项、缺失的价格占位行、模型规格表。
 //
 // 设计原则：
 //   - 只补缺失，不覆盖已有数据，可以反复执行；
+//   - 价格只是占位默认值，管理员可按自己服务商的实际成本在「模型价格」中调整；
 //   - 全新安装时 prices 表为空，价格交给内置价格表（GetDefaultPrice）同步，
-//     这里跳过，避免「只有 qwen4-max 一行」导致内置价格不再同步。
+//     这里跳过，避免「只有一行价格」导致内置价格不再同步。
 func SeedForkDefaults(tx *gorm.DB) error {
 	if err := seedOptionDefaults(tx); err != nil {
 		return err
 	}
-	if err := seedQwen4MaxPrice(tx); err != nil {
+	if err := seedPricePlaceholder(tx); err != nil {
 		return err
 	}
 	return seedModelInfoRows(tx)
@@ -72,7 +73,8 @@ func seedOptionDefaults(tx *gorm.DB) error {
 	return nil
 }
 
-func seedQwen4MaxPrice(tx *gorm.DB) error {
+// seedPricePlaceholder 为缺失的模型补一条价格占位行，已有配置一律不动。
+func seedPricePlaceholder(tx *gorm.DB) error {
 	const modelName = "qwen4-max"
 
 	var exist int64
@@ -108,10 +110,10 @@ func seedQwen4MaxPrice(tx *gorm.DB) error {
 		ExtraRatios: &ratios,
 	}
 	if err := tx.Create(price).Error; err != nil {
-		logger.SysError("补充 qwen4-max 价格失败: " + err.Error())
+		logger.SysError("补充内置价格行失败: " + err.Error())
 		return err
 	}
-	logger.SysLog("已补充 qwen4-max 价格（input=0.8 / output=2.4 / locked）")
+	logger.SysLog("已补充内置价格行: " + modelName)
 	return nil
 }
 

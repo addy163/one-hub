@@ -60,7 +60,7 @@ All upstream features and the data schema are preserved; changes are incremental
 | Pricing UI fix | A model that is not available for a group is now rendered as grey `N/A` instead of `Free`, so "no permission" is no longer confused with "free" |
 | Passthrough semantics | `ShouldPassthroughExtraBody` makes the three layers explicit: per-channel `disable_extra_body` is a veto, the global switch is the master switch, `allow_extra_body` is a per-channel whitelist when the global switch is off |
 | Security / reverse proxy | `session_secure: auto` honours `X-Forwarded-Proto/Scheme` and `Forwarded`; `trusted_proxies` restricts which proxies may set `X-Forwarded-For`; WebSocket connection limits are configurable |
-| Built-in data | `qwen4-max` price and 104 model specs are shipped with the binary |
+| Built-in data | Placeholder default prices and 104 model specs are shipped with the binary |
 
 ## Database changes and automatic migration
 
@@ -68,8 +68,8 @@ No manual SQL is required, for either a fresh install or an upgrade.
 
 - **Schema**: GORM `AutoMigrate` runs on every start (`model/main.go`), creating missing tables, columns and indexes.
 - **Data**: `gormigrate` migrations in `model/migrate.go`, recorded in the `migrations` table with unique IDs. Each migration is idempotent and only fills in missing rows, never overwriting values an admin already changed. They run on the master node only.
-- **Current fork migration**: `202611170001` seeds the three relay endpoint options, the `qwen4-max` price row (`locked=1`, cache ratios 0.25 / 0.25 / 2.0) and 104 model specs from `model/seed/model_info.json`.
-- **Built-in prices**: on a fresh install with an empty `prices` table, `GetDefaultPrice()` seeds the built-in prices, which now include `qwen4-max`. The migration intentionally skips the price row when the table is empty so that the built-in sync is not blocked.
+- **Current fork migration**: `202611170001` seeds the three relay endpoint options, any missing placeholder price row and 104 model specs from `model/seed/model_info.json`.
+- **Built-in prices**: on a fresh install with an empty `prices` table, `GetDefaultPrice()` seeds the built-in prices. Those values are placeholders only — provider pricing varies, so adjust them under "Model Prices"; rows you edit are never overwritten by later upgrades. The migration intentionally skips the price row when the table is empty so that the built-in sync is not blocked.
 
 ### Migrating from one-hub
 
@@ -79,7 +79,7 @@ docker stop one-hub && docker rename one-hub one-hub-prev
 docker run -d --name one-hub --network host -v /path/to/data:/data ghcr.io/addy163/one-hub:latest
 ```
 
-Watch the startup log for `database migrated` and the `已补充...` lines, then verify that the "Relay endpoints" panel exists, `qwen4-max` is priced, and the model info table contains 104 rows. To roll back, restore the old container and the SQL dump.
+Watch the startup log for `database migrated` and the `已补充...` lines, then verify that the "Relay endpoints" panel exists, "Model Prices" opens with the built-in prices initialized, and the model info table contains 104 rows. To roll back, restore the old container and the SQL dump.
 
 ## Functional Changes
 

@@ -73,9 +73,8 @@ _本项目基于 [MartialBE/one-hub](https://github.com/MartialBE/one-hub) 二�
 | 线路健康检查 | 服务端按间隔探测每条线路的 `/api/status`，结果写入内存并在 `/api/status` 中随线路一起下发；后台线路表格显示状态列并支持「立即检测」 | 新增配置项 `RelayEndpointProbeInterval`（秒，0 为关闭）、`RelayEndpointProbeTimeout`（毫秒）；新增接口 `GET /api/relay_endpoints`、`POST /api/relay_endpoints/probe` |
 | 探测失败信息隔离 | 探测失败的具体原因（内网地址、证书错误等）只返回给管理员，普通用户只看到「离线」 | 安全加固 |
 | 新用户优选在线线路 | 用户没有历史选择时，默认选中第一条在线线路，而不是固定取列表第一条 | 体验优化 |
-| 内置 qwen4-max 价格 | `GetDefaultPrice()` 增加 `qwen4-max`（输入 0.8 / 输出 2.4，约 ¥11.2 / ¥33.6 每百万 tokens） | 全新安装即可用，且高于官方价，避免被充值折扣与分组倍率击穿成本 |
 | 内置模型规格 | 随程序内置 104 条模型规格（上下文长度、最大输出、输入输出模态） | 全新安装开箱即有模型详情，不再是一片空白 |
-| 数据迁移自动化 | 新增 `gormigrate` 迁移 `202611170001`：补齐线路配置项、qwen4-max 价格行、模型规格 | 老库升级自动补齐，只补缺失、不覆盖已有配置 |
+| 数据迁移自动化 | 新增 `gormigrate` 迁移 `202611170001`：补齐线路配置项、缺失的价格行、模型规格 | 老库升级自动补齐，只补缺失、不覆盖已有配置 |
 
 ### 2026-11-16 · 多线路地址分发
 
@@ -118,13 +117,13 @@ _本项目基于 [MartialBE/one-hub](https://github.com/MartialBE/one-hub) 二�
 
 | ID | 内容 |
 | --- | --- |
-| `202611170001` | 补齐 `RelayEndpoints` / `RelayEndpointProbeInterval` / `RelayEndpointProbeTimeout` 三个配置项；补齐 `qwen4-max` 价格行（`locked=1`，缓存倍率 0.25 / 0.25 / 2.0）；补齐 104 条模型规格（数据见 `model/seed/model_info.json`） |
+| `202611170001` | 补齐 `RelayEndpoints` / `RelayEndpointProbeInterval` / `RelayEndpointProbeTimeout` 三个配置项；补齐缺失的价格占位行（仅在该模型尚无价格时插入）；补齐 104 条模型规格（数据见 `model/seed/model_info.json`） |
 
 ### 内置价格表
 
-全新安装且 `prices` 表为空时，程序会用 `GetDefaultPrice()` 的内置价格初始化。本项目在此基础上补了 `qwen4-max`，因此全新安装不需要先去「更新价格」也不会落到 `DefaultPrice=30` 的天价。
+全新安装且 `prices` 表为空时，程序会用 `GetDefaultPrice()` 的内置价格初始化，与上游行为一致。内置值只是**占位默认值**：不同服务商的采购价差异很大，请在「模型价格」里按自己的实际成本调整，改过的价格行后续升级不会被覆盖。
 
-> 注意：迁移只在 `prices` 表非空时补 `qwen4-max` 行，空表时交给内置价格同步，避免出现「只有一行价格」导致其它内置价格不再初始化。
+> 注意：迁移只在 `prices` 表非空时补缺失的价格行，空表时交给内置价格同步，避免出现「只有一行价格」导致其它内置价格不再初始化。
 
 ## 从 one-hub 迁移到本版本
 
@@ -142,7 +141,7 @@ docker run -d --name one-hub --network host   -v /path/to/data:/data ghcr.io/add
 ```
 database migration started
 已补充默认配置项: RelayEndpoints
-已补充 qwen4-max 价格（input=0.8 / output=2.4 / locked）
+已补充内置价格行: qwen4-max
 已补充模型规格 104 条
 database migrated
 ```
@@ -150,7 +149,7 @@ database migrated
 升级后自查清单：
 
 1. 后台「设置 → 运营设置」出现「线路管理（多地址分发）」面板；
-2. 「模型价格」里能看到 `qwen4-max`，且不是 `30 / 30`；
+2. 「模型价格」能正常打开，内置价格已初始化（可按自己的成本调整）；
 3. 「模型信息」有 104 条记录（老库之前已导入过则不会重复插入）；
 4. 前台令牌页的地址选择框在配置了多条线路后出现。
 
