@@ -443,11 +443,27 @@ func migrateTokenLimitsStructure() *gormigrate.Migration {
 		},
 	}
 }
-// seedForkData 写入二次开发引入的默认数据（线路配置项、qwen4-max 价格、模型规格）。
+// seedForkData 写入二次开发引入的默认数据（线路配置项、内置价格占位行、模型规格）。
 // 幂等：只补缺失，管理员改过的配置与价格不会被覆盖。
 func seedForkData() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "202611170001",
+		Migrate: func(tx *gorm.DB) error {
+			return SeedForkDefaults(tx)
+		},
+		Rollback: func(tx *gorm.DB) error {
+			return nil
+		},
+	}
+}
+
+// seedForkData2 再次执行同一套补齐逻辑。
+// 用途：种子数据（尤其 model_info.json）后续有新增时，已升级过的库不会再跑
+// 202611170001，新增一批迁移可以让老库把新增的模型规格补上。函数本身幂等，
+// 已存在的模型与配置一律跳过。
+func seedForkData2() *gormigrate.Migration {
+	return &gormigrate.Migration{
+		ID: "202611170002",
 		Migrate: func(tx *gorm.DB) error {
 			return SeedForkDefaults(tx)
 		},
@@ -471,6 +487,7 @@ func migrationAfter(db *gorm.DB) error {
 		addExtraRatios(),
 		migrateTokenLimitsStructure(),
 		seedForkData(),
+		seedForkData2(),
 	})
 	return m.Migrate()
 }

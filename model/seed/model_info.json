@@ -1649,5 +1649,75 @@
   "desc": "Lighter GLM-4.5 variant for fast coding assistance and cheaper agents",
   "source": "openrouter",
   "conf": "medium"
+ },
+ {
+  "model": "doubao-seed-2-1-lite",
+  "name": "Doubao Seed 2.1 Lite",
+  "ctx": 1024000,
+  "max": 256000,
+  "in": [
+   "text",
+   "image",
+   "audio",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Omni-modal Seed 2.1 model with native text, image, audio and video understanding, 1M context",
+  "source": "火山方舟",
+  "conf": "high"
+ },
+ {
+  "model": "doubao-seed-2-1-lite-260915",
+  "name": "Doubao Seed 2.1 Lite (260915)",
+  "ctx": 1024000,
+  "max": 256000,
+  "in": [
+   "text",
+   "image",
+   "audio",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Omni-modal Seed 2.1 model with native text, image, audio and video understanding, 1M context",
+  "source": "火山方舟",
+  "conf": "high"
+ },
+ {
+  "model": "doubao-seed-character",
+  "name": "Doubao Seed Character",
+  "ctx": 128000,
+  "max": 32000,
+  "in": [
+   "text",
+   "image",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Character-driven dialogue model for role-play, storytelling and long persona consistency",
+  "source": "火山方舟",
+  "conf": "high"
+ },
+ {
+  "model": "doubao-seed-character-260628",
+  "name": "Doubao Seed Character (260628)",
+  "ctx": 128000,
+  "max": 32000,
+  "in": [
+   "text",
+   "image",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Character-driven dialogue model for role-play, storytelling and long persona consistency",
+  "source": "火山方舟",
+  "conf": "high"
  }
 ]
