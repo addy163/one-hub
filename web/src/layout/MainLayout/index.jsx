@@ -10,6 +10,7 @@ import AdminContainer from 'ui-component/AdminContainer';
 
 // project imports
 import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
+import { NoticeBanner } from 'ui-component/notice';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import navigation from 'menu-items';
@@ -120,6 +121,7 @@ const MainLayout = () => {
       <Sidebar drawerOpen={!matchDownMd ? leftDrawerOpened : !leftDrawerOpened} drawerToggle={handleLeftDrawerToggle} />
 
       <Main theme={theme} open={leftDrawerOpened}>
+        <NoticeBanner />
         <Breadcrumbs separator={<Icon icon="solar:arrow-right-linear" width="16" />} navigation={navigation} icon title rightAlign />
         <AuthGuard>
           <AdminContainer>

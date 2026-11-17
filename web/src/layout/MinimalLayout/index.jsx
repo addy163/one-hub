@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { AppBar, Box, CssBaseline, Toolbar, Container, useMediaQuery } from '@mui/material';
 import Header from './Header';
 import Footer from 'ui-component/Footer';
+import { NoticeBanner } from 'ui-component/notice';
 
 // ==============================|| MINIMAL LAYOUT ||============================== //
 
@@ -57,6 +58,7 @@ const MinimalLayout = () => {
           }
         }}
       >
+        <NoticeBanner sx={{ mx: { xs: 1.5, sm: 2, md: 3 }, mt: 2, mb: 0 }} />
         <Outlet />
       </Box>
       <Box sx={{ flex: 'none', position: 'relative', zIndex: 1 }}>

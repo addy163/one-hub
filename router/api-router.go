@@ -27,6 +27,8 @@ func SetApiRouter(router *gin.Engine) {
 		apiRouter.GET("/image/:id", controller.CheckImg)
 		apiRouter.GET("/status", middleware.TrySetUserBySession(), controller.GetStatus)
 		apiRouter.GET("/notice", controller.GetNotice)
+		apiRouter.GET("/notices", middleware.TrySetUserBySession(), controller.GetActiveNotices)
+		apiRouter.POST("/notices/read", middleware.UserAuth(), controller.MarkNoticeRead)
 		apiRouter.GET("/about", controller.GetAbout)
 		apiRouter.GET("/prices", middleware.PricesAuth(), middleware.CORS(), controller.GetPricesList)
 		apiRouter.GET("/ownedby", relay.GetModelOwnedBy)
@@ -126,6 +128,17 @@ func SetApiRouter(router *gin.Engine) {
 		{
 			relayEndpointRoute.GET("/", controller.GetRelayEndpoints)
 			relayEndpointRoute.POST("/probe", controller.ProbeRelayEndpoints)
+		}
+
+		noticeAdminRoute := apiRouter.Group("/notices/manage")
+		noticeAdminRoute.Use(middleware.AdminAuth())
+		{
+			noticeAdminRoute.GET("/", controller.GetNoticesList)
+			noticeAdminRoute.POST("/", controller.SaveNotice)
+			noticeAdminRoute.PUT("/", controller.SaveNotice)
+			noticeAdminRoute.DELETE("/:id", controller.DeleteNotice)
+			noticeAdminRoute.POST("/:id/status", controller.SetNoticeStatus)
+			noticeAdminRoute.GET("/:id/stats", controller.GetNoticeStats)
 		}
 
 		modelOwnedByRoute := apiRouter.Group("/model_ownedby")

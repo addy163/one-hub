@@ -24,6 +24,7 @@ const Task = Loadable(lazy(() => import('views/Task')));
 const UserGroup = Loadable(lazy(() => import('views/UserGroup')));
 const ModelOwnedby = Loadable(lazy(() => import('views/ModelOwnedby')));
 const ModelInfo = Loadable(lazy(() => import('views/ModelInfo')));
+const Notice = Loadable(lazy(() => import('views/Notice')));
 const Invoice = Loadable(lazy(() => import('views/Invoice')));
 const InvoiceDetail = Loadable(lazy(() => import('views/Invoice/detail')));
 const MultiUserStats = Loadable(lazy(() => import('views/MultiUserStats')));
@@ -137,6 +138,10 @@ const MainRoutes = {
     {
       path: 'model_info',
       element: <ModelInfo />
+    },
+    {
+      path: 'notice',
+      element: <Notice />
     },
     {
       path: 'system_info',

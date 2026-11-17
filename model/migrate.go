@@ -473,6 +473,27 @@ func seedForkData2() *gormigrate.Migration {
 	}
 }
 
+// migrateLegacyNoticeToTable 把旧版单条公告（options.Notice 里的一段 Markdown）
+// 迁移到 notices 表，让升级后的库不会丢掉已经发布的公告内容。
+func migrateLegacyNoticeToTable() *gormigrate.Migration {
+	return &gormigrate.Migration{
+		ID: "202611170003",
+		Migrate: func(tx *gorm.DB) error {
+			if !tx.Migrator().HasTable(&Notice{}) {
+				return nil
+			}
+			if err := MigrateLegacyNotice(tx); err != nil {
+				logger.SysLog("迁移旧公告失败: " + err.Error())
+				return err
+			}
+			return nil
+		},
+		Rollback: func(tx *gorm.DB) error {
+			return nil
+		},
+	}
+}
+
 func migrationAfter(db *gorm.DB) error {
 	// 从库不执行
 	if !config.IsMasterNode {
@@ -488,6 +509,7 @@ func migrationAfter(db *gorm.DB) error {
 		migrateTokenLimitsStructure(),
 		seedForkData(),
 		seedForkData2(),
+		migrateLegacyNoticeToTable(),
 	})
 	return m.Migrate()
 }

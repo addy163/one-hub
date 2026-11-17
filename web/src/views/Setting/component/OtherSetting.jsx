@@ -178,24 +178,14 @@ const OtherSetting = () => {
               </Button>
             </Grid>
             <Grid xs={12}>
-              <FormControl fullWidth>
-                <TextField
-                  multiline
-                  maxRows={15}
-                  id="Notice"
-                  label={t('setting_index.otherSettings.generalSettings.noticeLabel')}
-                  value={inputs.Notice}
-                  name="Notice"
-                  onChange={handleInputChange}
-                  minRows={10}
-                  placeholder={t('setting_index.otherSettings.generalSettings.noticePlaceholder')}
-                />
-              </FormControl>
-            </Grid>
-            <Grid xs={12}>
-              <Button variant="contained" onClick={submitNotice}>
-                {t('setting_index.otherSettings.generalSettings.saveNotice')}
-              </Button>
+              <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  公告已升级为多条管理，支持草稿、定时生效、顶部横幅与已读统计。
+                </Typography>
+                <Button variant="outlined" size="small" href="/panel/notice">
+                  前往公告管理
+                </Button>
+              </Stack>
             </Grid>
           </Grid>
         </SubCard>

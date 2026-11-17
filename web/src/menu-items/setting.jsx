@@ -14,7 +14,8 @@ const icons = {
   IconCoins: () => <Icon width={20} icon="solar:hand-money-bold-duotone" />,
   IconUsers: () => <Icon width={20} icon="solar:users-group-rounded-bold-duotone" />,
   IconModel: () => <Icon width={20} icon="mingcute:ai-fill" />,
-  IconInfo: () => <Icon width={20} icon="solar:info-circle-bold-duotone" />
+  IconInfo: () => <Icon width={20} icon="solar:info-circle-bold-duotone" />,
+  IconNotice: () => <Icon width={20} icon="solar:bell-bing-bold-duotone" />
 };
 
 const Setting = {
@@ -80,6 +81,15 @@ const Setting = {
           type: 'item',
           url: '/panel/model_info',
           icon: icons.IconInfo,
+          breadcrumbs: false,
+          isAdmin: true
+        },
+        {
+          id: 'notice',
+          title: '公告管理',
+          type: 'item',
+          url: '/panel/notice',
+          icon: icons.IconNotice,
           breadcrumbs: false,
           isAdmin: true
         },
