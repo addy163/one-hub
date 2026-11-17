@@ -61,6 +61,7 @@ All upstream features and the data schema are preserved; changes are incremental
 | Passthrough semantics | `ShouldPassthroughExtraBody` makes the three layers explicit: per-channel `disable_extra_body` is a veto, the global switch is the master switch, `allow_extra_body` is a per-channel whitelist when the global switch is off |
 | Security / reverse proxy | `session_secure: auto` honours `X-Forwarded-Proto/Scheme` and `Forwarded`; `trusted_proxies` restricts which proxies may set `X-Forwarded-For`; WebSocket connection limits are configurable |
 | Built-in data | Placeholder default prices and 108 model specs (including Doubao Seed 2.1 Lite and Seed Character) are shipped with the binary |
+| Time-based rates | A model can define several time windows (e.g. 22:00–08:00 at half price). Windows are evaluated in UTC+8; requests hitting a window are billed with that window's ratios, and the log records `price_period` |
 
 ## Database changes and automatic migration
 
@@ -70,6 +71,25 @@ No manual SQL is required, for either a fresh install or an upgrade.
 - **Data**: `gormigrate` migrations in `model/migrate.go`, recorded in the `migrations` table with unique IDs. Each migration is idempotent and only fills in missing rows, never overwriting values an admin already changed. They run on the master node only.
 - **Current fork migrations**: `202611170001` seeds the three relay endpoint options, any missing placeholder price row and the model specs from `model/seed/model_info.json`; `202611170002` re-runs the same idempotent seeding so that databases already upgraded past `202611170001` still receive later additions to the seed data.
 - **Built-in prices**: on a fresh install with an empty `prices` table, `GetDefaultPrice()` seeds the built-in prices. Those values are placeholders only — provider pricing varies, so adjust them under "Model Prices"; rows you edit are never overwritten by later upgrades. The migration intentionally skips the price row when the table is empty so that the built-in sync is not blocked.
+
+### Time-based rates (peak / off-peak)
+
+Some providers (Alibaba Model Studio, Volcengine Ark) charge different rates inside and outside peak hours. Any model can carry several time windows; billing picks the window that contains the request arrival time.
+
+Configure it under "Pricing → Single price" by enabling "Time-based rates" and entering CNY per 1M tokens per window (converted to ratios on save).
+
+```json
+{
+  "enabled": true,
+  "periods": [
+    { "name": "off-peak", "start": "22:00", "end": "08:00", "input": 0.07143, "output": 0.28571, "cached": 0.02 }
+  ]
+}
+```
+
+Rules: windows use **UTC+8** regardless of the server time zone; the start is inclusive and the end exclusive; `start > end` means the window crosses midnight; windows are matched in order and the first hit wins; outside every window the base `prices.input/output` applies; `input`/`output` of 0 inherits the base rate; `cached` overrides the cache-hit ratio for that window. Pre-consumption and settlement use the same window (a long request is not re-priced mid-flight), and the log `metadata` records `price_period` together with the effective `input_ratio` / `output_ratio`.
+
+With no windows configured, `time_prices` stays empty and behaviour is identical to upstream.
 
 ### Migrating from one-hub
 

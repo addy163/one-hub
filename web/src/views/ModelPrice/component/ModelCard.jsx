@@ -9,7 +9,18 @@ import { copy } from 'utils/common';
 import { useTranslation } from 'react-i18next';
 // ----------------------------------------------------------------------
 
-export default function ModelCard({ model, provider, modelInfo, price, group, ownedbyIcon, type, formatPrice, onViewDetail }) {
+export default function ModelCard({
+  model,
+  provider,
+  modelInfo,
+  price,
+  group,
+  ownedbyIcon,
+  type,
+  formatPrice,
+  timePrices,
+  onViewDetail
+}) {
   const theme = useTheme();
   const { t } = useTranslation();
   // 解析输入输出模态
@@ -224,6 +235,12 @@ export default function ModelCard({ model, provider, modelInfo, price, group, ow
               {type === 'times' && (
                 <Label color="warning" variant="soft" sx={{ fontWeight: 600 }}>
                   {t('modelpricePage.times')}
+                </Label>
+              )}
+              {timePrices?.enabled && timePrices?.periods?.length > 0 && (
+                <Label color="info" variant="soft" sx={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                  <Icon icon="eva:clock-outline" width={14} height={14} />
+                  {t('modelpricePage.timePrices')}
                 </Label>
               )}
             </Stack>

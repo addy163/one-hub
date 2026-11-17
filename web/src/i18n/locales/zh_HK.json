@@ -591,7 +591,9 @@
     "billingMethod": "計費方式",
     "currentUserGroup": "當前用戶組",
     "viewDetail": "查看詳情",
-    "timeUnit": "次"
+    "timeUnit": "次",
+    "timePrices": "分時價格",
+    "timePricesTip": "以上時段按東八區（UTC+8）計算，未列出的時間按基礎價格計費"
   },
   "nova 映射": "nova 映射",
   "onyx 映射": "onyx 映射",
@@ -730,7 +732,20 @@
     "noAvailableRatios": "冇可用嘅擴展倍率",
     "noExtraRatios": "暫無額外擴展倍率，請從下拉框選擇添加",
     "promptRatio": "提示倍率",
-    "selectExtraRatio": "選擇擴展倍率"
+    "selectExtraRatio": "選擇擴展倍率",
+    "timePrices": "分时倍率",
+    "timePricesTip": "按东八区（UTC+8）划分时段，未命中任何时段时按基础价格计费",
+    "periodName": "名称",
+    "periodStart": "开始",
+    "periodEnd": "结束",
+    "periodInput": "输入",
+    "periodOutput": "输出",
+    "periodCached": "缓存倍率",
+    "addPeriod": "添加时段",
+    "removePeriod": "删除",
+    "timePricesHint": "输入/输出按「元/百万 tokens」填写，留空表示沿用基础价格；缓存倍率相对本时段输入价，留空则沿用额外倍率",
+    "timePricesEmpty": "請至少填寫一個完整的時段（開始與結束）",
+    "timePricesZero": "時段的輸入與輸出價格不能同時為 0"
   },
   "profile": "個人設定",
   "profilePage": {

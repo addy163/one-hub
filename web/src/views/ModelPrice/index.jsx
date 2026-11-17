@@ -1073,6 +1073,7 @@ export default function ModelPrice() {
                       unit={unit}
                       type={model.type}
                       formatPrice={formatPrice}
+                      timePrices={model.priceData?.price?.time_prices}
                       onViewDetail={() => handleViewDetail(model)}
                     />
                   </Grid>

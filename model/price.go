@@ -2,6 +2,9 @@ package model
 
 import (
 	"one-api/common/config"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/shopspring/decimal"
 	"gorm.io/datatypes"
@@ -62,8 +65,108 @@ type Price struct {
 	Locked      bool    `json:"locked" gorm:"default:false"` // 如果模型为locked 则覆盖模式不会更新locked的模型价格
 
 	ExtraRatios *datatypes.JSONType[map[string]float64] `json:"extra_ratios,omitempty" gorm:"type:json"`
+	TimePrices  *datatypes.JSONType[PriceTimePrices]    `json:"time_prices,omitempty" gorm:"type:json"`
 	ModelInfo   *ModelInfoResponse                      `json:"model_info,omitempty" gorm:"-"`
 }
+
+// BillingZone 分时倍率使用的时区。国内服务商的忙时/闲时都按东八区划分，
+// 与服务器所在时区无关，因此固定 UTC+8（中国无夏令时）。
+var BillingZone = time.FixedZone("CST", 8*60*60)
+
+// PricePeriod 一个时段的价格覆盖。Start/End 形如 "22:00"，含 Start 不含 End，
+// 支持跨零点（start 晚于 end 时表示跨日，如 22:00-08:00）。
+type PricePeriod struct {
+	Name   string   `json:"name,omitempty"`
+	Start  string   `json:"start"`
+	End    string   `json:"end"`
+	Input  float64  `json:"input"`
+	Output float64  `json:"output"`
+	Cached *float64 `json:"cached,omitempty"` // 缓存命中倍率（相对本时段输入价），不填则沿用 extra_ratios
+}
+
+// PriceTimePrices 分时倍率配置。Periods 按顺序匹配，命中第一个即生效；
+// 都没命中时回落到 prices.input / prices.output。
+type PriceTimePrices struct {
+	Enabled bool          `json:"enabled"`
+	Periods []PricePeriod `json:"periods"`
+}
+
+func parseHourMinute(value string) (int, bool) {
+	parts := strings.Split(strings.TrimSpace(value), ":")
+	if len(parts) != 2 {
+		return 0, false
+	}
+	hour, err := strconv.Atoi(strings.TrimSpace(parts[0]))
+	if err != nil {
+		return 0, false
+	}
+	minute, err := strconv.Atoi(strings.TrimSpace(parts[1]))
+	if err != nil {
+		return 0, false
+	}
+	if hour < 0 || hour > 23 || minute < 0 || minute > 59 {
+		return 0, false
+	}
+	return hour*60 + minute, true
+}
+
+// Contains 判断时刻是否落在时段内。
+func (period *PricePeriod) Contains(now time.Time) bool {
+	start, ok := parseHourMinute(period.Start)
+	if !ok {
+		return false
+	}
+	end, ok := parseHourMinute(period.End)
+	if !ok || start == end {
+		return false
+	}
+
+	current := now.In(BillingZone)
+	minutes := current.Hour()*60 + current.Minute()
+	if start < end {
+		return minutes >= start && minutes < end
+	}
+	// 跨零点，例如 22:00-08:00
+	return minutes >= start || minutes < end
+}
+
+// PeriodAt 返回当前命中的时段，未配置或未命中返回 nil。
+func (price *Price) PeriodAt(now time.Time) *PricePeriod {
+	if price.TimePrices == nil {
+		return nil
+	}
+	timePrices := price.TimePrices.Data()
+	if !timePrices.Enabled {
+		return nil
+	}
+	for index := range timePrices.Periods {
+		period := timePrices.Periods[index]
+		if period.Contains(now) {
+			return &period
+		}
+	}
+	return nil
+}
+
+// RatiosAt 返回当前生效的输入/输出倍率与命中的时段（未命中时段时为 nil）。
+// 时段里的 input/output 为 0 时表示沿用基础价格。
+func (price *Price) RatiosAt(now time.Time) (input float64, output float64, period *PricePeriod) {
+	input = price.GetInput()
+	output = price.GetOutput()
+
+	period = price.PeriodAt(now)
+	if period == nil {
+		return
+	}
+	if period.Input > 0 {
+		input = period.Input
+	}
+	if period.Output > 0 && price.Type != TimesPriceType {
+		output = period.Output
+	}
+	return
+}
+
 
 func GetAllPrices() ([]*Price, error) {
 	var prices []*Price
@@ -147,7 +250,7 @@ func (price *Price) FetchOutputCurrencyPrice(rate float64) string {
 }
 
 func UpdatePrices(tx *gorm.DB, models []string, prices *Price) error {
-	err := tx.Model(Price{}).Where("model IN (?)", models).Select("*").Omit("model").Updates(
+	err := tx.Model(Price{}).Where("model IN (?)", models).Select("*").Omit("model", "time_prices").Updates(
 		Price{
 			Type:        prices.Type,
 			ChannelType: prices.ChannelType,

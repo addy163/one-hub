@@ -303,6 +303,44 @@ export default function ModelDetailModal({ open, onClose, model, provider, model
           </TableContainer>
         </Box>
 
+        {/* 分时价格 */}
+        {priceData?.price?.time_prices?.enabled && priceData?.price?.time_prices?.periods?.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+              <Icon icon="eva:clock-outline" width={20} height={20} />
+              <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                {t('modelpricePage.timePrices')}
+              </Typography>
+            </Stack>
+            <Stack spacing={1}>
+              {priceData.price.time_prices.periods.map((period, index) => {
+                const ratio = priceData?.group?.ratio || 1;
+                return (
+                  <Stack key={index} direction="row" alignItems="center" spacing={2} flexWrap="wrap" useFlexGap>
+                    <Typography variant="body2" color="text.secondary" sx={{ minWidth: 110 }}>
+                      {period.name || `${period.start}-${period.end}`}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {period.start} - {period.end}
+                    </Typography>
+                    <Label color="success" variant="outlined" sx={{ fontSize: '0.75rem' }}>
+                      {formatPrice(period.input * ratio, 'tokens')}
+                    </Label>
+                    {priceData.price.type !== 'times' && (
+                      <Label color="warning" variant="outlined" sx={{ fontSize: '0.75rem' }}>
+                        {formatPrice(period.output * ratio, 'tokens')}
+                      </Label>
+                    )}
+                  </Stack>
+                );
+              })}
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              {t('modelpricePage.timePricesTip')}
+            </Typography>
+          </Box>
+        )}
+
         {/* 其他信息 */}
         {priceData?.price?.extra_ratios && Object.keys(priceData.price.extra_ratios).length > 0 && (
           <Box sx={{ mt: 3 }}>

@@ -25,6 +25,10 @@ type Quota struct {
 	groupRatio       float64
 	inputRatio       float64
 	outputRatio      float64
+	baseInputRatio   float64  // 不含分组倍率的输入倍率（分时命中后为时段价）
+	baseOutputRatio  float64  // 不含分组倍率的输出倍率
+	pricePeriod      string   // 命中的时段名称，未命中为空
+	cachedRatio      *float64 // 时段内指定的缓存命中倍率，未指定为 nil
 	preConsumedQuota int
 	cacheQuota       int
 	userId           int
@@ -56,17 +60,38 @@ func NewQuota(c *gin.Context, modelName string, promptTokens int) *Quota {
 	quota.groupName = c.GetString("token_group")
 	quota.backupGroupName = c.GetString("token_backup_group")
 	quota.groupRatio = c.GetFloat64("group_ratio") // 这里的倍率已经在 common.go 中正确设置了
-	quota.inputRatio = quota.price.GetInput() * quota.groupRatio
-	quota.outputRatio = quota.price.GetOutput() * quota.groupRatio
+
+	// 分时倍率：按请求到达时间选时段，未配置时段时等同于基础价格
+	inputRatio, outputRatio, period := quota.price.RatiosAt(time.Now())
+	quota.baseInputRatio = inputRatio
+	quota.baseOutputRatio = outputRatio
+	quota.inputRatio = inputRatio * quota.groupRatio
+	quota.outputRatio = outputRatio * quota.groupRatio
+	if period != nil {
+		quota.pricePeriod = period.Name
+		if quota.pricePeriod == "" {
+			quota.pricePeriod = period.Start + "-" + period.End
+		}
+		quota.cachedRatio = period.Cached
+	}
 
 	return quota
 
 }
 
+// getExtraRatio 返回额外的 token 倍率。处于分时时段且该时段指定了缓存倍率时，
+// 缓存类的倍率以时段配置为准。
+func (q *Quota) getExtraRatio(key string) float64 {
+	if q.cachedRatio != nil && (key == config.UsageExtraCache || key == config.UsageExtraCachedRead) {
+		return *q.cachedRatio
+	}
+	return q.price.GetExtraRatio(key)
+}
+
 func (q *Quota) PreQuotaConsumption() *types.OpenAIErrorWithStatusCode {
 	if q.price.Type == model.TimesPriceType {
 		q.preConsumedQuota = int(1000 * q.inputRatio)
-	} else if q.price.Input != 0 || q.price.Output != 0 {
+	} else if q.baseInputRatio != 0 || q.baseOutputRatio != 0 {
 		q.preConsumedQuota = int(float64(q.promptTokens)*q.inputRatio) + config.PreConsumedQuota
 	}
 
@@ -213,8 +238,16 @@ func (q *Quota) GetLogMeta(usage *types.Usage) map[string]any {
 		"is_backup_group":   q.isBackupGroup, // 添加是否使用备用分组的标识
 		"price_type":        q.price.Type,
 		"group_ratio":       q.groupRatio,
-		"input_ratio":       q.price.GetInput(),
-		"output_ratio":      q.price.GetOutput(),
+		"input_ratio":       q.baseInputRatio,
+		"output_ratio":      q.baseOutputRatio,
+	}
+
+	if q.pricePeriod != "" {
+		meta["price_period"] = q.pricePeriod
+	}
+
+	if q.cachedRatio != nil {
+		meta["price_period_cached_ratio"] = *q.cachedRatio
 	}
 
 	firstResponseTime := q.GetFirstResponseTime()
@@ -227,7 +260,7 @@ func (q *Quota) GetLogMeta(usage *types.Usage) map[string]any {
 
 		for key, value := range extraTokens {
 			meta[key] = value
-			extraRatio := q.price.GetExtraRatio(key)
+			extraRatio := q.getExtraRatio(key)
 			meta[key+"_ratio"] = extraRatio
 		}
 	}
@@ -288,7 +321,7 @@ func (q *Quota) getComputeTokensByUsage(usage *types.Usage) (promptTokens, compl
 	extraTokens := usage.GetExtraTokens()
 
 	for key, value := range extraTokens {
-		extraRatio := q.price.GetExtraRatio(key)
+		extraRatio := q.getExtraRatio(key)
 		if model.GetExtraPriceIsPrompt(key) {
 			promptTokens += model.GetIncreaseTokens(value, extraRatio)
 		} else {
@@ -305,7 +338,7 @@ func (q *Quota) getComputeTokensByUsageEvent(usage *types.UsageEvent) (promptTok
 	extraTokens := usage.GetExtraTokens()
 
 	for key, value := range extraTokens {
-		extraRatio := q.price.GetExtraRatio(key)
+		extraRatio := q.getExtraRatio(key)
 		if model.GetExtraPriceIsPrompt(key) {
 			promptTokens += model.GetIncreaseTokens(value, extraRatio)
 		} else {

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   Autocomplete,
+  Box,
   Button,
   Checkbox,
   Dialog,
@@ -22,6 +23,8 @@ import {
   Paper,
   Select,
   Stack,
+  Switch,
+  IconButton,
   TextField,
   Typography
 } from '@mui/material';
@@ -32,6 +35,7 @@ import { createFilterOptions } from '@mui/material/Autocomplete';
 import { priceType, ValueFormatter } from './util';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
 import ToggleButtonGroup from 'ui-component/ToggleButton';
 import Decimal from 'decimal.js';
@@ -41,6 +45,62 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const filter = createFilterOptions();
+
+// 分时倍率：界面上按「元/百万 tokens」填写，保存时换算成倍率（1 倍率 = 0.014 元/千 tokens）
+const RMB_PER_RATE = 14;
+
+const emptyTimePeriod = () => ({
+  name: '',
+  start: '22:00',
+  end: '08:00',
+  input: '',
+  output: '',
+  cached: ''
+});
+
+// 接口数据 -> 表单（倍率转成元/百万）
+const timePricesToForm = (timePrices) => {
+  if (!timePrices || !timePrices.enabled || !Array.isArray(timePrices.periods) || timePrices.periods.length === 0) {
+    return { enabled: false, periods: [emptyTimePeriod()] };
+  }
+  return {
+    enabled: true,
+    periods: timePrices.periods.map((period) => ({
+      name: period.name || '',
+      start: period.start || '',
+      end: period.end || '',
+      input: period.input ? Number((period.input * RMB_PER_RATE).toFixed(6)) : '',
+      output: period.output ? Number((period.output * RMB_PER_RATE).toFixed(6)) : '',
+      cached: period.cached === undefined || period.cached === null ? '' : String(period.cached)
+    }))
+  };
+};
+
+// 表单 -> 接口数据（元/百万 转回倍率）
+const timePricesToApi = (timePrices) => {
+  if (!timePrices || !timePrices.enabled) {
+    return null;
+  }
+  const periods = (timePrices.periods || [])
+    .filter((period) => period.start && period.end)
+    .map((period) => {
+      const item = {
+        name: period.name || `${period.start}-${period.end}`,
+        start: period.start,
+        end: period.end,
+        input: Number(period.input) > 0 ? Number((Number(period.input) / RMB_PER_RATE).toFixed(6)) : 0,
+        output: Number(period.output) > 0 ? Number((Number(period.output) / RMB_PER_RATE).toFixed(6)) : 0
+      };
+      if (period.cached !== '' && period.cached !== undefined && period.cached !== null && Number(period.cached) > 0) {
+        item.cached = Number(period.cached);
+      }
+      return item;
+    });
+  if (periods.length === 0) {
+    return null;
+  }
+  return { enabled: true, periods };
+};
 
 // 单一模式下的表单验证
 const validateSingleMode = (t, values, rows) => {
@@ -75,6 +135,19 @@ const validateSingleMode = (t, values, rows) => {
       return t('pricing_edit.outputVal');
     }
   }
+  // 分时倍率校验
+  if (values.time_prices?.enabled) {
+    const periods = (values.time_prices.periods || []).filter((period) => period.start && period.end);
+    if (periods.length === 0) {
+      return t('pricing_edit.timePricesEmpty');
+    }
+    for (const period of periods) {
+      if (Number(period.input) <= 0 && (values.type === 'times' || Number(period.output) <= 0)) {
+        return t('pricing_edit.timePricesZero');
+      }
+    }
+  }
+
   return false;
 };
 
@@ -122,7 +195,8 @@ const singleOriginInputs = {
   input: 0,
   output: 0,
   locked: false,
-  extra_ratios: {}
+  extra_ratios: {},
+  time_prices: { enabled: false, periods: [emptyTimePeriod()] }
 };
 
 const EditModal = ({
@@ -257,7 +331,8 @@ const EditModal = ({
           await onSaveSingle({
             ...values,
             input: calculatedInput,
-            output: calculatedOutput
+            output: calculatedOutput,
+            time_prices: timePricesToApi(values.time_prices)
           });
         }
         setSubmitting(false);
@@ -341,16 +416,50 @@ const EditModal = ({
     }));
   };
 
+  // 分时倍率开关
+  const handleToggleTimePrices = (enabled) => {
+    setInputs((prev) => {
+      const current = prev.time_prices || { enabled: false, periods: [] };
+      const periods = current.periods && current.periods.length > 0 ? current.periods : [emptyTimePeriod()];
+      return { ...prev, time_prices: { enabled, periods } };
+    });
+  };
+
+  // 修改某个时段的字段
+  const handleTimePeriodChange = (index, field, value) => {
+    setInputs((prev) => {
+      const current = prev.time_prices || { enabled: true, periods: [] };
+      const periods = (current.periods || []).map((period, i) => (i === index ? { ...period, [field]: value } : period));
+      return { ...prev, time_prices: { enabled: true, periods } };
+    });
+  };
+
+  const handleAddTimePeriod = () => {
+    setInputs((prev) => {
+      const current = prev.time_prices || { enabled: true, periods: [] };
+      return { ...prev, time_prices: { enabled: true, periods: [...(current.periods || []), emptyTimePeriod()] } };
+    });
+  };
+
+  const handleRemoveTimePeriod = (index) => {
+    setInputs((prev) => {
+      const current = prev.time_prices || { enabled: true, periods: [] };
+      const periods = (current.periods || []).filter((period, i) => i !== index);
+      return { ...prev, time_prices: { enabled: true, periods: periods.length > 0 ? periods : [emptyTimePeriod()] } };
+    });
+  };
+
   useEffect(() => {
     if (singleMode) {
       // 单一模式初始化表单
       if (price) {
         setInputs({
           ...price,
-          extra_ratios: price.extra_ratios || {}
+          extra_ratios: price.extra_ratios || {},
+          time_prices: timePricesToForm(price.time_prices)
         });
       } else {
-        setInputs(singleOriginInputs);
+        setInputs({ ...singleOriginInputs, time_prices: timePricesToForm(null) });
       }
       setErrors({});
     } else {
@@ -615,6 +724,98 @@ const EditModal = ({
     );
   };
 
+  // 渲染分时倍率配置（单模式）
+  const renderTimePrices = () => {
+    const timePrices = inputs.time_prices || { enabled: false, periods: [] };
+    const periods = timePrices.periods && timePrices.periods.length > 0 ? timePrices.periods : [emptyTimePeriod()];
+
+    return (
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Box>
+            <Typography variant="subtitle2">{t('pricing_edit.timePrices')}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {t('pricing_edit.timePricesTip')}
+            </Typography>
+          </Box>
+          <Switch checked={!!timePrices.enabled} onChange={(event) => handleToggleTimePrices(event.target.checked)} />
+        </Stack>
+
+        {timePrices.enabled && (
+          <Stack spacing={1.5} sx={{ mt: 2 }}>
+            {periods.map((period, index) => (
+              <Stack key={index} direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
+                <TextField
+                  size="small"
+                  label={t('pricing_edit.periodName')}
+                  value={period.name}
+                  onChange={(event) => handleTimePeriodChange(index, 'name', event.target.value)}
+                  sx={{ width: { xs: '100%', sm: 110 } }}
+                />
+                <TextField
+                  size="small"
+                  type="time"
+                  label={t('pricing_edit.periodStart')}
+                  value={period.start}
+                  onChange={(event) => handleTimePeriodChange(index, 'start', event.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ width: { xs: '100%', sm: 120 } }}
+                />
+                <TextField
+                  size="small"
+                  type="time"
+                  label={t('pricing_edit.periodEnd')}
+                  value={period.end}
+                  onChange={(event) => handleTimePeriodChange(index, 'end', event.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ width: { xs: '100%', sm: 120 } }}
+                />
+                <TextField
+                  size="small"
+                  type="number"
+                  label={t('pricing_edit.periodInput')}
+                  value={period.input}
+                  onChange={(event) => handleTimePeriodChange(index, 'input', event.target.value)}
+                  InputProps={{ endAdornment: <InputAdornment position="end">¥/M</InputAdornment> }}
+                  sx={{ width: { xs: '100%', sm: 130 } }}
+                />
+                <TextField
+                  size="small"
+                  type="number"
+                  label={t('pricing_edit.periodOutput')}
+                  value={period.output}
+                  disabled={inputs.type === 'times'}
+                  onChange={(event) => handleTimePeriodChange(index, 'output', event.target.value)}
+                  InputProps={{ endAdornment: <InputAdornment position="end">¥/M</InputAdornment> }}
+                  sx={{ width: { xs: '100%', sm: 130 } }}
+                />
+                <TextField
+                  size="small"
+                  type="number"
+                  label={t('pricing_edit.periodCached')}
+                  value={period.cached}
+                  onChange={(event) => handleTimePeriodChange(index, 'cached', event.target.value)}
+                  sx={{ width: { xs: '100%', sm: 120 } }}
+                />
+                <IconButton size="small" onClick={() => handleRemoveTimePeriod(index)} title={t('pricing_edit.removePeriod')}>
+                  <Icon icon="mdi:close" fontSize={16} />
+                </IconButton>
+              </Stack>
+            ))}
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+              <Button size="small" variant="outlined" onClick={handleAddTimePeriod}>
+                {t('pricing_edit.addPeriod')}
+              </Button>
+              <Typography variant="caption" color="text.secondary">
+                {t('pricing_edit.timePricesHint')}
+              </Typography>
+            </Stack>
+          </Stack>
+        )}
+      </Paper>
+    );
+  };
+
   // 渲染模型选择器 (多模式特有)
   const renderModelSelector = (formProps) => {
     if (!formProps) return null;
@@ -732,6 +933,7 @@ const EditModal = ({
             <Alert severity="warning">{t('pricing_edit.lockedTip')}</Alert>
 
             {renderExtraRatioSelector()}
+            {renderTimePrices()}
 
             {errors.general && (
               <Typography color="error" variant="body2">

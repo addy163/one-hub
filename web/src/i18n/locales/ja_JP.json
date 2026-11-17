@@ -587,7 +587,9 @@
     "billingMethod": "課金方式",
     "currentUserGroup": "現在のユーザーグループ",
     "viewDetail": "詳細を表示",
-    "timeUnit": "回"
+    "timeUnit": "回",
+    "timePrices": "時間帯別料金",
+    "timePricesTip": "UTC+8 で判定されます。記載のない時間は基本料金が適用されます"
   },
   "nova 映射": "新星マッピング",
   "onyx 映射": "オニキスマッピング",
@@ -728,7 +730,20 @@
     "noAvailableRatios": "利用可能な拡張倍率はありません",
     "noExtraRatios": "追加の拡張倍率はありません。ドロップダウンメニューから選択してください。",
     "promptRatio": "倍率係数",
-    "selectExtraRatio": "拡大率を選択します"
+    "selectExtraRatio": "拡大率を選択します",
+    "timePrices": "Time-based rates",
+    "timePricesTip": "Windows are evaluated in UTC+8; the base rate applies outside them",
+    "periodName": "Name",
+    "periodStart": "Start",
+    "periodEnd": "End",
+    "periodInput": "Input",
+    "periodOutput": "Output",
+    "periodCached": "Cache ratio",
+    "addPeriod": "Add period",
+    "removePeriod": "Remove",
+    "timePricesHint": "Enter CNY per 1M tokens; leave blank to inherit the base rate. Cache ratio is relative to this period input price.",
+    "timePricesEmpty": "開始と終了を入れた期間を 1 つ以上追加してください",
+    "timePricesZero": "期間の入力・出力価格を両方 0 にはできません"
   },
   "profile": "プロフィール",
   "profilePage": {

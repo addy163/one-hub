@@ -705,7 +705,9 @@
     "billingMethod": "计费方式",
     "currentUserGroup": "当前用户组",
     "viewDetail": "查看详情",
-    "timeUnit": "次"
+    "timeUnit": "次",
+    "timePrices": "分时价格",
+    "timePricesTip": "以上时段按东八区（UTC+8）计算，未列出的时间按基础价格计费"
   },
   "paymentPage": {
     "orderList": "订单列表",
@@ -1441,7 +1443,20 @@
     "promptRatio": "提示倍率",
     "completionRatio": "完成倍率",
     "noAvailableRatios": "没有可用的扩展倍率",
-    "delMultipleInfoTip": "确定删除所选的 {{count}} 个价格吗？"
+    "delMultipleInfoTip": "确定删除所选的 {{count}} 个价格吗？",
+    "timePrices": "分时倍率",
+    "timePricesTip": "按东八区（UTC+8）划分时段，未命中任何时段时按基础价格计费",
+    "periodName": "名称",
+    "periodStart": "开始",
+    "periodEnd": "结束",
+    "periodInput": "输入",
+    "periodOutput": "输出",
+    "periodCached": "缓存倍率",
+    "addPeriod": "添加时段",
+    "removePeriod": "删除",
+    "timePricesHint": "输入/输出按「元/百万 tokens」填写，留空表示沿用基础价格；缓存倍率相对本时段输入价，留空则沿用额外倍率",
+    "timePricesEmpty": "请至少填写一个完整的时段（开始与结束）",
+    "timePricesZero": "时段的输入与输出价格不能同时为 0"
   },
   "redemption_edit": {
     "requiredQuota": "必须大于等于0",
