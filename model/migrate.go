@@ -443,6 +443,20 @@ func migrateTokenLimitsStructure() *gormigrate.Migration {
 		},
 	}
 }
+// seedForkData 写入二次开发引入的默认数据（线路配置项、qwen4-max 价格、模型规格）。
+// 幂等：只补缺失，管理员改过的配置与价格不会被覆盖。
+func seedForkData() *gormigrate.Migration {
+	return &gormigrate.Migration{
+		ID: "202611170001",
+		Migrate: func(tx *gorm.DB) error {
+			return SeedForkDefaults(tx)
+		},
+		Rollback: func(tx *gorm.DB) error {
+			return nil
+		},
+	}
+}
+
 func migrationAfter(db *gorm.DB) error {
 	// 从库不执行
 	if !config.IsMasterNode {
@@ -456,6 +470,7 @@ func migrationAfter(db *gorm.DB) error {
 		addOldTokenMaxId(),
 		addExtraRatios(),
 		migrateTokenLimitsStructure(),
+		seedForkData(),
 	})
 	return m.Migrate()
 }

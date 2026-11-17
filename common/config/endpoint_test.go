@@ -107,3 +107,58 @@ func TestRelayEndpointsForGroupSkipsDisabled(t *testing.T) {
 		}
 	}
 }
+
+func TestRelayEndpointHealth(t *testing.T) {
+	t.Run("unknown before first probe", func(t *testing.T) {
+		health := GetEndpointHealth("https://never-probed.example.com")
+		if health.Status != EndpointStatusUnknown {
+			t.Fatalf("want unknown, got %s", health.Status)
+		}
+	})
+
+	t.Run("stores health keyed by normalized url", func(t *testing.T) {
+		SetEndpointHealth("https://Probe.Example.com/", RelayEndpointHealth{
+			Status:    EndpointStatusUp,
+			LatencyMs: 42,
+			CheckedAt: 1700000000,
+		})
+		health := GetEndpointHealth("https://probe.example.com")
+		if health.Status != EndpointStatusUp || health.LatencyMs != 42 || health.CheckedAt != 1700000000 {
+			t.Fatalf("unexpected health: %+v", health)
+		}
+	})
+
+	t.Run("public response hides probe error but admin sees it", func(t *testing.T) {
+		SetEndpointHealth("https://broken.example.com", RelayEndpointHealth{
+			Status: EndpointStatusDown,
+			Error:  "dial tcp 10.0.0.1:443: connect: connection refused",
+		})
+		raw := `[{"id":"broken","name":"故障线路","url":"https://broken.example.com","enabled":true}]`
+
+		public := RelayEndpointsForGroup(raw, "default")
+		if len(public) != 1 || public[0].Health == nil {
+			t.Fatalf("public list should carry health: %+v", public)
+		}
+		if public[0].Health.Status != EndpointStatusDown {
+			t.Errorf("want down, got %s", public[0].Health.Status)
+		}
+		if public[0].Health.Error != "" {
+			t.Errorf("probe error must not leak to end users, got %q", public[0].Health.Error)
+		}
+
+		admin := RelayEndpointsForAdmin(raw)
+		if len(admin) != 1 || admin[0].Health == nil || admin[0].Health.Error == "" {
+			t.Errorf("admin should see probe error: %+v", admin)
+		}
+	})
+
+	t.Run("disabled endpoint is not delivered but still listed for admin", func(t *testing.T) {
+		raw := `[{"id":"off","name":"停用","url":"https://off2.example.com","enabled":false}]`
+		if got := RelayEndpointsForGroup(raw, "default"); len(got) != 0 {
+			t.Fatalf("disabled endpoint must not be delivered, got %+v", got)
+		}
+		if got := RelayEndpointsForAdmin(raw); len(got) != 1 {
+			t.Fatalf("admin should see disabled endpoint, got %+v", got)
+		}
+	})
+}

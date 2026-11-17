@@ -31,6 +31,7 @@ import KeywordTableHead from 'ui-component/TableHead';
 import TableToolBar from 'ui-component/TableToolBar';
 import { API } from 'utils/api';
 import useRelayEndpoint from 'hooks/useRelayEndpoint';
+import EndpointStatus from 'ui-component/EndpointStatus';
 import { Icon } from '@iconify/react';
 import EditeModal from './component/EditModal';
 import { useSelector } from 'react-redux';
@@ -275,11 +276,14 @@ export default function Token() {
               </Box>
               {t('token_index.replaceApiAddress2')}
             </Box>
-            {relayEndpoint?.note && (
-              <Typography variant="caption" color="text.secondary">
-                {relayEndpoint.note}
-              </Typography>
-            )}
+            <Stack direction="row" alignItems="center" spacing={2} flexWrap="wrap" useFlexGap>
+              <EndpointStatus endpoint={relayEndpoint} />
+              {relayEndpoint?.note && (
+                <Typography variant="caption" color="text.secondary">
+                  {relayEndpoint.note}
+                </Typography>
+              )}
+            </Stack>
           </Stack>
         </Alert>
       </Stack>

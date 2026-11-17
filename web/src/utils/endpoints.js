@@ -25,6 +25,23 @@ export function getRelayEndpoints(siteInfo) {
   return list;
 }
 
+// 健康状态由服务端定时探测写入，status 取 up / down / unknown
+export function getEndpointHealth(endpoint) {
+  const health = endpoint?.health || {};
+  const status = ['up', 'down'].includes(health.status) ? health.status : 'unknown';
+  return {
+    status,
+    latency: Number(health.latency_ms) > 0 ? Number(health.latency_ms) : 0
+  };
+}
+
+export function getEndpointStatusText(endpoint) {
+  const { status, latency } = getEndpointHealth(endpoint);
+  if (status === 'up') return latency ? `在线 · ${latency}ms` : '在线';
+  if (status === 'down') return '离线';
+  return '未探测';
+}
+
 export function getSelectedEndpoint(siteInfo) {
   const list = getRelayEndpoints(siteInfo);
   if (list.length === 0) return null;
@@ -35,7 +52,11 @@ export function getSelectedEndpoint(siteInfo) {
   } catch (e) {
     savedId = null;
   }
-  return list.find((item) => item.id === savedId) || list[0];
+  const saved = list.find((item) => item.id === savedId);
+  if (saved) return saved;
+
+  // 没有历史选择时优先挑一条在线线路，避免新用户一上来就碰上挂掉的主线路
+  return list.find((item) => getEndpointHealth(item).status === 'up') || list[0];
 }
 
 export function selectEndpoint(endpoint) {

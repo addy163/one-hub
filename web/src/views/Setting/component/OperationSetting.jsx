@@ -42,6 +42,8 @@ const OperationSetting = () => {
     ChatLink: '',
     ChatLinks: '',
     RelayEndpoints: '',
+    RelayEndpointProbeInterval: 60,
+    RelayEndpointProbeTimeout: 3000,
     QuotaPerUnit: 0,
     AutomaticDisableChannelEnabled: '',
     AutomaticEnableChannelEnabled: '',
@@ -205,6 +207,19 @@ const OperationSetting = () => {
             await updateOption('ChatLinks', inputs.ChatLinks);
           }
           break;
+        case 'relayprobe':
+          if (Number(inputs.RelayEndpointProbeInterval) < 0 || Number(inputs.RelayEndpointProbeTimeout) < 500) {
+            showError('探测间隔不能小于 0（0 表示关闭），超时不能小于 500 毫秒');
+            return;
+          }
+          if (Number(originInputs['RelayEndpointProbeInterval']) !== Number(inputs.RelayEndpointProbeInterval)) {
+            await updateOption('RelayEndpointProbeInterval', inputs.RelayEndpointProbeInterval);
+          }
+          if (Number(originInputs['RelayEndpointProbeTimeout']) !== Number(inputs.RelayEndpointProbeTimeout)) {
+            await updateOption('RelayEndpointProbeTimeout', inputs.RelayEndpointProbeTimeout);
+          }
+          break;
+
         case 'relayendpoints':
           if ((originInputs['RelayEndpoints'] || '') !== (inputs.RelayEndpoints || '')) {
             if (!verifyJSON(inputs.RelayEndpoints || '[]')) {
@@ -911,6 +926,7 @@ const OperationSetting = () => {
             <div>
               这里维护下发给用户的 API 地址清单。用户只能看到自己所在分组的线路；「可见分组」填用户组标识（如 vip,svip），留空表示所有分组可见。
               未配置任何线路时，前端自动回落到「服务器地址」，行为与升级前一致。
+              服务端会按间隔探测每条线路的 /api/status 并在「状态」列显示结果，探测间隔与超时在下方设置，保存后下一轮探测生效。
             </div>
           </Alert>
           <Stack justifyContent="flex-start" alignItems="flex-start" spacing={2}>
@@ -923,6 +939,41 @@ const OperationSetting = () => {
               }}
             >
               保存线路配置
+            </Button>
+          </Stack>
+
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <FormControl sx={{ minWidth: 220 }}>
+              <InputLabel htmlFor="RelayEndpointProbeInterval">探测间隔（秒，0 为关闭）</InputLabel>
+              <OutlinedInput
+                id="RelayEndpointProbeInterval"
+                name="RelayEndpointProbeInterval"
+                type="number"
+                value={inputs.RelayEndpointProbeInterval}
+                onChange={handleInputChange}
+                label="探测间隔（秒，0 为关闭）"
+                disabled={loading}
+              />
+            </FormControl>
+            <FormControl sx={{ minWidth: 220 }}>
+              <InputLabel htmlFor="RelayEndpointProbeTimeout">探测超时（毫秒）</InputLabel>
+              <OutlinedInput
+                id="RelayEndpointProbeTimeout"
+                name="RelayEndpointProbeTimeout"
+                type="number"
+                value={inputs.RelayEndpointProbeTimeout}
+                onChange={handleInputChange}
+                label="探测超时（毫秒）"
+                disabled={loading}
+              />
+            </FormControl>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                submitConfig('relayprobe').then();
+              }}
+            >
+              保存探测设置
             </Button>
           </Stack>
         </Stack>

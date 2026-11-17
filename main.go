@@ -8,6 +8,7 @@ import (
 	"one-api/common"
 	"one-api/common/cache"
 	"one-api/common/config"
+	"one-api/common/endpointprobe"
 	"one-api/common/logger"
 	"one-api/common/notify"
 	"one-api/common/oidc"
@@ -70,6 +71,9 @@ func main() {
 
 	initMemoryCache()
 	initSync()
+
+	// 线路健康检查：按配置间隔探测每条线路的 /api/status
+	endpointprobe.Start()
 
 	common.InitTokenEncoders()
 	requester.InitHttpClient()

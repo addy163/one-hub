@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { GridRowModes, DataGrid, GridToolbarContainer, GridActionsCellItem } from '@mui/x-data-grid';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Stack, Tooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
-import { showError } from 'utils/common';
+import { showError, showSuccess } from 'utils/common';
+import { API } from 'utils/api';
+import EndpointStatus from 'ui-component/EndpointStatus';
 
 function validation(row) {
   if (!row.name) {
@@ -26,6 +28,23 @@ function validation(row) {
     return '分组只能包含字母、数字、下划线、中划线和逗号';
   }
   return false;
+}
+
+function normalizeUrl(url) {
+  return String(url || '')
+    .trim()
+    .replace(/\/+$/, '')
+    .toLowerCase();
+}
+
+function healthMapFrom(endpoints) {
+  const map = {};
+  (endpoints || []).forEach((item) => {
+    if (item?.url && item.health) {
+      map[normalizeUrl(item.url)] = item.health;
+    }
+  });
+  return map;
 }
 
 function randomId() {
@@ -73,7 +92,7 @@ function toJson(rows) {
   return JSON.stringify(payload, null, 2);
 }
 
-function EditToolbar({ setRows, setRowModesModel }) {
+function EditToolbar({ setRows, setRowModesModel, onProbe, probing }) {
   const handleClick = () => {
     const id = randomId();
     setRows((oldRows) => [{ id, name: '', url: '', groups: '', note: '', enabled: true, sort: 0, isNew: true }, ...oldRows]);
@@ -85,21 +104,60 @@ function EditToolbar({ setRows, setRowModesModel }) {
 
   return (
     <GridToolbarContainer>
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-        新增线路
-      </Button>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
+        <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+          新增线路
+        </Button>
+        <Tooltip title="按已保存的配置探测每条线路的 /api/status">
+          <span>
+            <Button color="secondary" disabled={probing} onClick={onProbe}>
+              {probing ? '检测中…' : '立即检测'}
+            </Button>
+          </span>
+        </Tooltip>
+      </Stack>
     </GridToolbarContainer>
   );
 }
 
 EditToolbar.propTypes = {
   setRows: PropTypes.func.isRequired,
-  setRowModesModel: PropTypes.func.isRequired
+  setRowModesModel: PropTypes.func.isRequired,
+  onProbe: PropTypes.func,
+  probing: PropTypes.bool
 };
 
 const RelayEndpointsDataGrid = ({ endpoints, onChange }) => {
   const [rows, setRows] = useState([]);
   const [rowModesModel, setRowModesModel] = useState({});
+  const [healthMap, setHealthMap] = useState({});
+  const [probing, setProbing] = useState(false);
+
+  const loadHealth = useCallback(async () => {
+    try {
+      const res = await API.get('/api/relay_endpoints/');
+      setHealthMap(healthMapFrom(res.data?.data?.endpoints));
+    } catch (e) {
+      // 探测结果只影响展示，失败时保持原状
+    }
+  }, []);
+
+  const handleProbe = useCallback(async () => {
+    setProbing(true);
+    try {
+      const res = await API.post('/api/relay_endpoints/probe');
+      setHealthMap(healthMapFrom(res.data?.data?.endpoints));
+      showSuccess('线路检测完成');
+    } catch (e) {
+      showError(e);
+    } finally {
+      setProbing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadHealth();
+  }, [loadHealth]);
 
   const setEndpoints = useCallback(
     (nextRows) => {
@@ -188,6 +246,15 @@ const RelayEndpointsDataGrid = ({ endpoints, onChange }) => {
         description: '逗号分隔，留空表示所有分组可见'
       },
       { field: 'note', sortable: false, headerName: '说明', flex: 1, minWidth: 160, editable: true, hideable: false },
+      {
+        field: 'status',
+        headerName: '状态',
+        width: 120,
+        sortable: false,
+        editable: false,
+        hideable: false,
+        renderCell: (params) => <EndpointStatus endpoint={{ health: healthMap[normalizeUrl(params.row.url)] }} />
+      },
       { field: 'enabled', sortable: false, headerName: '启用', flex: 1, minWidth: 90, type: 'boolean', editable: true, hideable: false },
       { field: 'sort', sortable: true, headerName: '排序', type: 'number', flex: 1, minWidth: 90, editable: true, hideable: false },
       {
@@ -228,7 +295,7 @@ const RelayEndpointsDataGrid = ({ endpoints, onChange }) => {
         }
       }
     ],
-    [handleEditClick, handleSaveClick, handleDeleteClick, handleCancelClick, rowModesModel]
+    [handleEditClick, handleSaveClick, handleDeleteClick, handleCancelClick, rowModesModel, healthMap]
   );
 
   useEffect(() => {
@@ -255,7 +322,7 @@ const RelayEndpointsDataGrid = ({ endpoints, onChange }) => {
         processRowUpdate={processRowUpdate}
         onProcessRowUpdateError={handleProcessRowUpdateError}
         slots={{ toolbar: EditToolbar }}
-        slotProps={{ toolbar: { setRows, setRowModesModel } }}
+        slotProps={{ toolbar: { setRows, setRowModesModel, onProbe: handleProbe, probing } }}
       />
     </Box>
   );

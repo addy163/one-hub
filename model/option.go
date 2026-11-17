@@ -90,6 +90,8 @@ func InitOptionMap() {
 	config.GlobalOption.RegisterString("ChatLink", &config.ChatLink)
 	config.GlobalOption.RegisterString("ChatLinks", &config.ChatLinks)
 	config.GlobalOption.RegisterString("RelayEndpoints", &config.RelayEndpoints)
+	config.GlobalOption.RegisterInt("RelayEndpointProbeInterval", &config.RelayEndpointProbeInterval)
+	config.GlobalOption.RegisterInt("RelayEndpointProbeTimeout", &config.RelayEndpointProbeTimeout)
 	config.GlobalOption.RegisterFloat("QuotaPerUnit", &config.QuotaPerUnit)
 	config.GlobalOption.RegisterInt("RetryTimes", &config.RetryTimes)
 	config.GlobalOption.RegisterInt("RetryCooldownSeconds", &config.RetryCooldownSeconds)

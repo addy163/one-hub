@@ -13,7 +13,7 @@
 
 # One Hub
 
-_This project is based on [one-api](https://github.com/songquanpeng/one-api) and has been developed for the second time._
+_This project is a fork of [MartialBE/one-hub](https://github.com/MartialBE/one-hub), which itself is a fork of [one-api](https://github.com/songquanpeng/one-api)._
 
 <p align="center">
   <a href="https://raw.githubusercontent.com/MartialBE/one-api/main/LICENSE">
@@ -44,7 +44,45 @@ If you find that a new model is missing, please update the newly added model in 
 
 </div>
 
+## About this repository
+
+This repository is a **secondary development of [one-hub](https://github.com/MartialBE/one-hub)** (one-hub is a secondary development of [one-api](https://github.com/songquanpeng/one-api)).
+
+- Repository: <https://github.com/addy163/one-hub>
+- Upstream: <https://github.com/MartialBE/one-hub>
+
+All upstream features and the data schema are preserved; changes are incremental only:
+
+| Area | Change |
+| --- | --- |
+| Multi-endpoint distribution | Admins maintain a list of API base URLs and expose different ones per user group (`vip` → main site, `default` → alternate domain). Filtering happens server-side, `groups` is never sent to clients, and the frontend falls back to `ServerAddress` when no endpoint is configured |
+| Endpoint health check | The server periodically probes each endpoint's `/api/status`, exposes the result through `/api/status`, and the admin grid shows a status column plus a "probe now" button. Interval/timeout are configurable (`RelayEndpointProbeInterval`, `RelayEndpointProbeTimeout`) |
+| Pricing UI fix | A model that is not available for a group is now rendered as grey `N/A` instead of `Free`, so "no permission" is no longer confused with "free" |
+| Passthrough semantics | `ShouldPassthroughExtraBody` makes the three layers explicit: per-channel `disable_extra_body` is a veto, the global switch is the master switch, `allow_extra_body` is a per-channel whitelist when the global switch is off |
+| Security / reverse proxy | `session_secure: auto` honours `X-Forwarded-Proto/Scheme` and `Forwarded`; `trusted_proxies` restricts which proxies may set `X-Forwarded-For`; WebSocket connection limits are configurable |
+| Built-in data | `qwen4-max` price and 104 model specs are shipped with the binary |
+
+## Database changes and automatic migration
+
+No manual SQL is required, for either a fresh install or an upgrade.
+
+- **Schema**: GORM `AutoMigrate` runs on every start (`model/main.go`), creating missing tables, columns and indexes.
+- **Data**: `gormigrate` migrations in `model/migrate.go`, recorded in the `migrations` table with unique IDs. Each migration is idempotent and only fills in missing rows, never overwriting values an admin already changed. They run on the master node only.
+- **Current fork migration**: `202611170001` seeds the three relay endpoint options, the `qwen4-max` price row (`locked=1`, cache ratios 0.25 / 0.25 / 2.0) and 104 model specs from `model/seed/model_info.json`.
+- **Built-in prices**: on a fresh install with an empty `prices` table, `GetDefaultPrice()` seeds the built-in prices, which now include `qwen4-max`. The migration intentionally skips the price row when the table is empty so that the built-in sync is not blocked.
+
+### Migrating from one-hub
+
+```bash
+mysqldump -h127.0.0.1 -u<user> -p<pass> onehub > onehub_before_fork.sql
+docker stop one-hub && docker rename one-hub one-hub-prev
+docker run -d --name one-hub --network host -v /path/to/data:/data ghcr.io/addy163/one-hub:latest
+```
+
+Watch the startup log for `database migrated` and the `已补充...` lines, then verify that the "Relay endpoints" panel exists, `qwen4-max` is priced, and the model info table contains 104 rows. To roll back, restore the old container and the SQL dump.
+
 ## Functional Changes
+
 
 - Brand new UI interface
 - Added user dashboard

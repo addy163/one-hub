@@ -7,6 +7,7 @@ import { useState, useCallback } from 'react';
 import { API } from 'utils/api';
 import { replaceChatPlaceholders, getChatLinks } from 'utils/common';
 import useRelayEndpoint from 'hooks/useRelayEndpoint';
+import EndpointStatus from 'ui-component/EndpointStatus';
 import { IconAppWindow } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
@@ -82,6 +83,7 @@ const QuickStartCard = () => {
               <Typography variant="caption" color="textSecondary">
                 {relayUrl}
               </Typography>
+              <EndpointStatus endpoint={relayEndpoint} />
             </Stack>
           )}
 

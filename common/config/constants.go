@@ -27,6 +27,10 @@ var ChatLinks = ""
 // 格式：[{"id":"main","name":"主线路","url":"https://api.example.com","groups":["vip"],"note":"","enabled":true,"sort":100}]
 // groups 为空表示所有分组可见；空列表时前端回落到 ServerAddress。
 var RelayEndpoints = ""
+
+// 线路健康检查：间隔单位秒，<=0 表示关闭；超时单位毫秒。
+var RelayEndpointProbeInterval = 60
+var RelayEndpointProbeTimeout = 3000
 var AnalyticsCode = ""
 var QuotaPerUnit = 500 * 1000.0 // $0.002 / 1K tokens
 var DisplayInCurrencyEnabled = true

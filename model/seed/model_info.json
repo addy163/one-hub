@@ -1,0 +1,1653 @@
+[
+ {
+  "model": "Doubao-1.5-vision-pro",
+  "name": "Doubao 1.5 Vision Pro",
+  "ctx": 128000,
+  "max": 16000,
+  "in": [
+   "text",
+   "image",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Flagship model for demanding analysis, coding, and production agent workflows",
+  "source": "qiniu-ai",
+  "conf": "medium"
+ },
+ {
+  "model": "ERNIE-4.0",
+  "name": "ERNIE-4.0",
+  "ctx": 8192,
+  "max": 2048,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "百度官方",
+  "conf": "high"
+ },
+ {
+  "model": "ERNIE-4.0-8K",
+  "name": "ERNIE-4.0-8K",
+  "ctx": 8192,
+  "max": 2048,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "百度官方",
+  "conf": "high"
+ },
+ {
+  "model": "ERNIE-Lite-8K",
+  "name": "ERNIE-Lite-8K",
+  "ctx": 8192,
+  "max": 2048,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "百度官方",
+  "conf": "high"
+ },
+ {
+  "model": "ERNIE-Speed-128K",
+  "name": "ERNIE-Speed-128K",
+  "ctx": 131072,
+  "max": 4096,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "百度官方",
+  "conf": "high"
+ },
+ {
+  "model": "arcee-ai/trinity-large-preview:free",
+  "name": "arcee-ai/trinity-large-preview:free",
+  "ctx": 131072,
+  "max": 32768,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "Arcee preview 版",
+  "conf": "high"
+ },
+ {
+  "model": "dall-e-2",
+  "name": "dall-e-2",
+  "ctx": 1000,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "image"
+  ],
+  "desc": "",
+  "source": "OpenAI 图像生成",
+  "conf": "high"
+ },
+ {
+  "model": "dall-e-3",
+  "name": "dall-e-3",
+  "ctx": 4000,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "image"
+  ],
+  "desc": "",
+  "source": "OpenAI 图像生成",
+  "conf": "high"
+ },
+ {
+  "model": "deepseek-r1-250528",
+  "name": "DeepSeek R1 0528",
+  "ctx": 163840,
+  "max": 32768,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "DeepSeek reasoning model for multi-step analysis, math, coding, and tools",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "deepseek-v3-1-terminus",
+  "name": "DeepSeek V3.1",
+  "ctx": 131072,
+  "max": 65536,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "DeepSeek chat model for instruction following, coding, and analysis",
+  "source": "alibaba-cn",
+  "conf": "medium"
+ },
+ {
+  "model": "deepseek-v3-2-251201",
+  "name": "deepseek-v3-2-251201",
+  "ctx": 131072,
+  "max": 65536,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "阿里云百炼同源规格",
+  "conf": "high"
+ },
+ {
+  "model": "doubao-1-5-lite-32k-250115",
+  "name": "doubao-1-5-lite-32k-250115",
+  "ctx": 32768,
+  "max": 4096,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "火山方舟",
+  "conf": "high"
+ },
+ {
+  "model": "doubao-1-5-pro-32k-250115",
+  "name": "doubao-1-5-pro-32k-250115",
+  "ctx": 32768,
+  "max": 4096,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "火山方舟",
+  "conf": "high"
+ },
+ {
+  "model": "doubao-seed-1-6-251015",
+  "name": "Seed 1.6",
+  "ctx": 256000,
+  "max": 64000,
+  "in": [
+   "text",
+   "image",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "ByteDance Seed model for long-context reasoning, instruction following, and tool-assisted tasks",
+  "source": "volcengine",
+  "conf": "high"
+ },
+ {
+  "model": "doubao-seed-1-6-lite-251015",
+  "name": "doubao-seed-1-6-lite-251015",
+  "ctx": 256000,
+  "max": 32000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "火山方舟",
+  "conf": "high"
+ },
+ {
+  "model": "doubao-seed-1-8-251228",
+  "name": "Seed 1.8",
+  "ctx": 256000,
+  "max": 64000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "ByteDance Seed model for multimodal reasoning, long-context analysis, and agent workflows",
+  "source": "volcengine",
+  "conf": "high"
+ },
+ {
+  "model": "doubao-seed-2-0-lite-260215",
+  "name": "Doubao Seed 2.0 Lite",
+  "ctx": 256000,
+  "max": 32000,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Compact GPT model for low-latency assistance and high-volume workloads",
+  "source": "nano-gpt",
+  "conf": "medium"
+ },
+ {
+  "model": "doubao-seed-2-0-mini-260215",
+  "name": "Doubao Seed 2.0 Mini",
+  "ctx": 256000,
+  "max": 32000,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Compact GPT model for low-latency assistance and high-volume workloads",
+  "source": "nano-gpt",
+  "conf": "medium"
+ },
+ {
+  "model": "flux",
+  "name": "flux",
+  "ctx": 77,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "image"
+  ],
+  "desc": "",
+  "source": "BFL 图像生成",
+  "conf": "high"
+ },
+ {
+  "model": "flux-dev",
+  "name": "flux-dev",
+  "ctx": 77,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "image"
+  ],
+  "desc": "",
+  "source": "BFL 图像生成",
+  "conf": "high"
+ },
+ {
+  "model": "flux-pro",
+  "name": "flux-pro",
+  "ctx": 77,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "image"
+  ],
+  "desc": "",
+  "source": "BFL 图像生成",
+  "conf": "high"
+ },
+ {
+  "model": "flux.1.1-pro",
+  "name": "flux.1.1-pro",
+  "ctx": 77,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "image"
+  ],
+  "desc": "",
+  "source": "BFL 图像生成",
+  "conf": "high"
+ },
+ {
+  "model": "gemini-2.5-flash",
+  "name": "Gemini 2.5 Flash",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "audio",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Fast Gemini workhorse for multimodal apps where latency and price matter",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemini-2.5-flash-image",
+  "name": "Nano Banana",
+  "ctx": 32768,
+  "max": 8192,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text",
+   "image"
+  ],
+  "desc": "Nano Banana image model for fast generation, edits, and character-consistent assets",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "gemini-2.5-flash-lite",
+  "name": "Gemini 2.5 Flash-Lite",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "audio",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Lean Gemini 2.5 lane for cheap multimodal traffic and quick agents",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemini-2.5-pro",
+  "name": "Gemini 2.5 Pro",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "audio",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Google's proven reasoning model for coding, math, and multimodal analysis",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemini-3-flash-preview",
+  "name": "Gemini 3 Flash Preview",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "video",
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "New Gemini flash lane bringing frontier-style multimodal reasoning to cheaper runs",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemini-3-pro-image-preview",
+  "name": "Nano Banana Pro Preview",
+  "ctx": 65536,
+  "max": 32768,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text",
+   "image"
+  ],
+  "desc": "Nano Banana Pro for higher-fidelity image generation and design-heavy edits",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "gemini-3.1-flash-image",
+  "name": "Nano Banana 2",
+  "ctx": 131072,
+  "max": 32768,
+  "in": [
+   "text",
+   "image",
+   "video"
+  ],
+  "out": [
+   "text",
+   "image"
+  ],
+  "desc": "Image model for prompt-driven generation, editing, and visual design workflows",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemini-3.1-flash-image-preview",
+  "name": "Nano Banana 2 Preview",
+  "ctx": 65536,
+  "max": 58982,
+  "in": [
+   "image",
+   "text"
+  ],
+  "out": [
+   "text",
+   "image"
+  ],
+  "desc": "Image model for prompt-driven generation, editing, and visual design workflows",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "gemini-3.1-flash-lite",
+  "name": "Gemini 3.1 Flash Lite",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "video",
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Low-latency Gemini model for high-volume multimodal and agent workloads",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemini-3.1-pro-preview",
+  "name": "Gemini 3.1 Pro Preview",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "video",
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Reasoning-first Gemini preview for agentic coding and complex problem solving",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemini-3.5-flash",
+  "name": "Gemini 3.5 Flash",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "video",
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Fast Gemini model balancing multimodal reasoning, tool use, and cost",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemini-flash-lite-latest",
+  "name": "Gemini Flash-Lite Latest",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "video",
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Fast Gemini model balancing multimodal reasoning, tool use, and cost",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemini25flash",
+  "name": "Gemini 2.5 Flash",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "audio",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Fast Gemini workhorse for multimodal apps where latency and price matter",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "gemma3",
+  "name": "Gemma 3 27B IT",
+  "ctx": 131072,
+  "max": 117964,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Open Gemma instruction model for efficient chat and self-hosted deployments",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "google/gemma-3-4b-it:free",
+  "name": "Gemma 3 4B IT",
+  "ctx": 131072,
+  "max": 16384,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Open Gemma instruction model for efficient chat and self-hosted deployments",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "google/gemma-3n-e4b-it:free",
+  "name": "google/gemma-3n-e4b-it:free",
+  "ctx": 32768,
+  "max": 8192,
+  "in": [
+   "text",
+   "image",
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "Gemma 3n 官方",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-3.5-turbo",
+  "name": "GPT-3.5-turbo",
+  "ctx": 16385,
+  "max": 4096,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Compact GPT model for low-latency assistance and high-volume workloads",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-3.5-turbo-0613",
+  "name": "OpenAI: GPT-3.5 Turbo (older v0613)",
+  "ctx": 4095,
+  "max": 3685,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "GPT-3.5 Turbo is OpenAI's fastest model. It can understand and generate natural language or code, and is optimized for chat and traditional completion tasks.\n\nTraining data up to Sep 2021.",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "gpt-3.5-turbo-1106",
+  "name": "GPT-3.5 Turbo 1106",
+  "ctx": 16384,
+  "max": 4096,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Compact GPT model for low-latency assistance and high-volume workloads",
+  "source": "azure-cognitive-services",
+  "conf": "medium"
+ },
+ {
+  "model": "gpt-3.5-turbo-16k",
+  "name": "OpenAI: GPT-3.5 Turbo 16k",
+  "ctx": 16385,
+  "max": 4096,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "This model offers four times the context length of gpt-3.5-turbo, allowing it to support approximately 20 pages of text in a single request at a higher cost. Training data: up...",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "gpt-3.5-turbo-16k-0613",
+  "name": "gpt-3.5-turbo-16k-0613",
+  "ctx": 16385,
+  "max": 4096,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "OpenAI 官方",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-4-vision-preview",
+  "name": "gpt-4-vision-preview",
+  "ctx": 128000,
+  "max": 4096,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "OpenAI 官方",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-4.1",
+  "name": "GPT-4.1",
+  "ctx": 1047576,
+  "max": 32768,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Long-lived GPT workhorse for coding, instruction following, and production apps",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-4.1-mini",
+  "name": "GPT-4.1 mini",
+  "ctx": 1047576,
+  "max": 32768,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Affordable GPT-4.1 lane for fast coding help and structured extraction",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-4.1-nano",
+  "name": "GPT-4.1 nano",
+  "ctx": 1047576,
+  "max": 32768,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Tiny GPT-4.1 option for classification, routing, and very high-volume tasks",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-4o",
+  "name": "GPT-4o",
+  "ctx": 128000,
+  "max": 16384,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Omni-era GPT for multimodal chat, practical coding, and general assistants",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-4o-mini",
+  "name": "GPT-4o mini",
+  "ctx": 128000,
+  "max": 16384,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Small omni GPT for cheap multimodal assistance and production-scale traffic",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-4o-mini-transcribe",
+  "name": "gpt-4o-mini-transcribe",
+  "ctx": 16000,
+  "max": 0,
+  "in": [
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "OpenAI 语音识别",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-4o-mini-tts",
+  "name": "gpt-4o-mini-tts",
+  "ctx": 2000,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "audio"
+  ],
+  "desc": "",
+  "source": "OpenAI 语音合成",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-5",
+  "name": "GPT-5",
+  "ctx": 400000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Original GPT-5 workhorse for reasoning, coding, writing, and tool workflows",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-5-mini",
+  "name": "GPT-5 Mini",
+  "ctx": 400000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Small GPT-5 for responsive agents, coding help, and everyday automation",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-5-nano",
+  "name": "GPT-5 Nano",
+  "ctx": 400000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Tiny GPT-5 lane for routing, extraction, classification, and bulk jobs",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-5.1",
+  "name": "GPT-5.1",
+  "ctx": 400000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Sharper GPT-5 generation for coding, product work, and tool-assisted tasks",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-5.1-codex",
+  "name": "GPT-5.1 Codex",
+  "ctx": 400000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Coding-optimized GPT model for repository edits, reviews, and agentic software work",
+  "source": "azure-cognitive-services",
+  "conf": "medium"
+ },
+ {
+  "model": "gpt-5.1-codex-max",
+  "name": "GPT-5.1 Codex Max",
+  "ctx": 400000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Coding-optimized GPT model for repository edits, reviews, and agentic software work",
+  "source": "azure-cognitive-services",
+  "conf": "medium"
+ },
+ {
+  "model": "gpt-5.1-codex-mini",
+  "name": "GPT-5.1 Codex Mini",
+  "ctx": 400000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Coding-optimized GPT model for repository edits, reviews, and agentic software work",
+  "source": "azure-cognitive-services",
+  "conf": "medium"
+ },
+ {
+  "model": "gpt-5.4",
+  "name": "GPT-5.4",
+  "ctx": 1050000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Agent-ready GPT for coding and computer-use workflows at a lower cost",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-5.4-mini",
+  "name": "GPT-5.4 mini",
+  "ctx": 400000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Strong small GPT for coding subagents, quick tool use, and high-volume work",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-5.6-luna",
+  "name": "GPT-5.6 Luna",
+  "ctx": 1050000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Cost-efficient GPT-5.6 model for fast, high-volume workloads",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "gpt-5.6-terra",
+  "name": "GPT-5.6 Terra",
+  "ctx": 1050000,
+  "max": 128000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Balanced GPT-5.6 model for capable, cost-efficient everyday work",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "grok-2-image",
+  "name": "grok-2-image",
+  "ctx": 16000,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "image"
+  ],
+  "desc": "",
+  "source": "xAI 图像模型",
+  "conf": "high"
+ },
+ {
+  "model": "grok-3",
+  "name": "grok-3",
+  "ctx": 131072,
+  "max": 8192,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "xAI 官方",
+  "conf": "high"
+ },
+ {
+  "model": "grok-3-mini",
+  "name": "grok-3-mini",
+  "ctx": 131072,
+  "max": 8192,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "xAI 官方",
+  "conf": "high"
+ },
+ {
+  "model": "grok-3-mini-fast",
+  "name": "grok-3-mini-fast",
+  "ctx": 131072,
+  "max": 8192,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "xAI 官方",
+  "conf": "high"
+ },
+ {
+  "model": "grok-4",
+  "name": "grok-4",
+  "ctx": 256000,
+  "max": 30000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "xAI 官方",
+  "conf": "high"
+ },
+ {
+  "model": "grok-4-1-fast-non-reasoning",
+  "name": "grok-4-1-fast-non-reasoning",
+  "ctx": 2000000,
+  "max": 30000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "xAI 官方(多源一致)",
+  "conf": "high"
+ },
+ {
+  "model": "grok-4-1-fast-reasoning",
+  "name": "grok-4-1-fast-reasoning",
+  "ctx": 2000000,
+  "max": 30000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "xAI 官方(多源一致)",
+  "conf": "high"
+ },
+ {
+  "model": "grok-4.3",
+  "name": "grok-4.3",
+  "ctx": 1000000,
+  "max": 30000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "xAI 官方",
+  "conf": "high"
+ },
+ {
+  "model": "grok-code-fast-1",
+  "name": "grok-code-fast-1",
+  "ctx": 256000,
+  "max": 30000,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "xAI 官方",
+  "conf": "high"
+ },
+ {
+  "model": "grok-imagine-image",
+  "name": "grok-imagine-image",
+  "ctx": 16000,
+  "max": 0,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "image"
+  ],
+  "desc": "",
+  "source": "xAI 官方",
+  "conf": "high"
+ },
+ {
+  "model": "inclusionai/ling-3.0-flash-vl:free",
+  "name": "Ling 3.0 Flash VL",
+  "ctx": 131072,
+  "max": 32768,
+  "in": [
+   "text",
+   "image",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Multimodal reasoning model for visual analysis, planning, and tool use",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "kimi-k2-thinking-251104",
+  "name": "Kimi K2 Thinking",
+  "ctx": 262144,
+  "max": 16000,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Thinking Kimi model for slower research passes, planning, and hard technical questions",
+  "source": "amazon-bedrock",
+  "conf": "medium"
+ },
+ {
+  "model": "ling-3.0-flash-vl:free",
+  "name": "Ling 3.0 Flash VL",
+  "ctx": 131072,
+  "max": 32768,
+  "in": [
+   "text",
+   "image",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Multimodal reasoning model for visual analysis, planning, and tool use",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "music-01",
+  "name": "music-01",
+  "ctx": 0,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "audio"
+  ],
+  "desc": "",
+  "source": "自建音乐生成",
+  "conf": "high"
+ },
+ {
+  "model": "nano-banana",
+  "name": "Nano Banana",
+  "ctx": 32768,
+  "max": 8192,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text",
+   "image"
+  ],
+  "desc": "Nano Banana image model for fast generation, edits, and character-consistent assets",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "nano-banana-pro",
+  "name": "Nano Banana Pro Preview",
+  "ctx": 65536,
+  "max": 32768,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text",
+   "image"
+  ],
+  "desc": "Nano Banana Pro for higher-fidelity image generation and design-heavy edits",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "nano-banana2",
+  "name": "Nano Banana 2.1",
+  "ctx": 65536,
+  "max": 58982,
+  "in": [
+   "image",
+   "text"
+  ],
+  "out": [
+   "text",
+   "image"
+  ],
+  "desc": "Image model for prompt-driven generation, editing, and visual design workflows",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "nvidia/nemotron-3-super-120b-a12b",
+  "name": "Nemotron 3 Super 120B A12B",
+  "ctx": 262144,
+  "max": 16384,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Nemotron middle tier for collaborative agents and high-volume reasoning workloads",
+  "source": "openrouter",
+  "conf": "medium"
+ },
+ {
+  "model": "o3-mini",
+  "name": "o3-mini",
+  "ctx": 200000,
+  "max": 100000,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Smaller o-series reasoner for economical coding, math, and planning tasks",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "o4-mini",
+  "name": "o4-mini",
+  "ctx": 200000,
+  "max": 100000,
+  "in": [
+   "text",
+   "image"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Fast o-series model for compact reasoning, coding, and tool use",
+  "source": "openai",
+  "conf": "high"
+ },
+ {
+  "model": "openai/gpt-oss-120b:free",
+  "name": "openai/gpt-oss-120b:free",
+  "ctx": 131072,
+  "max": 32768,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "开源权重模型",
+  "conf": "high"
+ },
+ {
+  "model": "openai/gpt-oss-20b:free",
+  "name": "openai/gpt-oss-20b:free",
+  "ctx": 131072,
+  "max": 32768,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "开源权重模型",
+  "conf": "high"
+ },
+ {
+  "model": "play-dialog",
+  "name": "play-dialog",
+  "ctx": 0,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "audio"
+  ],
+  "desc": "",
+  "source": "自建语音对话",
+  "conf": "high"
+ },
+ {
+  "model": "qwen-flash",
+  "name": "qwen-flash",
+  "ctx": 1000000,
+  "max": 131072,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "qwen-flash 别名现指向 qwen3.8-flash",
+  "conf": "high"
+ },
+ {
+  "model": "qwen-max",
+  "name": "qwen-max",
+  "ctx": 1000000,
+  "max": 131072,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "qwen-max 别名现指向 qwen3.8-max",
+  "conf": "high"
+ },
+ {
+  "model": "qwen3-coder-flash",
+  "name": "qwen3-coder-flash",
+  "ctx": 1000000,
+  "max": 65536,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "OpenRouter",
+  "conf": "high"
+ },
+ {
+  "model": "qwen3-vl-flash",
+  "name": "qwen3-vl-flash",
+  "ctx": 1000000,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "阿里 VL Flash 系列",
+  "conf": "high"
+ },
+ {
+  "model": "qwen3.8-omni-flash",
+  "name": "qwen3.8-omni-flash",
+  "ctx": 1000000,
+  "max": 131072,
+  "in": [
+   "text",
+   "image",
+   "audio",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "阿里官方 + OpenRouter",
+  "conf": "high"
+ },
+ {
+  "model": "qwen4-max",
+  "name": "qwen4-max",
+  "ctx": 1000000,
+  "max": 131072,
+  "in": [
+   "text",
+   "image",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "阿里官方 + OpenRouter",
+  "conf": "high"
+ },
+ {
+  "model": "stepfun/step-3.5-flash:free",
+  "name": "stepfun-ai/Step-3.5-Flash",
+  "ctx": 262000,
+  "max": 66000,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "StepFun flash model for efficient multimodal reasoning, coding, and tool use",
+  "source": "siliconflow",
+  "conf": "medium"
+ },
+ {
+  "model": "text-embedding-3-small",
+  "name": "text-embedding-3-small",
+  "ctx": 8191,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [],
+  "desc": "",
+  "source": "OpenAI 嵌入模型",
+  "conf": "high"
+ },
+ {
+  "model": "text-embedding-ada-002",
+  "name": "text-embedding-ada-002",
+  "ctx": 8192,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [],
+  "desc": "",
+  "source": "OpenAI 嵌入模型",
+  "conf": "high"
+ },
+ {
+  "model": "tts-1",
+  "name": "tts-1",
+  "ctx": 4096,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "audio"
+  ],
+  "desc": "",
+  "source": "OpenAI 语音合成",
+  "conf": "high"
+ },
+ {
+  "model": "tts-1-1106",
+  "name": "tts-1-1106",
+  "ctx": 4096,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "audio"
+  ],
+  "desc": "",
+  "source": "OpenAI 语音合成",
+  "conf": "high"
+ },
+ {
+  "model": "tts-1-hd",
+  "name": "tts-1-hd",
+  "ctx": 4096,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "audio"
+  ],
+  "desc": "",
+  "source": "OpenAI 语音合成",
+  "conf": "high"
+ },
+ {
+  "model": "tts-1-hd-1106",
+  "name": "tts-1-hd-1106",
+  "ctx": 4096,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "audio"
+  ],
+  "desc": "",
+  "source": "OpenAI 语音合成",
+  "conf": "high"
+ },
+ {
+  "model": "uuzaichat",
+  "name": "uuzaichat",
+  "ctx": 0,
+  "max": 0,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "内部聚合别名",
+  "conf": "high"
+ },
+ {
+  "model": "uuzgm2.5",
+  "name": "Gemini 2.5 Pro",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "audio",
+   "video"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Google's proven reasoning model for coding, math, and multimodal analysis",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "uuzgm3.1pro",
+  "name": "Gemini 3.1 Pro Preview",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "video",
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Reasoning-first Gemini preview for agentic coding and complex problem solving",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "uuzgm3flash",
+  "name": "Gemini 3 Flash Preview",
+  "ctx": 1048576,
+  "max": 65536,
+  "in": [
+   "text",
+   "image",
+   "video",
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "New Gemini flash lane bringing frontier-style multimodal reasoning to cheaper runs",
+  "source": "google",
+  "conf": "high"
+ },
+ {
+  "model": "whisper-1",
+  "name": "whisper-1",
+  "ctx": 0,
+  "max": 0,
+  "in": [
+   "audio"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "",
+  "source": "OpenAI 语音识别",
+  "conf": "high"
+ },
+ {
+  "model": "z-ai/glm-4.5-air:free",
+  "name": "GLM-4.5-Air",
+  "ctx": 131072,
+  "max": 98304,
+  "in": [
+   "text"
+  ],
+  "out": [
+   "text"
+  ],
+  "desc": "Lighter GLM-4.5 variant for fast coding assistance and cheaper agents",
+  "source": "openrouter",
+  "conf": "medium"
+ }
+]

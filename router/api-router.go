@@ -121,6 +121,13 @@ func SetApiRouter(router *gin.Engine) {
 			optionRoute.POST("/system_info/log", controller.SystemLog)
 		}
 
+		relayEndpointRoute := apiRouter.Group("/relay_endpoints")
+		relayEndpointRoute.Use(middleware.RootAuth())
+		{
+			relayEndpointRoute.GET("/", controller.GetRelayEndpoints)
+			relayEndpointRoute.POST("/probe", controller.ProbeRelayEndpoints)
+		}
+
 		modelOwnedByRoute := apiRouter.Group("/model_ownedby")
 		modelOwnedByRoute.GET("/", controller.GetAllModelOwnedBy)
 		modelOwnedByRoute.Use(middleware.AdminAuth())

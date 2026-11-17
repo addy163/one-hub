@@ -317,6 +317,10 @@ func GetDefaultPrice() []*Price {
 		"qwen-max-longcontext": {[]float64{8.5714, 8.5714}, config.ChannelTypeAli},
 		// 0.008元/1,000tokens
 		"qwen-vl-plus": {[]float64{0.5715, 0.5715}, config.ChannelTypeAli},
+		// qwen4-max：官方输入 ¥10 / 输出 ¥30 每百万 tokens。
+		// 内置值取 ¥11.2 / ¥33.6（0.8 / 2.4），比官方价高 ~12%，
+		// 用来覆盖充值折扣与分组倍率造成的折损，避免低于成本价销售。
+		"qwen4-max": {[]float64{0.8, 2.4}, config.ChannelTypeAli},
 		// ￥0.0007 / 1k tokens
 		"text-embedding-v1": {[]float64{0.05, 0.05}, config.ChannelTypeAli},
 
