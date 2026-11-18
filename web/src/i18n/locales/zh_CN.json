@@ -1156,6 +1156,29 @@
         "saveButton": "保存 Turnstile 设置"
       }
     },
+    "homeSetting": {
+          "title": "首页设置",
+          "desc": "首页由「风格」和「内容来源」两部分决定。切换风格保存后立即生效，前台刷新即可看到，无需重新构建前端。",
+          "styleBrandName": "品牌首页",
+          "styleBrandDesc": "完整落地页：主视觉、服务商 Logo 墙、能力介绍与接入示例，适合对外运营的站点。",
+          "styleMinimalName": "极简首页",
+          "styleMinimalDesc": "单屏纯文字：一句话介绍加两个入口，没有图片与代码示例，适合内部或轻量部署。",
+          "styleCustomName": "自定义内容",
+          "styleCustomDesc": "使用下方内容渲染首页，支持 Markdown、HTML；填写链接则整页嵌入该网页。内容留空时自动显示品牌首页。",
+          "preview": "预览首页",
+          "previewHint": "在新窗口打开站点首页",
+          "styleSaved": "首页风格已切换",
+          "contentSaved": "首页内容已保存",
+          "legacyHint": "检测到已保存 {{count}} 字首页内容，当前风格没有使用它。",
+          "enableLegacy": "改用自定义内容",
+          "emptyHint": "内容为空时，前台会显示品牌首页，访客不会看到任何提示。",
+          "contentLabel": "首页内容",
+          "contentPlaceholder": "支持 Markdown 与 HTML；如果填写的是一个 http(s) 链接，则整页用 iframe 嵌入该网页。",
+          "contentHelper": "当前 {{count}} 字",
+          "saveContent": "保存内容",
+          "unsaved": "有未保存的修改",
+          "loading": "正在读取配置…"
+        },
     "otherSettings": {
       "title": "其他设置",
       "generalSettings": {
@@ -1177,6 +1200,7 @@
         "homePageContentLabel": "首页内容",
         "homePageContentPlaceholder": "在此输入首页内容，支持 Markdown & HTML 代码，设置后首页的状态信息将不再显示。如果输入的是一个链接，则会使用该链接作为 iframe 的 src 属性，这允许你设置任意网页作为首页。",
         "saveHomePageContent": "保存首页内容",
+        "homeMovedHint": "首页内容与风格已移到上方「首页设置」，在那里可以切换风格或编辑内容。",
         "aboutLabel": "关于",
         "aboutPlaceholder": "在此输入新的关于内容，支持 Markdown & HTML 代码。如果输入的是一个链接，则会使用该链接作为 iframe 的 src 属性，这允许你设置任意网页作为关于页面。",
         "saveAbout": "保存关于",

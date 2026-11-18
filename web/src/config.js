@@ -19,6 +19,7 @@ const config = {
     github_oauth: false,
     oidc_auth: false,
     logo: '',
+    home_style: 'brand',
     quota_per_unit: 500000,
     server_address: '',
     relay_endpoints: [],

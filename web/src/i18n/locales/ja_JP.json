@@ -1122,6 +1122,29 @@
         "title": "クロードの設定"
       }
     },
+    "homeSetting": {
+          "title": "ホームページ設定",
+          "desc": "ホームページは「スタイル」と「コンテンツ」の2つで決まります。保存するとすぐ反映され、サイトを再読み込みするだけで確認できます（再ビルド不要）。",
+          "styleBrandName": "ブランドページ",
+          "styleBrandDesc": "ヒーロー、プロバイダーのロゴ一覧、機能紹介、導入サンプルを含むフルランディングページ。公開サイト向け。",
+          "styleMinimalName": "ミニマル",
+          "styleMinimalDesc": "1画面のテキストのみ。短い紹介と2つのボタンだけで、画像やコード例はありません。",
+          "styleCustomName": "カスタムコンテンツ",
+          "styleCustomDesc": "下のコンテンツをホームページとして表示します（Markdown / HTML、リンクなら全画面埋め込み）。空の場合はブランドページを表示します。",
+          "preview": "プレビュー",
+          "previewHint": "新しいウィンドウでホームページを開きます",
+          "styleSaved": "ホームのスタイルを切り替えました",
+          "contentSaved": "ホームのコンテンツを保存しました",
+          "legacyHint": "保存済みのホームコンテンツが {{count}} 文字ありますが、現在のスタイルでは使用されていません。",
+          "enableLegacy": "カスタムコンテンツを使う",
+          "emptyHint": "コンテンツが空の場合、訪問者にはブランドページが表示されます。",
+          "contentLabel": "ホームのコンテンツ",
+          "contentPlaceholder": "Markdown と HTML に対応。http(s) リンクを入れると iframe で全画面埋め込みします。",
+          "contentHelper": "{{count}} 文字",
+          "saveContent": "コンテンツを保存",
+          "unsaved": "未保存の変更があります",
+          "loading": "設定を読み込み中…"
+        },
     "otherSettings": {
       "customSettings": {
         "aboutLabel": "概要",
@@ -1135,6 +1158,7 @@
         "logoPlaceholder": "ここにロゴ画像のURLを入力してください",
         "saveAbout": "概要を保存する",
         "saveHomePageContent": "ホームページの内容を保存する",
+        "homeMovedHint": "ホームページの内容とスタイルは上の「ホームページ設定」に移動しました。",
         "setFooter": "フッターを設定する",
         "setLogo": "ロゴを設定する",
         "setSystemName": "システム名を設定する",

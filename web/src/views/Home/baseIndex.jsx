@@ -19,9 +19,8 @@ import {
 } from '@mui/icons-material';
 
 // ==============================|| 优智AI（UUAI）品牌首页 ||============================== //
-// 本组件为站点定制首页，不依赖后台「自定义首页内容」。
-// 如需恢复后台自定义 HTML / Markdown 首页，把 views/Home/index.jsx 里的
-// FORCE_NEW_HOME 改为 false 即可，原有能力完整保留。
+// 内置首页模板之一，由后台「首页设置」的 HomePageStyle 选择（默认 brand）。
+// 模板注册见 views/Home/templates.js，新增风格无需改动本文件。
 
 const BRAND = {
   blue: '#5B7CFA',

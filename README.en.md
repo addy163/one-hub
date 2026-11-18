@@ -63,6 +63,7 @@ All upstream features and the data schema are preserved; changes are incremental
 | Built-in data | Placeholder default prices and 108 model specs (including Doubao Seed 2.1 Lite and Seed Character) are shipped with the binary |
 | Time-based rates | A model can define several time windows (e.g. 22:00–08:00 at half price). Windows are evaluated in UTC+8; requests hitting a window are billed with that window's ratios, and the log records `price_period` |
 | Announcements | Announcements are now a list instead of a single text: draft / published / offline, scheduled windows, severity, pinning, top banner, first-visit popup, mandatory acknowledgement, read and ack counters |
+| Home page styles | The home page is now a style plus a content source: built-in brand landing, minimal, or custom content. Switching applies immediately |
 
 ## Database changes and automatic migration
 
@@ -119,6 +120,23 @@ Read state is stored per user in `notice_reads` (`user_id + notice_id` unique), 
 `GET /api/notice` (singular) is untouched and still returns the legacy `Notice` option.
 
 With no windows configured, `time_prices` stays empty and behaviour is identical to upstream.
+
+### Home page styles
+
+The home page is no longer controlled by a single HTML blob. It is a **style × content source** pair, configured in Admin → Settings → Other Settings → Home Page.
+
+| Style | Behaviour |
+| --- | --- |
+| `brand` (default) | Built-in brand landing page: hero, vendor logo wall, capability sections, quickstart example |
+| `minimal` | Built-in minimal page: one screen of text, a short intro and two buttons, no images or code samples |
+| `custom` | Renders the saved home page content (Markdown / HTML; an `http(s)` link is embedded full page). **Falls back to `brand` when empty** |
+
+- The style lives in `options.HomePageStyle` and is delivered as `home_style` in `/api/status`, so switching takes effect on refresh — no front-end rebuild;
+- Unknown values (older builds, manual database edits, removed templates) fall back to `brand`, so adding a template only touches the front end;
+- Empty custom content shows the brand landing page instead of an error or placeholder — visitors never notice;
+- Upgrades default to `brand`. Any previously saved `HomePageContent` is kept but inactive, and the settings card offers a one-click switch.
+
+To add another built-in style, create a component under `web/src/views/Home/` and register it in `HOME_TEMPLATES` in `templates.js`.
 
 ### Migrating from one-hub
 

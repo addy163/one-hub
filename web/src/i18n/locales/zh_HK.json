@@ -1124,6 +1124,29 @@
         "title": "克勞德設置"
       }
     },
+    "homeSetting": {
+          "title": "首頁設定",
+          "desc": "首頁由「風格」和「內容來源」兩部分決定。切換風格儲存後即時生效，前台重新整理即可看到，無需重新建置前端。",
+          "styleBrandName": "品牌首頁",
+          "styleBrandDesc": "完整落地頁：主視覺、服務商 Logo 牆、能力介紹與接入範例，適合對外營運的站點。",
+          "styleMinimalName": "極簡首頁",
+          "styleMinimalDesc": "單屏純文字：一句話介紹加兩個入口，沒有圖片與程式碼範例，適合內部或輕量部署。",
+          "styleCustomName": "自訂內容",
+          "styleCustomDesc": "使用下方內容渲染首頁，支援 Markdown、HTML；填寫連結則整頁嵌入該網頁。內容留空時自動顯示品牌首頁。",
+          "preview": "預覽首頁",
+          "previewHint": "在新視窗開啟站點首頁",
+          "styleSaved": "首頁風格已切換",
+          "contentSaved": "首頁內容已儲存",
+          "legacyHint": "偵測到已儲存 {{count}} 字首頁內容，目前風格沒有使用它。",
+          "enableLegacy": "改用自訂內容",
+          "emptyHint": "內容為空時，前台會顯示品牌首頁，訪客不會看到任何提示。",
+          "contentLabel": "首頁內容",
+          "contentPlaceholder": "支援 Markdown 與 HTML；如果填寫的是一個 http(s) 連結，則整頁用 iframe 嵌入該網頁。",
+          "contentHelper": "目前 {{count}} 字",
+          "saveContent": "儲存內容",
+          "unsaved": "有未儲存的修改",
+          "loading": "正在讀取設定…"
+        },
     "otherSettings": {
       "customSettings": {
         "aboutLabel": "關於",
@@ -1137,6 +1160,7 @@
         "logoPlaceholder": "在此輸入 Logo 圖片地址",
         "saveAbout": "保存關於",
         "saveHomePageContent": "保存首頁內容",
+        "homeMovedHint": "首頁內容與風格已移到上方「首頁設定」，在那裡可以切換風格或編輯內容。",
         "setFooter": "設置頁腳",
         "setLogo": "設置 Logo",
         "setSystemName": "設置系統名稱",

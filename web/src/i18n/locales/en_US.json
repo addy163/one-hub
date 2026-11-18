@@ -1133,6 +1133,29 @@
         "save": "Save Claude's settings"
       }
     },
+    "homeSetting": {
+          "title": "Home Page",
+          "desc": "The home page is decided by a style and a content source. Switching style takes effect as soon as you save — just refresh the site, no rebuild needed.",
+          "styleBrandName": "Brand landing",
+          "styleBrandDesc": "Full landing page: hero, vendor logo wall, capability sections and a quickstart example. Best for a public-facing site.",
+          "styleMinimalName": "Minimal",
+          "styleMinimalDesc": "One screen of text: a short intro and two buttons, no images or code samples. Good for internal or lightweight deployments.",
+          "styleCustomName": "Custom content",
+          "styleCustomDesc": "Renders the content below as the home page (Markdown or HTML; a link is embedded full page). Falls back to the brand landing page when empty.",
+          "preview": "Preview home",
+          "previewHint": "Open the site home page in a new window",
+          "styleSaved": "Home style switched",
+          "contentSaved": "Home content saved",
+          "legacyHint": "Found {{count}} characters of saved home content. The current style does not use it.",
+          "enableLegacy": "Use custom content",
+          "emptyHint": "When the content is empty, visitors see the brand landing page — no placeholder message.",
+          "contentLabel": "Home Page Content",
+          "contentPlaceholder": "Supports Markdown and HTML. If you enter an http(s) link, the whole page is embedded with an iframe.",
+          "contentHelper": "{{count}} characters",
+          "saveContent": "Save content",
+          "unsaved": "Unsaved changes",
+          "loading": "Loading options…"
+        },
     "otherSettings": {
       "customSettings": {
         "aboutLabel": "About",
@@ -1146,6 +1169,7 @@
         "logoPlaceholder": "Enter Logo Image URL here",
         "saveAbout": "Save About",
         "saveHomePageContent": "Save Home Page Content",
+        "homeMovedHint": "Home page content and style moved to the Home Page card above.",
         "setFooter": "Set Footer",
         "setLogo": "Set Logo",
         "setSystemName": "Set System Name",

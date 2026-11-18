@@ -22,6 +22,7 @@ import { sanitizeHtml } from 'utils/sanitize';
 import { marked } from 'marked';
 import { LoadStatusContext } from 'contexts/StatusContext';
 import { useTranslation } from 'react-i18next';
+import HomeSetting from './HomeSetting';
 
 const OtherSetting = () => {
   const { t } = useTranslation();
@@ -31,7 +32,6 @@ const OtherSetting = () => {
     About: '',
     SystemName: '',
     Logo: '',
-    HomePageContent: '',
     AnalyticsCode: ''
   });
   let [loading, setLoading] = useState(false);
@@ -117,10 +117,6 @@ const OtherSetting = () => {
     await updateOption('AnalyticsCode', inputs.AnalyticsCode);
   };
 
-  const submitOption = async (key) => {
-    await updateOption(key, inputs[key]);
-  };
-
   const openGitHubRelease = () => {
     window.location = 'https://github.com/MartialBE/one-hub/releases/latest';
   };
@@ -167,6 +163,7 @@ const OtherSetting = () => {
   return (
     <>
       <Stack spacing={2}>
+        <HomeSetting />
         <SubCard title={t('setting_index.otherSettings.generalSettings.title')}>
           <Grid container spacing={{ xs: 3, sm: 2, md: 4 }}>
             <Grid xs={12}>
@@ -230,24 +227,9 @@ const OtherSetting = () => {
               </Button>
             </Grid>
             <Grid xs={12}>
-              <FormControl fullWidth>
-                <TextField
-                  multiline
-                  maxRows={15}
-                  id="HomePageContent"
-                  label={t('setting_index.otherSettings.customSettings.homePageContentLabel')}
-                  value={inputs.HomePageContent}
-                  name="HomePageContent"
-                  onChange={handleInputChange}
-                  minRows={10}
-                  placeholder={t('setting_index.otherSettings.customSettings.homePageContentPlaceholder')}
-                />
-              </FormControl>
-            </Grid>
-            <Grid xs={12}>
-              <Button variant="contained" onClick={() => submitOption('HomePageContent')}>
-                {t('setting_index.otherSettings.customSettings.saveHomePageContent')}
-              </Button>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                {t('setting_index.otherSettings.customSettings.homeMovedHint')}
+              </Typography>
             </Grid>
             <Grid xs={12}>
               <FormControl fullWidth>

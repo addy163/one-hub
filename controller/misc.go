@@ -14,6 +14,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HomeStyle 归一化当前首页方案：未知取值一律回落到内置品牌首页，
+// 这样前端新增模板时后端不需要跟着发版本。
+func HomeStyle() string {
+	switch config.HomePageStyle {
+	case "brand", "minimal", "custom":
+		return config.HomePageStyle
+	default:
+		return "brand"
+	}
+}
+
 func GetStatus(c *gin.Context) {
 	telegramBot := ""
 	if telegram.TGEnabled {
@@ -33,6 +44,7 @@ func GetStatus(c *gin.Context) {
 			"lark_client_id":      config.LarkClientId,
 			"system_name":         config.SystemName,
 			"logo":                config.Logo,
+			"home_style":          HomeStyle(),
 			"language":            config.Language,
 			"footer_html":         config.Footer,
 			"analytics_code":      config.AnalyticsCode,

@@ -32,6 +32,14 @@ var RelayEndpoints = ""
 var RelayEndpointProbeInterval = 60
 var RelayEndpointProbeTimeout = 3000
 var AnalyticsCode = ""
+
+// HomePageStyle 决定站点首页用哪套方案渲染，取值由前端模板注册表解释：
+//   brand   - 内置品牌首页（默认）
+//   minimal - 内置极简首页
+//   custom  - 使用后台「首页内容」；内容为空时前端自动回落到 brand
+// 未知取值同样回落到 brand，因此新增模板不需要改后端。
+var HomePageStyle = "brand"
+
 var QuotaPerUnit = 500 * 1000.0 // $0.002 / 1K tokens
 var DisplayInCurrencyEnabled = true
 
