@@ -655,8 +655,8 @@ func GetDefaultPrice() []*Price {
 		"gpt-image-2.5-sunburst": {4, 15, 5.0 / 8, 1.25 / 8},
 		"gpt-image-2.5-flare":    {4, 15, 5.0 / 8, 1.25 / 8},
 		"gpt-image-2":            {4, 15, 5.0 / 8, 1.25 / 8},
-		// gpt-image-1：图像输入 $10/M、图像输出 $40/M、文本输入 $5/M
-		"gpt-image-1": {5, 20, 5.0 / 10, 1.25 / 10},
+		// gpt-image-1 / gpt-image-1-mini / gpt-image-1.5 已于 2026-11-21 弃用，
+		// 不再内置默认价，避免自动同步把它们重新加回在售价格表。
 	}
 	for model, cfg := range imageTokenPrices {
 		extra := datatypes.NewJSONType(map[string]float64{
@@ -677,6 +677,6 @@ func GetDefaultPrice() []*Price {
 }
 
 func GetDefaultExtraRatio() string {
-	return `{"gpt-4o-audio-preview":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-10-01":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-12-17":{"input_audio_tokens":16,"output_audio_tokens":8},"gpt-4o-mini-audio-preview":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-mini-audio-preview-2024-12-17":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-realtime-preview":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-10-01":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-12-17":{"input_audio_tokens":8,"output_audio_tokens":4},"gpt-4o-mini-realtime-preview":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gpt-4o-mini-realtime-preview-2024-12-17":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gemini-2.5-flash-preview-04-17":{"reasoning_tokens":5.833},"gpt-image-1":{"input_text_tokens":0.5,"cached_tokens":0.125},"gpt-image-2.6-sunburst":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2.6-flare":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2.5-sunburst":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2.5-flare":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2":{"input_text_tokens":0.625,"cached_tokens":0.15625}}`
+	return `{"gpt-4o-audio-preview":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-10-01":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-12-17":{"input_audio_tokens":16,"output_audio_tokens":8},"gpt-4o-mini-audio-preview":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-mini-audio-preview-2024-12-17":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-realtime-preview":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-10-01":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-12-17":{"input_audio_tokens":8,"output_audio_tokens":4},"gpt-4o-mini-realtime-preview":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gpt-4o-mini-realtime-preview-2024-12-17":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gemini-2.5-flash-preview-04-17":{"reasoning_tokens":5.833},"gpt-image-2.6-sunburst":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2.6-flare":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2.5-sunburst":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2.5-flare":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2":{"input_text_tokens":0.625,"cached_tokens":0.15625}}`
 
 }

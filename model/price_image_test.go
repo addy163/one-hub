@@ -19,7 +19,6 @@ func TestDefaultPriceForGPTImage(t *testing.T) {
 		"gpt-image-2.5-sunburst": {4, 15, 0.625},
 		"gpt-image-2.5-flare":    {4, 15, 0.625},
 		"gpt-image-2":            {4, 15, 0.625},
-		"gpt-image-1":            {5, 20, 0.5},
 	}
 
 	found := make(map[string]bool)
@@ -49,6 +48,18 @@ func TestDefaultPriceForGPTImage(t *testing.T) {
 	for model := range want {
 		if !found[model] {
 			t.Errorf("默认价格表缺少 %s", model)
+		}
+	}
+}
+
+// 已弃用的模型不应再出现在默认价里，否则开启自动同步会被重新加回在售价格表。
+func TestDeprecatedImageModelsNotInDefaultPrice(t *testing.T) {
+	deprecated := []string{"gpt-image-1", "gpt-image-1-mini", "gpt-image-1.5"}
+	for _, price := range GetDefaultPrice() {
+		for _, m := range deprecated {
+			if price.Model == m {
+				t.Errorf("%s 已弃用，不应出现在默认价格表中", m)
+			}
 		}
 	}
 }
