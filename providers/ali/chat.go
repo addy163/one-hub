@@ -2,9 +2,11 @@ package ali
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"one-api/common"
 	"one-api/common/config"
+	"one-api/common/logger"
 	"one-api/common/requester"
 	"one-api/common/utils"
 	"one-api/types"
@@ -22,7 +24,33 @@ func (p *AliProvider) CreateChatCompletion(request *types.ChatCompletionRequest)
 		return p.OpenAIProvider.CreateChatCompletion(request)
 	}
 
-	req, errWithCode := p.getAliChatRequest(request)
+	path := p.nativeChatPath(request.Model)
+	response, errWithCode := p.sendChatCompletion(request, path)
+	if errWithCode == nil || !isNativeEndpointMismatch(errWithCode) {
+		return response, errWithCode
+	}
+
+	// 模型和接口不匹配时 DashScope 只回 "url error"，换另一个原生接口重试一次，
+	// 成功的组合记进缓存，后续同模型请求不再试探。
+	altPath := alternateChatPath(path)
+	response, altErr := p.sendChatCompletion(request, altPath)
+	if altErr == nil {
+		p.rememberNativeChatPath(request.Model, altPath)
+		logger.SysLog(fmt.Sprintf("阿里渠道模型 %s 使用原生接口 %s", request.Model, altPath))
+		return response, nil
+	}
+
+	// 两个原生接口都不通，说明该网关只挂了兼容接口，最后退回 compatible-mode
+	if isNativeEndpointMismatch(altErr) {
+		logger.SysLog(fmt.Sprintf("阿里渠道模型 %s 原生接口不可用，回退 OpenAI 兼容接口", request.Model))
+		return p.compatProvider().CreateChatCompletion(request)
+	}
+
+	return nil, altErr
+}
+
+func (p *AliProvider) sendChatCompletion(request *types.ChatCompletionRequest, path string) (*types.ChatCompletionResponse, *types.OpenAIErrorWithStatusCode) {
+	req, errWithCode := p.getAliChatRequest(request, path)
 	if errWithCode != nil {
 		return nil, errWithCode
 	}
@@ -43,7 +71,30 @@ func (p *AliProvider) CreateChatCompletionStream(request *types.ChatCompletionRe
 		return p.OpenAIProvider.CreateChatCompletionStream(request)
 	}
 
-	req, errWithCode := p.getAliChatRequest(request)
+	path := p.nativeChatPath(request.Model)
+	stream, errWithCode := p.sendChatCompletionStream(request, path)
+	if errWithCode == nil || !isNativeEndpointMismatch(errWithCode) {
+		return stream, errWithCode
+	}
+
+	altPath := alternateChatPath(path)
+	stream, altErr := p.sendChatCompletionStream(request, altPath)
+	if altErr == nil {
+		p.rememberNativeChatPath(request.Model, altPath)
+		logger.SysLog(fmt.Sprintf("阿里渠道模型 %s 使用原生接口 %s", request.Model, altPath))
+		return stream, nil
+	}
+
+	if isNativeEndpointMismatch(altErr) {
+		logger.SysLog(fmt.Sprintf("阿里渠道模型 %s 原生接口不可用，回退 OpenAI 兼容接口", request.Model))
+		return p.compatProvider().CreateChatCompletionStream(request)
+	}
+
+	return nil, altErr
+}
+
+func (p *AliProvider) sendChatCompletionStream(request *types.ChatCompletionRequest, path string) (requester.StreamReaderInterface[string], *types.OpenAIErrorWithStatusCode) {
+	req, errWithCode := p.getAliChatRequest(request, path)
 	if errWithCode != nil {
 		return nil, errWithCode
 	}
@@ -63,13 +114,16 @@ func (p *AliProvider) CreateChatCompletionStream(request *types.ChatCompletionRe
 	return requester.RequestStream[string](p.Requester, resp, chatHandler.handlerStream)
 }
 
-func (p *AliProvider) getAliChatRequest(request *types.ChatCompletionRequest) (*http.Request, *types.OpenAIErrorWithStatusCode) {
-	url, errWithCode := p.GetSupportedAPIUri(config.RelayModeChatCompletions)
-	if errWithCode != nil {
-		return nil, errWithCode
+func (p *AliProvider) getAliChatRequest(request *types.ChatCompletionRequest, path string) (*http.Request, *types.OpenAIErrorWithStatusCode) {
+	// 获取请求地址（原生接口路径由调用方指定，兼容模式走 /v1/chat/completions）
+	if path == "" {
+		var errWithCode *types.OpenAIErrorWithStatusCode
+		path, errWithCode = p.GetSupportedAPIUri(config.RelayModeChatCompletions)
+		if errWithCode != nil {
+			return nil, errWithCode
+		}
 	}
-	// 获取请求地址
-	fullRequestURL := p.GetFullRequestURL(url, request.Model)
+	fullRequestURL := p.GetFullRequestURL(path, request.Model)
 
 	// 获取请求头
 	headers := p.GetRequestHeaders()
@@ -78,7 +132,7 @@ func (p *AliProvider) getAliChatRequest(request *types.ChatCompletionRequest) (*
 		headers["X-DashScope-SSE"] = "enable"
 	}
 
-	aliRequest := p.convertFromChatOpenai(request)
+	aliRequest := p.convertFromChatOpenai(request, path == multimodalChatPath)
 	// 创建请求
 	req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(aliRequest), p.Requester.WithHeader(headers))
 	if err != nil {
@@ -112,49 +166,73 @@ func (p *AliProvider) convertToChatOpenai(response *AliChatResponse, request *ty
 		},
 	}
 
+	applyAliImageUsage(openaiResponse.Usage, &response.Usage)
+
 	*p.Usage = *openaiResponse.Usage
 
 	return
 }
 
+// applyAliImageUsage 把上游回显的图片张数与档位写进 usage，供按张计费使用。
+// 上游给的是累计值，所以直接覆盖而不是累加，流式多次调用也只会保留最后一份。
+func applyAliImageUsage(usage *types.Usage, aliUsage *AliUsage) {
+	if aliUsage.OutputImageCount > 0 {
+		tier := imageTier(aliUsage.OutputImageType)
+		if tier == "" {
+			tier = imageTierBySize(aliUsage.OutputWidth, aliUsage.OutputHeight)
+		}
+		if tier != "" {
+			usage.OutputImages = map[string]int{tier: aliUsage.OutputImageCount}
+		}
+	}
+
+	if aliUsage.InputImageCount > 0 {
+		tier := imageTier(aliUsage.InputImageType)
+		if tier == "" {
+			tier = imageTierBySize(aliUsage.OutputWidth, aliUsage.OutputHeight)
+		}
+		if tier != "" {
+			usage.InputImages = map[string]int{tier: aliUsage.InputImageCount}
+		}
+	}
+}
+
 // 阿里云聊天请求体
-func (p *AliProvider) convertFromChatOpenai(request *types.ChatCompletionRequest) *AliChatRequest {
+//
+// useParts 表示这次请求发往 multimodal-generation：该接口对部分模型（qwen-image
+// 等）只接受 parts 数组，字符串 content 会直接报 "Input should be a valid list"，
+// 所以统一按 parts 组装；text-generation 则沿用字符串格式。
+func (p *AliProvider) convertFromChatOpenai(request *types.ChatCompletionRequest, useParts bool) *AliChatRequest {
 	messages := make([]AliMessage, 0, len(request.Messages))
 	for i := 0; i < len(request.Messages); i++ {
 		message := request.Messages[i]
-		modelKeywords := strings.Split(VisionModelKeywords, ",")
-		isVisionModel := false
-		for _, keyword := range modelKeywords {
-			if strings.Contains(request.Model, keyword) {
-				isVisionModel = true
-				break
-			}
-		}
-		if !isVisionModel {
+		// 按消息里实际有没有图片决定 content 格式，而不是猜模型名：
+		// 原来按模型名猜，非视觉模型手里带的图片会被直接丢掉。
+		if !useParts && !messageHasImage(message) {
 			messages = append(messages, AliMessage{
 				Content: message.StringContent(),
 				Role:    strings.ToLower(message.Role),
 			})
-		} else {
-			openaiContent := message.ParseContent()
-			var parts []AliMessagePart
-			for _, part := range openaiContent {
-				if part.Type == types.ContentTypeText {
-					parts = append(parts, AliMessagePart{
-						Text: part.Text,
-					})
-				} else if part.Type == types.ContentTypeImageURL {
-					parts = append(parts, AliMessagePart{
-						Image: part.ImageURL.URL,
-					})
-				}
-			}
-			messages = append(messages, AliMessage{
-				Content: parts,
-				Role:    strings.ToLower(message.Role),
-			})
+			continue
 		}
 
+		openaiContent := message.ParseContent()
+		var parts []AliMessagePart
+		for _, part := range openaiContent {
+			if part.Type == types.ContentTypeText {
+				parts = append(parts, AliMessagePart{
+					Text: part.Text,
+				})
+			} else if part.Type == types.ContentTypeImageURL {
+				parts = append(parts, AliMessagePart{
+					Image: part.ImageURL.URL,
+				})
+			}
+		}
+		messages = append(messages, AliMessage{
+			Content: parts,
+			Role:    strings.ToLower(message.Role),
+		})
 	}
 
 	aliChatRequest := &AliChatRequest{
@@ -166,6 +244,9 @@ func (p *AliProvider) convertFromChatOpenai(request *types.ChatCompletionRequest
 			ResultFormat:      "message",
 			IncrementalOutput: request.Stream,
 			EnableThinking:    request.EnableThinking,
+			// 作图参数：只在调用方显式传入时下发，文本模型不受影响
+			Size: request.Size,
+			N:    requestImageCount(request),
 		},
 	}
 
@@ -259,7 +340,26 @@ func (h *aliStreamHandler) convertToOpenaiStream(aliResponse *AliChatResponse, d
 		h.Usage.CompletionTokens = aliResponse.Usage.OutputTokens
 		h.Usage.TotalTokens = aliResponse.Usage.InputTokens + aliResponse.Usage.OutputTokens
 	}
+	applyAliImageUsage(h.Usage, &aliResponse.Usage)
 
 	responseBody, _ := json.Marshal(streamResponse)
 	dataChan <- string(responseBody)
+}
+
+// messageHasImage 判断该条消息是否带图片输入
+func messageHasImage(message types.ChatCompletionMessage) bool {
+	for _, part := range message.ParseContent() {
+		if part.Type == types.ContentTypeImageURL {
+			return true
+		}
+	}
+	return false
+}
+
+// requestImageCount 取作图张数。n 为 0 或 1 时不下发，避免文本模型收到多余参数。
+func requestImageCount(request *types.ChatCompletionRequest) int {
+	if request.N == nil || *request.N <= 1 {
+		return 0
+	}
+	return *request.N
 }

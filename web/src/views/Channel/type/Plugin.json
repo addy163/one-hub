@@ -95,12 +95,12 @@
       }
     },
     "use_openai_api": {
-      "name": "使用OpenAI API",
-      "description": "使用OpenAI API",
+      "name": "使用 OpenAI 兼容接口",
+      "description": "默认走 DashScope 原生接口（/api/v1/services/aigc/...），网页搜索、思考模式、qwen-image 作图等只有原生支持。仅在网关只提供 /compatible-mode 时勾选；原生接口若返回 404 或 url error，程序会自动退回兼容接口一次。",
       "params": {
         "enable": {
           "name": "启用",
-          "description": "是否启用使用OpenAI API, 开启用直接使用ali官方兼容OpenAI的API，不再做类型转换, 且上述插件无效",
+          "description": "开启后请求发往 /compatible-mode/v1/chat/completions，不再走原生接口",
           "type": "bool",
           "required": true
         }
@@ -197,7 +197,6 @@
       }
     }
   },
-
   "27": {
     "voice": {
       "name": "声音映射",
@@ -242,7 +241,6 @@
       }
     }
   },
-
   "8": {
     "customize": {
       "name": "自定义参数",

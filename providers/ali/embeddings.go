@@ -8,6 +8,11 @@ import (
 )
 
 func (p *AliProvider) CreateEmbeddings(request *types.EmbeddingRequest) (*types.EmbeddingResponse, *types.OpenAIErrorWithStatusCode) {
+	// 兼容模式下用 OpenAI 的 /v1/embeddings，原生向量接口只存在于官方域名
+	if p.UseOpenaiAPI {
+		return p.OpenAIProvider.CreateEmbeddings(request)
+	}
+
 	url, errWithCode := p.GetSupportedAPIUri(config.RelayModeEmbeddings)
 	if errWithCode != nil {
 		return nil, errWithCode

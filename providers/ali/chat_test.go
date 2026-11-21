@@ -71,6 +71,37 @@ func TestChatCompletionsError(t *testing.T) {
 	assert.Equal(t, "InvalidParameter", err.Code)
 }
 
+// TestChatCompletionsCompat 校验默认走 OpenAI 兼容协议，
+// 且渠道地址只填域名时会自动补上 /compatible-mode。
+func TestChatCompletionsCompat(t *testing.T) {
+	url, server, teardown := setupAliTestServer()
+	context, _ := test.GetContext("POST", "/v1/chat/completions", test.RequestJSONConfig(), nil)
+	defer teardown()
+	server.RegisterHandler("/compatible-mode/v1/chat/completions", handleCompatChatCompletionEndpoint)
+
+	chatRequest := test.GetChatCompletionRequest("default", "qwen-turbo", "false")
+
+	channel := getAliCompatChannel(url)
+	provider := providers.GetProvider(&channel, context)
+	chatProvider, _ := provider.(providers_base.ChatInterface)
+
+	usage := &types.Usage{}
+	chatProvider.SetUsage(usage)
+	response, errWithCode := chatProvider.CreateChatCompletion(chatRequest)
+
+	assert.Nil(t, errWithCode)
+	assert.NotNil(t, response)
+	test.CheckChat(t, response, "qwen-turbo", usage)
+}
+
+func handleCompatChatCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"id":"chatcmpl-test","object":"chat.completion","created":1700000000,` +
+		`"model":"qwen-turbo","choices":[{"index":0,"message":{"role":"assistant","content":"Hello"},` +
+		`"finish_reason":"stop"}],"usage":{"prompt_tokens":14,"completion_tokens":19,"total_tokens":33}}`))
+}
+
 // func TestChatCompletionsStream(t *testing.T) {
 // 	url, server, teardown := setupAliTestServer()
 // 	context, w := test.GetContext("POST", "/v1/chat/completions", test.RequestJSONConfig(), nil)
@@ -327,4 +358,52 @@ func streamResponseCheck(t *testing.T, response string) {
 	assert.True(t, strings.HasSuffix(lines[len(lines)-1], "data: [DONE]"))
 	// 检测倒数第二行是否存在 `"finish_reason":"stop"`
 	assert.True(t, strings.Contains(lines[len(lines)-2], `"finish_reason":"stop"`))
+}
+
+// TestChatCompletionsFallbackToCompat 网关只挂兼容接口时，原生 404 后应自动退回兼容模式
+func TestChatCompletionsFallbackToCompat(t *testing.T) {
+	url, server, teardown := setupAliTestServer()
+	context, _ := test.GetContext("POST", "/v1/chat/completions", test.RequestJSONConfig(), nil)
+	defer teardown()
+	server.RegisterHandler("/compatible-mode/v1/chat/completions", handleCompatChatCompletionEndpoint)
+
+	channel := getAliChannel(url)
+	provider := providers.GetProvider(&channel, context)
+	chatProvider, _ := provider.(providers_base.ChatInterface)
+
+	usage := &types.Usage{}
+	chatProvider.SetUsage(usage)
+	response, errWithCode := chatProvider.CreateChatCompletion(test.GetChatCompletionRequest("default", "qwen-native-missing", "false"))
+
+	assert.Nil(t, errWithCode)
+	assert.NotNil(t, response)
+	assert.Equal(t, "Hello", response.Choices[0].Message.Content)
+}
+
+// TestChatImageGenerations 作图模型在原生接口里以 image part 返回，需转成 Markdown 链接
+func TestChatImageGenerations(t *testing.T) {
+	url, server, teardown := setupAliTestServer()
+	context, _ := test.GetContext("POST", "/v1/chat/completions", test.RequestJSONConfig(), nil)
+	defer teardown()
+	server.RegisterHandler("/api/v1/services/aigc/multimodal-generation/generation", handleImageOutputEndpoint)
+
+	channel := getAliChannel(url)
+	provider := providers.GetProvider(&channel, context)
+	chatProvider, _ := provider.(providers_base.ChatInterface)
+
+	usage := &types.Usage{}
+	chatProvider.SetUsage(usage)
+	response, errWithCode := chatProvider.CreateChatCompletion(test.GetChatCompletionRequest("default", "qwen-image-3.0-pro", "false"))
+
+	assert.Nil(t, errWithCode)
+	assert.NotNil(t, response)
+	content, _ := response.Choices[0].Message.Content.(string)
+	assert.Contains(t, content, "![image](https://example.com/a.png)")
+}
+
+func handleImageOutputEndpoint(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write([]byte(`{"output":{"choices":[{"finish_reason":"stop","message":{"role":"assistant",` +
+		`"content":[{"type":"image","image":"https://example.com/a.png"}]}}]},` +
+		`"usage":{"input_tokens":10,"output_tokens":1,"total_tokens":11},"request_id":"img-test"}`))
 }
