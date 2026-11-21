@@ -52,6 +52,10 @@ export default function ModelDetailModal({ open, onClose, model, provider, model
   const outputModalities = modelInfo ? getModalities(modelInfo.output_modalities) : [];
   const tags = modelInfo ? getTags(modelInfo.tags) : [];
 
+  // 图片计费档位，只展示配置了单价的档位
+  const imageTiers = priceData?.price?.image_prices?.tiers || {};
+  const imageTierList = ['1k', '2k', '4k'].filter((tier) => Number(imageTiers[tier]?.input) > 0 || Number(imageTiers[tier]?.output) > 0);
+
   return (
     <Dialog
       open={open}
@@ -337,6 +341,46 @@ export default function ModelDetailModal({ open, onClose, model, provider, model
             </Stack>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
               {t('modelpricePage.timePricesTip')}
+            </Typography>
+          </Box>
+        )}
+
+        {/* 图片价格 */}
+        {priceData?.price?.image_prices?.enabled && imageTierList.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+              <Icon icon="eva:image-outline" width={20} height={20} />
+              <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                {t('modelpricePage.imagePrices')}
+              </Typography>
+            </Stack>
+            <TableContainer component={Paper} variant="outlined">
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t('modelpricePage.imageTier')}</TableCell>
+                    <TableCell align="right">{t('modelpricePage.imageInputPrice')}</TableCell>
+                    <TableCell align="right">{t('modelpricePage.imageOutputPrice')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {imageTierList.map((tier) => {
+                    const tierPrice = priceData.price.image_prices.tiers[tier] || {};
+                    const ratio = priceData?.group?.ratio || 1;
+                    const toRMB = (rate) => (Number(rate) > 0 ? `¥${(Number(rate) * ratio * 0.014).toFixed(2)}` : '—');
+                    return (
+                      <TableRow key={tier}>
+                        <TableCell sx={{ textTransform: 'uppercase' }}>{tier}</TableCell>
+                        <TableCell align="right">{toRMB(tierPrice.input)}</TableCell>
+                        <TableCell align="right">{toRMB(tierPrice.output)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              {t('modelpricePage.imagePricesTip')}
             </Typography>
           </Box>
         )}

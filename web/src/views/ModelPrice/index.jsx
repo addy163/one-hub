@@ -1074,6 +1074,7 @@ export default function ModelPrice() {
                       type={model.type}
                       formatPrice={formatPrice}
                       timePrices={model.priceData?.price?.time_prices}
+                      imagePrices={model.priceData?.price?.image_prices}
                       onViewDetail={() => handleViewDetail(model)}
                     />
                   </Grid>

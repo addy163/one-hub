@@ -66,7 +66,43 @@ type Price struct {
 
 	ExtraRatios *datatypes.JSONType[map[string]float64] `json:"extra_ratios,omitempty" gorm:"type:json"`
 	TimePrices  *datatypes.JSONType[PriceTimePrices]    `json:"time_prices,omitempty" gorm:"type:json"`
+	ImagePrices *datatypes.JSONType[PriceImagePrices]   `json:"image_prices,omitempty" gorm:"type:json"`
 	ModelInfo   *ModelInfoResponse                      `json:"model_info,omitempty" gorm:"-"`
+}
+
+// PriceImageTier 单个档位的图片单价，单位与 token 价一致（倍率），
+// 1 倍率 = 0.014 元/张；前端按元填写，保存时换算。
+type PriceImageTier struct {
+	Input  float64 `json:"input,omitempty"`  // 输入图（图生图/图中图）单价
+	Output float64 `json:"output,omitempty"` // 生成图单价
+}
+
+// PriceImagePrices 图片按张计费配置。Tiers 的键为档位名（1k/2k/4k），
+// 计费时按上游回显的张数与档位相乘；档位缺失或单价为 0 表示该档不计费。
+type PriceImagePrices struct {
+	Enabled bool                      `json:"enabled"`
+	Tiers   map[string]PriceImageTier `json:"tiers"`
+}
+
+// GetImagePrices 返回启用的图片计费配置，未启用时返回 nil。
+func (price *Price) GetImagePrices() *PriceImagePrices {
+	if price.ImagePrices == nil {
+		return nil
+	}
+	conf := price.ImagePrices.Data()
+	if !conf.Enabled || len(conf.Tiers) == 0 {
+		return nil
+	}
+	return &conf
+}
+
+// GetImageTier 返回指定档位的单价配置。
+func (conf *PriceImagePrices) GetImageTier(tier string) (PriceImageTier, bool) {
+	if conf == nil {
+		return PriceImageTier{}, false
+	}
+	t, ok := conf.Tiers[tier]
+	return t, ok
 }
 
 // BillingZone 分时倍率使用的时区。国内服务商的忙时/闲时都按东八区划分，
@@ -167,7 +203,6 @@ func (price *Price) RatiosAt(now time.Time) (input float64, output float64, peri
 	return
 }
 
-
 func GetAllPrices() ([]*Price, error) {
 	var prices []*Price
 	if err := DB.Find(&prices).Error; err != nil {
@@ -250,7 +285,7 @@ func (price *Price) FetchOutputCurrencyPrice(rate float64) string {
 }
 
 func UpdatePrices(tx *gorm.DB, models []string, prices *Price) error {
-	err := tx.Model(Price{}).Where("model IN (?)", models).Select("*").Omit("model", "time_prices").Updates(
+	err := tx.Model(Price{}).Where("model IN (?)", models).Select("*").Omit("model", "time_prices", "image_prices").Updates(
 		Price{
 			Type:        prices.Type,
 			ChannelType: prices.ChannelType,
@@ -605,10 +640,43 @@ func GetDefaultPrice() []*Price {
 		})
 	}
 
+	// GPT-Image 系列按 token 计费：图像输入 $8/M、图像输出 $30/M、文本输入 $5/M、
+	// 缓存文本输入 $1.25/M。倍率基准是 $2/M（1 倍率 = 0.014 元/1k token），
+	// 因此 input=4（图像输入）、output=15（图像输出），文本与缓存用 extra_ratios 修正。
+	// 尺寸/质量造成的单价差异体现在上游回显的 output token 数上，不需要档位表。
+	imageTokenPrices := map[string]struct {
+		input  float64
+		output float64
+		text   float64 // 文本输入相对图像输入的倍率
+		cached float64 // 缓存文本输入相对图像输入的倍率
+	}{
+		"gpt-image-2.6-sunburst": {4, 15, 5.0 / 8, 1.25 / 8},
+		"gpt-image-2.6-flare":    {4, 15, 5.0 / 8, 1.25 / 8},
+		"gpt-image-2.5-sunburst": {4, 15, 5.0 / 8, 1.25 / 8},
+		"gpt-image-2.5-flare":    {4, 15, 5.0 / 8, 1.25 / 8},
+		"gpt-image-2":            {4, 15, 5.0 / 8, 1.25 / 8},
+		// gpt-image-1：图像输入 $10/M、图像输出 $40/M、文本输入 $5/M
+		"gpt-image-1": {5, 20, 5.0 / 10, 1.25 / 10},
+	}
+	for model, cfg := range imageTokenPrices {
+		extra := datatypes.NewJSONType(map[string]float64{
+			config.UsageExtraInputTextTokens: cfg.text,
+			config.UsageExtraCache:           cfg.cached,
+		})
+		prices = append(prices, &Price{
+			Model:       model,
+			Type:        TokensPriceType,
+			ChannelType: config.ChannelTypeOpenAI,
+			Input:       cfg.input,
+			Output:      cfg.output,
+			ExtraRatios: &extra,
+		})
+	}
+
 	return prices
 }
 
 func GetDefaultExtraRatio() string {
-	return `{"gpt-4o-audio-preview":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-10-01":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-12-17":{"input_audio_tokens":16,"output_audio_tokens":8},"gpt-4o-mini-audio-preview":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-mini-audio-preview-2024-12-17":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-realtime-preview":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-10-01":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-12-17":{"input_audio_tokens":8,"output_audio_tokens":4},"gpt-4o-mini-realtime-preview":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gpt-4o-mini-realtime-preview-2024-12-17":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gemini-2.5-flash-preview-04-17":{"reasoning_tokens":5.833},"gpt-image-1":{"input_text_tokens": 0.5}}`
+	return `{"gpt-4o-audio-preview":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-10-01":{"input_audio_tokens":40,"output_audio_tokens":20},"gpt-4o-audio-preview-2024-12-17":{"input_audio_tokens":16,"output_audio_tokens":8},"gpt-4o-mini-audio-preview":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-mini-audio-preview-2024-12-17":{"input_audio_tokens":67,"output_audio_tokens":34},"gpt-4o-realtime-preview":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-10-01":{"input_audio_tokens":20,"output_audio_tokens":10},"gpt-4o-realtime-preview-2024-12-17":{"input_audio_tokens":8,"output_audio_tokens":4},"gpt-4o-mini-realtime-preview":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gpt-4o-mini-realtime-preview-2024-12-17":{"input_audio_tokens":17,"output_audio_tokens":8.4},"gemini-2.5-flash-preview-04-17":{"reasoning_tokens":5.833},"gpt-image-1":{"input_text_tokens":0.5,"cached_tokens":0.125},"gpt-image-2.6-sunburst":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2.6-flare":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2.5-sunburst":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2.5-flare":{"input_text_tokens":0.625,"cached_tokens":0.15625},"gpt-image-2":{"input_text_tokens":0.625,"cached_tokens":0.15625}}`
 
 }

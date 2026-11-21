@@ -229,6 +229,10 @@ type ChatCompletionRequest struct {
 	ThinkingBudget *int  `json:"thinking_budget,omitempty"` // qwen3 思考长度，只有enable_thinking开启才生效
 	EnableSearch   *bool `json:"enable_search,omitempty"`   // qwen 搜索开关
 
+	// 作图模型的输出尺寸，形如 1024*1024。仅透传给支持的渠道（如阿里 qwen-image），
+	// 不传时由上游使用默认尺寸（通常是 2048*2048，即 2K 档）。
+	Size string `json:"size,omitempty"`
+
 	Thinking *interface{} `json:"thinking,omitempty"` // thinking 思考开关，兼容火山引擎
 
 	// OpenAI / 各家兼容协议里的常见新参数。结构体里声明一份便于程序感知与校验，

@@ -17,11 +17,55 @@ type Usage struct {
 	ExtraTokens  map[string]int          `json:"-"`
 	ExtraBilling map[string]ExtraBilling `json:"-"`
 	TextBuilder  strings.Builder         `json:"-"`
+
+	// 图片张数，按档位（1k/2k/4k）统计。作图类模型的 usage 里没有 token，
+	// 只能靠张数计费，因此单独记录，不参与 token 计算。
+	InputImages  map[string]int `json:"-"`
+	OutputImages map[string]int `json:"-"`
 }
 
 type ExtraBilling struct {
 	Type      string `json:"type"`
 	CallCount int    `json:"call_count"`
+}
+
+// ImageTierNames 图片计费支持的档位，按从小到大排列。
+var ImageTierNames = []string{"1k", "2k", "4k"}
+
+// AddInputImage / AddOutputImage 累加某个档位的图片张数。
+func (u *Usage) AddInputImage(tier string, count int) {
+	if count <= 0 {
+		return
+	}
+	if u.InputImages == nil {
+		u.InputImages = make(map[string]int)
+	}
+	u.InputImages[tier] += count
+}
+
+func (u *Usage) AddOutputImage(tier string, count int) {
+	if count <= 0 {
+		return
+	}
+	if u.OutputImages == nil {
+		u.OutputImages = make(map[string]int)
+	}
+	u.OutputImages[tier] += count
+}
+
+// HasImages 判断本次调用是否产生了需要按张计费的图片。
+func (u *Usage) HasImages() bool {
+	for _, n := range u.InputImages {
+		if n > 0 {
+			return true
+		}
+	}
+	for _, n := range u.OutputImages {
+		if n > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func (u *Usage) GetExtraTokens() map[string]int {

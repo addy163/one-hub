@@ -40,6 +40,10 @@ type Quota struct {
 	startTime         time.Time
 	firstResponseTime time.Time
 	extraBillingData  map[string]ExtraBillingData
+
+	// 本次调用的图片张数（按档位），由 usage 填充，用于按张计费
+	imageInputs  map[string]int
+	imageOutputs map[string]int
 }
 
 func NewQuota(c *gin.Context, modelName string, promptTokens int) *Quota {
@@ -263,6 +267,14 @@ func (q *Quota) GetLogMeta(usage *types.Usage) map[string]any {
 			extraRatio := q.getExtraRatio(key)
 			meta[key+"_ratio"] = extraRatio
 		}
+
+		// 图片按张计费时把张数与档位记进日志，方便核对上游账单
+		if len(usage.OutputImages) > 0 {
+			meta["output_images"] = usage.OutputImages
+		}
+		if len(usage.InputImages) > 0 {
+			meta["input_images"] = usage.InputImages
+		}
 	}
 
 	if q.extraBillingData != nil {
@@ -278,10 +290,25 @@ func (q *Quota) getRequestTime() int {
 
 // 通过 token 数获取消费配额
 func (q *Quota) GetTotalQuota(promptTokens, completionTokens int, extraBilling map[string]types.ExtraBilling) (quota int) {
+	// 作图类模型按「张数 × 档位单价」结算，与 token 无关。
+	// 但 gpt-image 这类模型上游会回显图像 output token，此时按 token 结算更准确，
+	// 档位价退化为「拿不到 token 用量」时的兜底（如 DashScope 只回尺寸和张数），
+	// 避免同一张图既按 token 又按档位收两次。
+	imageQuota := 0
+	if completionTokens == 0 {
+		imageQuota = q.getImageQuota()
+	}
+
 	if q.price.Type == model.TimesPriceType {
-		quota = int(1000 * q.inputRatio)
+		// 配了图片档位价时以图片计费为准，避免与固定单价重复收费
+		if imageQuota > 0 {
+			quota = imageQuota
+		} else {
+			quota = int(1000 * q.inputRatio)
+		}
 	} else {
 		quota = int(math.Ceil((float64(promptTokens) * q.inputRatio) + (float64(completionTokens) * q.outputRatio)))
+		quota += imageQuota
 	}
 
 	q.GetExtraBillingData(extraBilling)
@@ -304,13 +331,46 @@ func (q *Quota) GetTotalQuota(promptTokens, completionTokens int, extraBilling m
 		quota = 1
 	}
 	totalTokens := promptTokens + completionTokens
-	if totalTokens == 0 {
+	if totalTokens == 0 && q.price.Type != model.TimesPriceType && imageQuota == 0 && extraBillingQuota == 0 {
 		// in this case, must be some error happened
 		// we cannot just return, because we may have to return the pre-consumed quota
 		quota = 0
 	}
 
 	return quota
+}
+
+// getImageQuota 按上游回显的图片张数与档位计算配额。
+// 单价存的是倍率（1 倍率 = 0.014 元/张），1 倍率对应 1000 配额。
+func (q *Quota) getImageQuota() int {
+	conf := q.price.GetImagePrices()
+	if conf == nil {
+		return 0
+	}
+
+	total := 0
+	for tier, count := range q.imageOutputs {
+		if count <= 0 {
+			continue
+		}
+		if t, ok := conf.GetImageTier(tier); ok && t.Output > 0 {
+			total += int(math.Ceil(float64(count) * t.Output * 1000))
+		}
+	}
+	for tier, count := range q.imageInputs {
+		if count <= 0 {
+			continue
+		}
+		if t, ok := conf.GetImageTier(tier); ok && t.Input > 0 {
+			total += int(math.Ceil(float64(count) * t.Input * 1000))
+		}
+	}
+
+	if total <= 0 {
+		return 0
+	}
+
+	return int(math.Ceil(float64(total) * q.groupRatio))
 }
 
 // 获取计算的 token 数
@@ -352,6 +412,8 @@ func (q *Quota) getComputeTokensByUsageEvent(usage *types.UsageEvent) (promptTok
 // 通过 usage 获取消费配额
 func (q *Quota) GetTotalQuotaByUsage(usage *types.Usage) (quota int) {
 	promptTokens, completionTokens := q.getComputeTokensByUsage(usage)
+	q.imageInputs = usage.InputImages
+	q.imageOutputs = usage.OutputImages
 	return q.GetTotalQuota(promptTokens, completionTokens, usage.ExtraBilling)
 }
 

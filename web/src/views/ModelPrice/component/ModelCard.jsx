@@ -19,10 +19,18 @@ export default function ModelCard({
   type,
   formatPrice,
   timePrices,
+  imagePrices,
   onViewDetail
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
+
+  // 图片计费：倍率 1 = 0.014 元/张，只展示配置了单价的档位
+  const imageTierList =
+    imagePrices?.enabled && imagePrices?.tiers
+      ? ['1k', '2k', '4k'].filter((tier) => Number(imagePrices.tiers[tier]?.output) > 0 || Number(imagePrices.tiers[tier]?.input) > 0)
+      : [];
+  const formatImagePrice = (rate) => `¥${(Number(rate) * 0.014).toFixed(2)}`;
   // 解析输入输出模态
   const getModalities = (modalitiesStr) => {
     try {
@@ -243,6 +251,12 @@ export default function ModelCard({
                   {t('modelpricePage.timePrices')}
                 </Label>
               )}
+              {imageTierList.length > 0 && (
+                <Label color="secondary" variant="soft" sx={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                  <Icon icon="eva:image-outline" width={14} height={14} />
+                  {t('modelpricePage.imagePrices')}
+                </Label>
+              )}
             </Stack>
           </Box>
         </Stack>
@@ -269,6 +283,19 @@ export default function ModelCard({
                   {formatPrice(price.output, type)}
                 </Label>
               </Stack>
+              {imageTierList.map((tier) => (
+                <Stack key={tier} direction="row" alignItems="center" justifyContent="space-between">
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', textTransform: 'uppercase' }}>
+                    {tier}
+                  </Typography>
+                  <Label color="secondary" variant="outlined" sx={{ fontSize: '0.75rem', py: 0.25, px: 0.75, fontWeight: 600 }}>
+                    {Number(imagePrices.tiers[tier].output) > 0
+                      ? formatImagePrice(imagePrices.tiers[tier].output)
+                      : formatImagePrice(imagePrices.tiers[tier].input)}
+                    {t('modelpricePage.imagePerUnit')}
+                  </Label>
+                </Stack>
+              ))}
             </Stack>
           ) : (
             <Box

@@ -78,6 +78,9 @@ _本项目基于 [MartialBE/one-hub](https://github.com/MartialBE/one-hub) 二�
 | 数据迁移自动化 | 新增 `gormigrate` 迁移 `202611170001`、`202611170002`：补齐线路配置项、缺失的价格行、模型规格 | 老库升级自动补齐，只补缺失、不覆盖已有配置 |
 | 公告系统 | 公告由「单条文本」升级为多条目管理：草稿/发布/下线、定时生效、级别、置顶、顶部横幅、首次弹窗、必须确认、已读与确认统计 | 新增表 `notices`、`notice_reads`；新增后台「运营 → 公告管理」页；旧的 `options.Notice` 自动迁移为第一条公告 |
 | 首页方案 | 首页改为「风格 × 内容」两个维度：内置品牌首页、极简首页、自定义内容三选一，切换即时生效 | 新增配置项 `HomePageStyle`（默认 `brand`）；自定义内容为空时自动回落品牌首页；旧 `HomePageContent` 保留不删 |
+| 阿里千问渠道 | 内置「阿里千问」渠道默认走 DashScope 原生接口，支持网页搜索、思考模式与 qwen-image 作图（图生图/文生图返回 image part）；兼容接口改为按渠道勾选 | 原生聊天接口自动在 `multimodal-generation` 与 `text-generation` 之间探测并缓存；两个都不通时自动退回 `/compatible-mode`；渠道地址填了 `/compatible-mode` 也会自动剥离 |
+| 图片按档位计费 | 作图模型（如 qwen-image-3.0-pro）按 1K/2K/4K 档位与张数结算，输入图与生成图分别定价，与官方账单口径一致 | `prices` 新增 `image_prices`；档位取上游回显的 `output_image_type`，取不到按像素面积兜底；同时修复作图 usage 无 token 被判定为 0 导致免费；聊天请求新增 `size` 透传，可主动选 1K 省钱 |
+| GPT-Image 按 token 计费 | gpt-image-2.6 / 2.5 等模型上游会回显图像 token，按「图像输入 $8/M、输出 $30/M、文本输入 $5/M」结算，尺寸与质量差异由 token 数自然体现，不需要档位表 | 默认价格内置倍率与 `extra_ratios`（文本输入、缓存）；档位价只在拿不到 token 用量时生效，避免同一张图既按 token 又按档位收两次 |
 
 ### 2026-11-16 · 多线路地址分发
 

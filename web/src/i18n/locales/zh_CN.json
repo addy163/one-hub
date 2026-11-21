@@ -707,7 +707,13 @@
     "viewDetail": "查看详情",
     "timeUnit": "次",
     "timePrices": "分时价格",
-    "timePricesTip": "以上时段按东八区（UTC+8）计算，未列出的时间按基础价格计费"
+    "timePricesTip": "以上时段按东八区（UTC+8）计算，未列出的时间按基础价格计费",
+    "imagePrices": "图片计费",
+    "imageTier": "档位",
+    "imageInputPrice": "输入图",
+    "imageOutputPrice": "生成图",
+    "imagePerUnit": "/张",
+    "imagePricesTip": "图片模型按张计费，档位由上游返回的实际尺寸决定；表中价格已乘当前用户组倍率"
   },
   "paymentPage": {
     "orderList": "订单列表",
@@ -1479,6 +1485,14 @@
     "addPeriod": "添加时段",
     "removePeriod": "删除",
     "timePricesHint": "输入/输出按「元/百万 tokens」填写，留空表示沿用基础价格；缓存倍率相对本时段输入价，留空则沿用额外倍率",
+    "imagePrices": "图片计费",
+    "imagePricesTip": "上游只回图片尺寸和张数（如 DashScope）时按张计费；gpt-image 等回传 token 用量的模型仍按 token 计费",
+    "imageTier": "档位",
+    "imageInputPrice": "输入图（元/张）",
+    "imageOutputPrice": "生成图（元/张）",
+    "imagePriceUnit": "¥/张",
+    "imagePricesEmpty": "请至少填写一个档位的单价",
+    "imagePricesHint": "只填用得到的档位；留空表示该档不单独计费。尺寸由请求里的 size 决定（如 1024*1024 为 1K，不传默认 2048*2048 为 2K）。gpt-image 系列无需开启此项，上游回显 token 用量时以 token 为准",
     "timePricesEmpty": "请至少填写一个完整的时段（开始与结束）",
     "timePricesZero": "时段的输入与输出价格不能同时为 0"
   },

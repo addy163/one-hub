@@ -102,6 +102,60 @@ const timePricesToApi = (timePrices) => {
   return { enabled: true, periods };
 };
 
+// 图片计费：档位与换算。倍率 1 = 0.014 元/张，与 token 价的 1 倍率 = 14 元/百万不同，
+// 所以单独用一个常量，不受表格的 K/M 单位影响。
+const IMAGE_TIERS = ['1k', '2k', '4k'];
+const RMB_PER_IMAGE_RATE = 0.014;
+
+const emptyImageTiers = () => {
+  const tiers = {};
+  IMAGE_TIERS.forEach((tier) => {
+    tiers[tier] = { input: '', output: '' };
+  });
+  return tiers;
+};
+
+// 接口数据 -> 表单（倍率转成元/张）
+const imagePricesToForm = (imagePrices) => {
+  const tiers = emptyImageTiers();
+  if (!imagePrices || !imagePrices.tiers) {
+    return { enabled: !!imagePrices?.enabled, tiers };
+  }
+  IMAGE_TIERS.forEach((tier) => {
+    const tierPrice = imagePrices.tiers[tier];
+    if (!tierPrice) {
+      return;
+    }
+    tiers[tier] = {
+      input: tierPrice.input ? Number((tierPrice.input * RMB_PER_IMAGE_RATE).toFixed(6)) : '',
+      output: tierPrice.output ? Number((tierPrice.output * RMB_PER_IMAGE_RATE).toFixed(6)) : ''
+    };
+  });
+  return { enabled: !!imagePrices.enabled, tiers };
+};
+
+// 表单 -> 接口数据（元/张 转回倍率）
+const imagePricesToApi = (imagePrices) => {
+  if (!imagePrices || !imagePrices.enabled) {
+    return null;
+  }
+  const tiers = {};
+  let hasValue = false;
+  IMAGE_TIERS.forEach((tier) => {
+    const tierPrice = imagePrices.tiers?.[tier] || {};
+    const input = Number(tierPrice.input) > 0 ? Number((Number(tierPrice.input) / RMB_PER_IMAGE_RATE).toFixed(6)) : 0;
+    const output = Number(tierPrice.output) > 0 ? Number((Number(tierPrice.output) / RMB_PER_IMAGE_RATE).toFixed(6)) : 0;
+    if (input > 0 || output > 0) {
+      tiers[tier] = { input, output };
+      hasValue = true;
+    }
+  });
+  if (!hasValue) {
+    return null;
+  }
+  return { enabled: true, tiers };
+};
+
 // 单一模式下的表单验证
 const validateSingleMode = (t, values, rows) => {
   if (values.model === '') {
@@ -145,6 +199,15 @@ const validateSingleMode = (t, values, rows) => {
       if (Number(period.input) <= 0 && (values.type === 'times' || Number(period.output) <= 0)) {
         return t('pricing_edit.timePricesZero');
       }
+    }
+  }
+
+  // 图片计费至少要填一个档位的单价
+  if (values.image_prices?.enabled) {
+    const tiers = values.image_prices.tiers || {};
+    const hasValue = IMAGE_TIERS.some((tier) => Number(tiers[tier]?.input) > 0 || Number(tiers[tier]?.output) > 0);
+    if (!hasValue) {
+      return t('pricing_edit.imagePricesEmpty');
     }
   }
 
@@ -196,7 +259,8 @@ const singleOriginInputs = {
   output: 0,
   locked: false,
   extra_ratios: {},
-  time_prices: { enabled: false, periods: [emptyTimePeriod()] }
+  time_prices: { enabled: false, periods: [emptyTimePeriod()] },
+  image_prices: { enabled: false, tiers: emptyImageTiers() }
 };
 
 const EditModal = ({
@@ -332,7 +396,8 @@ const EditModal = ({
             ...values,
             input: calculatedInput,
             output: calculatedOutput,
-            time_prices: timePricesToApi(values.time_prices)
+            time_prices: timePricesToApi(values.time_prices),
+            image_prices: imagePricesToApi(values.image_prices)
           });
         }
         setSubmitting(false);
@@ -449,6 +514,24 @@ const EditModal = ({
     });
   };
 
+  // 图片计费开关
+  const handleToggleImagePrices = (enabled) => {
+    setInputs((prev) => {
+      const current = prev.image_prices || { enabled: false, tiers: emptyImageTiers() };
+      return { ...prev, image_prices: { enabled, tiers: current.tiers || emptyImageTiers() } };
+    });
+  };
+
+  // 修改某个档位的单价
+  const handleImageTierChange = (tier, field, value) => {
+    setInputs((prev) => {
+      const current = prev.image_prices || { enabled: true, tiers: emptyImageTiers() };
+      const tiers = { ...(current.tiers || emptyImageTiers()) };
+      tiers[tier] = { ...(tiers[tier] || { input: '', output: '' }), [field]: value };
+      return { ...prev, image_prices: { enabled: true, tiers } };
+    });
+  };
+
   useEffect(() => {
     if (singleMode) {
       // 单一模式初始化表单
@@ -456,10 +539,11 @@ const EditModal = ({
         setInputs({
           ...price,
           extra_ratios: price.extra_ratios || {},
-          time_prices: timePricesToForm(price.time_prices)
+          time_prices: timePricesToForm(price.time_prices),
+          image_prices: imagePricesToForm(price.image_prices)
         });
       } else {
-        setInputs({ ...singleOriginInputs, time_prices: timePricesToForm(null) });
+        setInputs({ ...singleOriginInputs, time_prices: timePricesToForm(null), image_prices: imagePricesToForm(null) });
       }
       setErrors({});
     } else {
@@ -816,6 +900,71 @@ const EditModal = ({
     );
   };
 
+  // 渲染图片按张计费配置（单模式）
+  const renderImagePrices = () => {
+    const imagePrices = inputs.image_prices || { enabled: false, tiers: emptyImageTiers() };
+    const tiers = imagePrices.tiers || emptyImageTiers();
+    const unit = t('pricing_edit.imagePriceUnit');
+
+    return (
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Box>
+            <Typography variant="subtitle2">{t('pricing_edit.imagePrices')}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {t('pricing_edit.imagePricesTip')}
+            </Typography>
+          </Box>
+          <Switch checked={!!imagePrices.enabled} onChange={(event) => handleToggleImagePrices(event.target.checked)} />
+        </Stack>
+
+        {imagePrices.enabled && (
+          <Stack spacing={1} sx={{ mt: 2 }}>
+            <Stack direction="row" spacing={1} sx={{ px: 0.5 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ width: 44 }}>
+                {t('pricing_edit.imageTier')}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
+                {t('pricing_edit.imageInputPrice')}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
+                {t('pricing_edit.imageOutputPrice')}
+              </Typography>
+            </Stack>
+            {IMAGE_TIERS.map((tier) => (
+              <Stack key={tier} direction="row" spacing={1} alignItems="center">
+                <Typography variant="body2" sx={{ width: 44, textTransform: 'uppercase' }}>
+                  {tier}
+                </Typography>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={tiers[tier]?.input ?? ''}
+                  placeholder="0"
+                  onChange={(event) => handleImageTierChange(tier, 'input', event.target.value)}
+                  InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment> }}
+                  sx={{ flex: 1 }}
+                />
+                <TextField
+                  size="small"
+                  type="number"
+                  value={tiers[tier]?.output ?? ''}
+                  placeholder="0"
+                  onChange={(event) => handleImageTierChange(tier, 'output', event.target.value)}
+                  InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment> }}
+                  sx={{ flex: 1 }}
+                />
+              </Stack>
+            ))}
+            <Typography variant="caption" color="text.secondary">
+              {t('pricing_edit.imagePricesHint')}
+            </Typography>
+          </Stack>
+        )}
+      </Paper>
+    );
+  };
+
   // 渲染模型选择器 (多模式特有)
   const renderModelSelector = (formProps) => {
     if (!formProps) return null;
@@ -934,6 +1083,7 @@ const EditModal = ({
 
             {renderExtraRatioSelector()}
             {renderTimePrices()}
+            {renderImagePrices()}
 
             {errors.general && (
               <Typography color="error" variant="body2">
