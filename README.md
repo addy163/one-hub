@@ -259,7 +259,7 @@ docker compose -f docker-compose.release.yml up -d
 
 镜像内的版本号会显示在后台关于页，方便确认线上跑的是哪个版本。
 
-**发布新版本**：往仓库推一个 `v*` 标签（如 `v0.9.3`）即自动构建并推送 `amd64`/`arm64` 多架构清单；也可以在 Actions 页面手动运行 `Publish Docker image` 工作流，版本号留空时会用 `dev-<commit>`。
+**发布新版本**：往仓库推一个 `v*` 标签（如 `v0.9.3`）即自动构建并推送 `amd64`/`arm64` 多架构清单；也可以在 Actions 页面手动运行 `Publish Docker image` 工作流，**运行时要把分支选成对应的 tag**（选 `main` 只会得到 `dev` 标签，不会更新 `latest`），版本号留空时用 `dev-<commit>`。
 
 ## 从 one-hub 迁移到本版本
 

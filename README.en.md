@@ -190,7 +190,7 @@ docker compose -f docker-compose.release.yml up -d
 
 Tag scheme: `latest` follows the newest tag; `v0.9.2` / `0.9` pin a version, which is recommended for production instead of `latest`. The version baked into the image is shown on the admin About page.
 
-**Releasing**: push a `v*` tag (e.g. `v0.9.3`) and the multi-arch `amd64`/`arm64` manifest is built and pushed automatically. You can also run the `Publish Docker image` workflow manually; leaving the version blank uses `dev-<commit>`.
+**Releasing**: push a `v*` tag (e.g. `v0.9.3`) and the multi-arch `amd64`/`arm64` manifest is built and pushed automatically. You can also run the `Publish Docker image` workflow manually — **pick the tag as the ref when doing so** (running it on `main` only produces a `dev` tag and will not move `latest`); leaving the version blank uses `dev-<commit>`.
 
 ## Functional Changes
 
