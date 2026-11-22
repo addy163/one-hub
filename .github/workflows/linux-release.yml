@@ -3,10 +3,11 @@ permissions:
   contents: write
 
 on:
+  # 桌面 / 二进制包使用独立 tag 命名空间（v*-desktop*）；
+  # Docker 镜像发布走 v*，两边互不触发，避免每次发镜像都要跑三个平台打包
   push:
     tags:
-      - "*"
-      - "!*-alpha*"
+      - "v*-desktop*"
 jobs:
   release:
     runs-on: ubuntu-latest
