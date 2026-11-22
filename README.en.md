@@ -159,6 +159,12 @@ The official image is published on GitHub Container Registry with both `linux/am
 docker pull ghcr.io/addy163/one-hub:latest
 ```
 
+The package is **public**, so no login or token is needed to pull it. Connections to `ghcr.io` can be slow or time out from mainland China; retry, or use a working registry mirror. If the network simply will not cooperate, build the image yourself from the `Dockerfile` in this repository:
+
+```bash
+docker buildx build --platform linux/amd64 -t one-hub:local --load .
+```
+
 **Quick start** (SQLite, data stored in `./data`, good for a trial):
 
 ```bash
@@ -183,6 +189,8 @@ docker compose -f docker-compose.release.yml up -d
 ```
 
 Tag scheme: `latest` follows the newest tag; `v0.9.2` / `0.9` pin a version, which is recommended for production instead of `latest`. The version baked into the image is shown on the admin About page.
+
+**Releasing**: push a `v*` tag (e.g. `v0.9.3`) and the multi-arch `amd64`/`arm64` manifest is built and pushed automatically. You can also run the `Publish Docker image` workflow manually; leaving the version blank uses `dev-<commit>`.
 
 ## Functional Changes
 

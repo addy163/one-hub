@@ -222,6 +222,12 @@ _本项目基于 [MartialBE/one-hub](https://github.com/MartialBE/one-hub) 二�
 docker pull ghcr.io/addy163/one-hub:latest
 ```
 
+镜像仓库已设为**公开**，下拉不需要登录，也不需要 token。国内直连 `ghcr.io` 偶尔会超时，重试几次或换一个可用的镜像加速地址即可；如果网络实在不通，也可以直接用仓库里的 `Dockerfile` 自己构建：
+
+```bash
+docker buildx build --platform linux/amd64 -t one-hub:local --load .
+```
+
 **最简启动**（SQLite，数据落在当前目录的 `data/`，适合试用）：
 
 ```bash
@@ -252,6 +258,8 @@ docker compose -f docker-compose.release.yml up -d
 标签规则：`latest` 跟随最新 tag；`v0.9.2`、`0.9` 这类版本标签用于锁定版本，生产环境建议锁版本而不是用 `latest`。
 
 镜像内的版本号会显示在后台关于页，方便确认线上跑的是哪个版本。
+
+**发布新版本**：往仓库推一个 `v*` 标签（如 `v0.9.3`）即自动构建并推送 `amd64`/`arm64` 多架构清单；也可以在 Actions 页面手动运行 `Publish Docker image` 工作流，版本号留空时会用 `dev-<commit>`。
 
 ## 从 one-hub 迁移到本版本
 
