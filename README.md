@@ -39,7 +39,7 @@ _本项目基于 [MartialBE/one-hub](https://github.com/MartialBE/one-hub) 二�
 
 **如果发现缺少新模型，请在`后台-模型价格-更新价格`中更新新增的模型**
 
-[演示网站](https://one-hub.xiao5.info/)
+[演示网站]([https://api.uuz.ai/]
 [文档](https://one-hub-doc.vercel.app/)
 
 </div>
