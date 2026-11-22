@@ -1,0 +1,11 @@
+.git
+.github
+web/node_modules
+web/build
+web/.vite
+data
+*.log
+.workbuddy
+docs
+README.md
+README.en.md

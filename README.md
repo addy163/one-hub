@@ -214,6 +214,45 @@ _本项目基于 [MartialBE/one-hub](https://github.com/MartialBE/one-hub) 二�
 
 新增一套内置首页：在 `web/src/views/Home/` 下写一个组件，再到 `templates.js` 的 `HOME_TEMPLATES` 里加一行即可。
 
+## 使用预构建镜像
+
+官方镜像发布在 GitHub Container Registry，同时提供 `linux/amd64` 与 `linux/arm64`（Intel/AMD 服务器、Apple 芯片 Mac、群晖等 arm64 NAS 都能直接拉）：
+
+```bash
+docker pull ghcr.io/addy163/one-hub:latest
+```
+
+**最简启动**（SQLite，数据落在当前目录的 `data/`，适合试用）：
+
+```bash
+docker run -d --name one-hub -p 3000:3000 \
+  -v $(pwd)/data:/data \
+  -e TZ=Asia/Shanghai \
+  -e USER_TOKEN_SECRET=$(openssl rand -hex 32) \
+  -e SESSION_SECRET=$(openssl rand -hex 32) \
+  --restart always \
+  ghcr.io/addy163/one-hub:latest
+```
+
+`USER_TOKEN_SECRET` 是**必填**的（用户令牌的签名密钥），缺失会直接启动失败；`SESSION_SECRET` 不填会自动生成随机值，但重启后登录态全部失效，所以生产环境务必两个都固定下来并妥善保存。
+
+打开 `http://<服务器IP>:3000`，管理员账号是 `root`，**初始密码是首次启动时随机生成的**，只打印一次，用下面这条命令取出来（登录后请立刻修改）：
+
+```bash
+docker logs one-hub 2>&1 | grep 初始密码
+```
+
+**生产部署**（MySQL + Redis，推荐）：
+
+```bash
+# 先按 docker-compose.release.yml 顶部注释创建 .env
+docker compose -f docker-compose.release.yml up -d
+```
+
+标签规则：`latest` 跟随最新 tag；`v0.9.2`、`0.9` 这类版本标签用于锁定版本，生产环境建议锁版本而不是用 `latest`。
+
+镜像内的版本号会显示在后台关于页，方便确认线上跑的是哪个版本。
+
 ## 从 one-hub 迁移到本版本
 
 ```bash

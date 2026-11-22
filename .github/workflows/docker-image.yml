@@ -1,124 +1,83 @@
-name: one-api docker image
+name: Publish Docker image (ghcr.io)
 
+# 打 tag（v*）时自动构建多架构镜像并推送到 GitHub Container Registry；
+# 也可以在 Actions 页面手动触发，版本号留空时用 dev-<commit> 作为镜像内版本。
 on:
   push:
-    branches:
-      - main
     tags:
       - "v*"
-    paths-ignore:
-      - "README.md"
-      - "README.en.md"
-      - "docs/**"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "镜像内显示的版本号，例如 v0.9.2（留空则用 dev-<commit>）"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
+      - name: 检出代码
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Save dev version info
-        run: |
-          HASH=$(git rev-parse --short=7 HEAD)
-          echo "dev-$HASH" > VERSION
-      - name: Save Tag version info
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          git describe --tags > VERSION
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 22.20.0
-      - name: Cache Node modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            web/node_modules
-            ~/.cache/yarn
-          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Build Frontend
-        env:
-          CI: ""
-        run: |
-          export VERSION=$(cat VERSION)
-          cd web
-          yarn install
-          VITE_APP_VERSION=$VERSION yarn run build
-          cd ..
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: "1.25.0"
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-      - name: Build Backend (amd64)
-        run: |
-          go mod download
-          go build -ldflags "-s -w -X 'one-api/common/config.Version=$(cat VERSION)' -extldflags '-static'" -o one-api-amd64
 
-      - name: Build Backend (arm64)
+      - name: 写入版本号
         run: |
-          sudo rm /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
-          sudo apt-get install gcc-aarch64-linux-gnu
-          CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w -X 'one-api/common/config.Version=$(cat VERSION)' -extldflags '-static'" -o one-api-arm64
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.version }}" ]; then
+            echo "${{ inputs.version }}" > VERSION
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "${GITHUB_REF_NAME}" > VERSION
+          else
+            echo "dev-$(git rev-parse --short=7 HEAD)" > VERSION
+          fi
+          echo "VERSION=$(cat VERSION)"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      # arm64 镜像的 apk 安装仍需要模拟；Go 侧已改成纯交叉编译，不受影响。
+      - name: 准备 QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Login to GHCR
-        uses: docker/login-action@v2
+      - name: 准备 Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录 ghcr.io
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          registry: docker.io
-          username: ${{ vars.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }} # Replace with your Docker Hub password secret
-
-      - name: Docker meta
+      - name: 生成镜像标签
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
-          # list of Docker images to use as base name for tags
-          images: |
-            ghcr.io/${{ vars.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_HUB_REPO }}
-            docker.io/${{ vars.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_HUB_REPO }}
-          # generate Docker tags based on the following events/attributes
+          images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/main' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
-            type=pep440,pattern={{raw}},enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=dev,enable=${{ github.event_name == 'workflow_dispatch' }}
+          labels: |
+            org.opencontainers.image.title=one-hub
+            org.opencontainers.image.description=One Hub - LLM API gateway with usage billing
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v4
+      - name: 构建并推送（amd64 / arm64）
+        uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
-          build-args: |
-            COMMIT_SHA=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          file: Dockerfile-action

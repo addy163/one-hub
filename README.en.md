@@ -151,6 +151,39 @@ docker run -d --name one-hub --network host -v /path/to/data:/data ghcr.io/addy1
 
 Watch the startup log for `database migrated` and the `已补充...` lines, then verify that the "Relay endpoints" panel exists, "Model Prices" opens with the built-in prices initialized, and the model info table contains 108 rows. To roll back, restore the old container and the SQL dump.
 
+## Prebuilt images
+
+The official image is published on GitHub Container Registry with both `linux/amd64` and `linux/arm64`, so Intel/AMD servers, Apple silicon Macs and arm64 NAS devices can pull it directly:
+
+```bash
+docker pull ghcr.io/addy163/one-hub:latest
+```
+
+**Quick start** (SQLite, data stored in `./data`, good for a trial):
+
+```bash
+docker run -d --name one-hub -p 3000:3000 \
+  -v $(pwd)/data:/data \
+  -e TZ=Asia/Shanghai \
+  -e USER_TOKEN_SECRET=$(openssl rand -hex 32) \
+  -e SESSION_SECRET=$(openssl rand -hex 32) \
+  --restart always \
+  ghcr.io/addy163/one-hub:latest
+```
+
+`USER_TOKEN_SECRET` is **required** (it signs user tokens) and the container exits immediately without it. If `SESSION_SECRET` is omitted, a random one is generated at startup, which invalidates every session on restart, so pin both in production.
+
+Open `http://<host>:3000` and sign in as `root`. The initial password is **randomly generated on first start and printed once** in the container log — read it with `docker logs one-hub 2>&1 | grep 初始密码` and change it right after logging in.
+
+**Production** (MySQL + Redis, recommended):
+
+```bash
+# create .env as described at the top of docker-compose.release.yml
+docker compose -f docker-compose.release.yml up -d
+```
+
+Tag scheme: `latest` follows the newest tag; `v0.9.2` / `0.9` pin a version, which is recommended for production instead of `latest`. The version baked into the image is shown on the admin About page.
+
 ## Functional Changes
 
 
